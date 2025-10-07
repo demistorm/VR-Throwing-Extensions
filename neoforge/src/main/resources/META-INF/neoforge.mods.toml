@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "Insert License Here"
+
+[[mods]]
+modId = "vr_throwing_extensions"
+version = "${version}"
+displayName = "VR Throwing Extensions"
+authors = "Me!"
+description = '''
+This is an example description! Tell everyone what your mod is about!
+'''
+#logoFile = ""
+
+[[dependencies.vr_throwing_extensions]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.vr_throwing_extensions]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.vr_throwing_extensions]]
+modId = "architectury"
+type = "required"
+versionRange = "[16.1.4,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[mixins]]
+config = "vr_throwing_extensions.mixins.json"
