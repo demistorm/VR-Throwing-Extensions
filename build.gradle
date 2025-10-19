@@ -1,0 +1,113 @@
+// Root build configuration for multi-loader VR Throwing Extensions
+// This file sets up Architectury Loom to build for Fabric, Forge, and NeoForge
+// Each loader gets its own subproject (fabric/, forge/, neoforge/) with common code in common/
+
+plugins {
+    // Architectury plugin enables multi-loader builds
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    // Loom plugin for Minecraft modding (applied to subprojects)
+    id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
+}
+
+// Tell Architectury which Minecraft version we're targeting
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+// Configure all subprojects (common/, fabric/, forge/, neoforge/)
+subprojects {
+    apply plugin: "java"
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        // Suppress Mojang mappings license warning
+        silentMojangMappingsLicense()
+    }
+
+    repositories {
+        // Local Maven repository for Vivecraft multi-loader build
+        mavenLocal()
+
+        // Mod Menu API for configuration screens
+        maven {
+            name = "Terraformers"
+            url = "https://maven.terraformersmc.com/"
+        }
+
+        // Modrinth Maven for Vivecraft dependency
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+        }
+
+        // Architectury Maven for cross-loader utilities
+        maven {
+            name = "Architectury"
+            url = "https://maven.architectury.dev/"
+        }
+
+        // Forge Maven for Forge/NeoForge dependencies
+        maven {
+            name = "Forge"
+            url = "https://maven.minecraftforge.net/"
+        }
+
+        // Curse Maven for additional mod dependencies
+        maven {
+            name = "Curse Maven"
+            url = "https://cursemaven.com"
+        }
+    }
+
+    dependencies {
+        // Core Minecraft dependency
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+
+        // Mappings for Minecraft obfuscation
+        mappings loom.layered() {
+            officialMojangMappings()
+        }
+
+        // We depend on Fabric loader here to use the Fabric @Environment annotations
+        // This is needed for client-side code separation across all loaders
+        // Do NOT use other classes from fabric loader in common code
+        modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+        // Vivecraft dependency handled per module to use appropriate JAR for each loader
+        // Common module uses compileOnly, loader modules use runtime dependency
+    }
+
+    // Ensure all Java compilation uses UTF-8 encoding and Java 21
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+        options.release = 21
+    }
+
+    // Generate sources JAR for all subprojects (helpful for debugging)
+    java {
+        withSourcesJar()
+    }
+}
+
+// Configure all projects (root + subprojects)
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
+
+    // Set consistent project metadata across all loaders
+    archivesBaseName = rootProject.archives_base_name
+    version = rootProject.mod_version
+    group = rootProject.maven_group
+
+    // Consistent Java compilation settings
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+        options.release = 21
+    }
+
+    // Generate sources for all projects
+    java {
+        withSourcesJar()
+    }
+}

@@ -1,0 +1,110 @@
+// Forge module build configuration for VR Throwing Extensions
+// This module contains Forge-specific implementations and runtime dependencies
+// All common VR logic is in the common module - this just handles Forge integration
+
+plugins {
+    // Shadow plugin for bundling common module
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+// Configure Architectury for this Forge module
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+// Set loader-specific archive name for better organization
+archivesBaseName = rootProject.archives_base_name + "-forge"
+
+loom {
+    // No access wideners or mixin configs needed for our VR throwing mod
+    // We use only public Minecraft APIs and Vivecraft API
+}
+
+configurations {
+    // Common module configuration
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this
+
+    // Build configuration inheritance
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+repositories {
+    // Add repositories to publish here
+    maven { url "https://cursemaven.com" }
+}
+
+dependencies {
+    // Core Forge dependency
+    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+
+    // Include the common module with all our shared VR logic
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
+
+    // Vivecraft runtime dependency - Forge version
+    // This provides the actual VR functionality at runtime on Forge
+    modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-forge"
+
+  
+    // MixinExtras for advanced mixin features
+}
+
+// Process resources and expand version placeholders
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": inputs.properties.version
+    }
+
+    filesMatching("pack.mcmeta") {
+        expand "version": inputs.properties.version
+    }
+}
+
+// Configure shadow JAR for including common module
+shadowJar {
+    exclude "architectury.common.json"
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+// Remap shadow JAR to proper Forge format
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier = null
+}
+
+// Configure regular JAR for development
+jar {
+    archiveClassifier = "dev"
+}
+
+// Configure sources JAR to include common module sources
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+// Configure Java components for publishing
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+// Publishing configuration for Forge builds
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            artifactId = rootProject.archives_base_name + "-" + project.name
+            from components.java
+        }
+    }
+}

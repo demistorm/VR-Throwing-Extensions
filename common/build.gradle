@@ -1,0 +1,65 @@
+// Common module build configuration for VR Throwing Extensions
+// This module contains all the shared logic that works across Fabric, Forge, and NeoForge
+// All VR throwing mechanics, entity logic, and effects go here - only platform-specific code in loader modules
+
+// Configure Architectury for this common module
+// This tells Architectury which loaders we're building for
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+// Loom configuration for the common module
+loom {
+    // No access widener needed - we use only public Minecraft APIs and Vivecraft API
+    // This keeps our mod compatible across all loaders without special access
+}
+
+repositories {
+    // Modrinth Maven for Vivecraft dependency
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+}
+
+dependencies {
+    // Fabric loader dependency - needed for @Environment annotations only
+    // This allows us to separate client-side code from server-side code across all loaders
+    // IMPORTANT: Do NOT use other Fabric classes in common code - only annotations!
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+    // Vivecraft dependency - compileOnly for API access
+    // We use the Fabric JAR for API access since Vivecraft's API classes are identical across loaders
+    // The actual runtime JAR will be provided by each loader module
+    modCompileOnly "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
+
+}
+
+// Publishing configuration for the common module
+// This allows other mods to depend on our common API if needed
+publishing {
+    publications {
+        mavenCommon(MavenPublication) {
+            artifactId = rootProject.archives_base_name
+            from components.java
+        }
+    }
+
+    // Configure repositories for publishing (if needed in future)
+    repositories {
+        // Add repositories to publish to here
+    }
+}
+
+// Java configuration for the common module
+java {
+    // Ensure consistent Java version across all platforms
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+// Additional Java compile options
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 21
+}

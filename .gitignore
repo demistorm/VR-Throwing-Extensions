@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+common/build/
+fabric/build/
+forge/build/
+neoforge/build/
+common/.gradle/
+fabric/.gradle/
+forge/.gradle/
+neoforge/.gradle/
+
+# Allow gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+
+# Minecraft run directories
+run/
+logs/
+crash-reports/
+common/run/
+fabric/run/
+forge/run/
+neoforge/run/
+
+# IDE files
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Misc
+CLAUDE.md
+.architectury-transformer
+.claude
+
+# Loom specific
+.loom-cache/
+remappedModSources/
+remappedMods/

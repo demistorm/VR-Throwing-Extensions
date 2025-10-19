@@ -1,0 +1,45 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+issueTrackerURL = "https://github.com/demistorm/vr-throwing-extensions/issues"
+license = "MIT"
+
+[[mods]]
+modId = "vr_throwing_extensions"
+version = "${version}"
+displayName = "VR Throwing Extensions"
+displayURL = "https://modrinth.com/mod/vr-throwing-extensions"
+authors = "Demistorm"
+description = '''
+Enhances VR throwing mechanics with realistic physics, weapon effects, and improved targeting.
+Works with Vivecraft to provide an immersive VR combat experience.
+
+Features:
+- Realistic throwing physics based on hand movement
+- Weapon effects: Boomerang and Embedding
+- Enhanced aim assistance for VR players
+- Blood particle effects on impact
+- Configuration support for all settings
+
+Requires Vivecraft mod for VR functionality.
+'''
+
+[[dependencies.vr_throwing_extensions]]
+modId = "forge"
+mandatory = true
+versionRange = "[55.0.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.vr_throwing_extensions]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.21.5]"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.vr_throwing_extensions]]
+modId = "vivecraft"
+mandatory = true
+versionRange = "[1.3.0,)"
+ordering = "AFTER"
+side = "BOTH"

@@ -1,0 +1,38 @@
+// Plugin management for multi-loader VR Throwing Extensions project
+// This tells Gradle where to find the Architectury and Loom plugins needed for cross-loader builds
+
+pluginManagement {
+    repositories {
+        // Fabric Maven for Loom plugin
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+
+        // Architectury Maven for Architectury plugin
+        maven {
+            name = 'Architectury'
+            url = 'https://maven.architectury.dev/'
+        }
+
+        // Forge Maven for Forge/NeoForge plugins
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+
+        // Standard Gradle repositories
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+// Define all subprojects in our multi-loader setup
+// This creates the module structure: common/, fabric/, forge/, neoforge/
+include("common")
+include("fabric")
+include("forge")
+include("neoforge")
+
+// Set the root project name (used for artifact naming)
+rootProject.name = "vr-throwing-extensions"
