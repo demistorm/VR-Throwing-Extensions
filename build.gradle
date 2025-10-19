@@ -97,7 +97,7 @@ allprojects {
 
     // Set consistent project metadata across all loaders
     archivesBaseName = rootProject.archives_base_name
-    version = rootProject.mod_version
+    version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
     // Consistent Java compilation settings
@@ -111,3 +111,58 @@ allprojects {
         withSourcesJar()
     }
 }
+
+// Task to collect all production JARs into a single directory
+tasks.register('collectProductionJars', Copy) {
+    description = "Collect all production JARs from all loaders into dist/ directory"
+    group = "build"
+
+    // Create output directory
+    def outputDir = layout.buildDirectory.dir("dist")
+    into outputDir
+
+    // Collect production JARs from each loader module
+    from("fabric/build/libs") {
+        include "*-fabric-*.jar"
+        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    }
+
+    from("forge/build/libs") {
+        include "*-forge-*.jar"
+        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    }
+
+    from("neoforge/build/libs") {
+        include "*-neoforge-*.jar"
+        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    }
+
+    // Only copy files that exist
+    eachFile { file ->
+        if (!file.file.exists()) {
+            exclude file.path
+        }
+    }
+
+    doLast {
+        println "\nProduction JARs collected to: ${outputDir.get()}"
+        fileTree(outputDir).visit { file ->
+            if (!file.isDirectory()) {
+                println "  - ${file.name}"
+            }
+        }
+    }
+}
+
+// Make sure JARs are built before collecting
+collectProductionJars.dependsOn {
+    tasks.matching { task -> task.name == "remapJar" || task.name == "jar" }
+}
+
+// Make collection happen after every build AND after clean build
+build.finalizedBy(collectProductionJars)
+
+// Also collect after each loader module builds
+project(":fabric").build.finalizedBy(collectProductionJars)
+project(":forge").build.finalizedBy(collectProductionJars)
+project(":neoforge").build.finalizedBy(collectProductionJars)
