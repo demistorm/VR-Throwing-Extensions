@@ -56,9 +56,13 @@ dependencies {
 // Process resources and expand version placeholders
 processResources {
     inputs.property "version", project.version
+    inputs.property "minecraft_version", rootProject.minecraft_version
+    inputs.property "forge_version", rootProject.forge_version
 
     filesMatching("META-INF/mods.toml") {
-        expand "version": inputs.properties.version
+        expand "version": inputs.properties.version,
+                "minecraft_version": inputs.properties.minecraft_version,
+                "forge_version": inputs.properties.forge_version
     }
 
     filesMatching("pack.mcmeta") {

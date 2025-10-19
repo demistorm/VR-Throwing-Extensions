@@ -23,7 +23,7 @@ public final class EmbeddingEffect {
     public static final float rollApproachPerTick = 20.0f;
     private static final float forwardSpinSpeedDegPerTick = 15.0f;
     // Move weapon toward center of hitbox (0.0 = surface, 1.0 = center)
-    private static final double embedAdjust = 0.45;
+    private static final double embedAdjust = 0.40;
 
     // Bleeding Tunables
     private static final int bleedIntervalTicks = 30; // Bleed every 30 ticks
@@ -32,7 +32,7 @@ public final class EmbeddingEffect {
     private EmbeddingEffect() {}
 
     // Stick weapon into target entity
-    public static void startEmbedding(ThrownProjectileEntity proj, EntityHitResult hit) {
+    public static void startEmbedding(ThrownProjectileEntity proj, EntityHitResult hit, Vec3 clampedHitPos) {
         if (proj.level().isClientSide()) return;
         Entity target = hit.getEntity();
         if (!(target instanceof LivingEntity living)) {
@@ -47,8 +47,8 @@ public final class EmbeddingEffect {
         dir = dir.normalize();
 
         // Find where weapon should stick (move toward center of hitbox)
-        Vec3 hitPos = hit.getLocation();
-        Vec3 embedPos = calculateEmbedPosition(target, hitPos);
+        // Use the pre-calculated clamped hit position from ThrownProjectileEntity
+        Vec3 embedPos = calculateEmbedPosition(target, clampedHitPos);
 
         // Set weapon rotation based on impact direction
         float yaw = (float)(Mth.atan2(dir.z, dir.x) * 180.0 / Math.PI);
@@ -74,9 +74,9 @@ public final class EmbeddingEffect {
                 SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.45f, 0.8f);
 
         // DEBUG
-        double finalEmbedDepth = hitPos.distanceTo(embedPos);
+        double finalEmbedDepth = clampedHitPos.distanceTo(embedPos);
         log.debug("[Embed] Projectile {} embedded into {} at {} (+{}), yaw={}, pitch={}, tilt={}, xRollStart={}",
-                proj.getId(), target.getName().getString(), hitPos,
+                proj.getId(), target.getName().getString(), clampedHitPos,
                 String.format("%.2f", finalEmbedDepth),
                 String.format("%.1f", yaw), String.format("%.1f", pitch),
                 String.format("%.1f", tiltDeg), String.format("%.1f", initialXRollDeg));

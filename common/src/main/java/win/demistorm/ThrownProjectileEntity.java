@@ -20,6 +20,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.effects.BoomerangEffect;
@@ -200,9 +201,24 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             }
         }
 
+        // Calculate hit position if hit an entity (needed for both bounce return and normal hit)
+        Vec3 hitPos = null;
+        if (hit.getType() == HitResult.Type.ENTITY) {
+            EntityHitResult entityHit = (EntityHitResult) hit;
+            Entity target = entityHit.getEntity();
+
+            // Calculate clamped hit position for both blood particles and embedding
+            AABB targetBox = target.getBoundingBox();
+            Vec3 projPos = this.position();
+            double hitX = Mth.clamp(projPos.x, targetBox.minX, targetBox.maxX);
+            double hitY = Mth.clamp(projPos.y, targetBox.minY, targetBox.maxY);
+            double hitZ = Mth.clamp(projPos.z, targetBox.minZ, targetBox.maxZ);
+            hitPos = new Vec3(hitX, hitY, hitZ);
+        }
+
         if (bounceActive || hasBounced) {
             if (hit.getType() == HitResult.Type.ENTITY) {
-                onHitEntity((EntityHitResult) hit);
+                onHitEntity((EntityHitResult) hit, hitPos);
                 log.debug("[VR Throw] Projectile {} hit entity during return, dropping", this.getId());
             } else {
                 log.debug("[VR Throw] Projectile {} hit block during return, dropping", this.getId());
@@ -214,7 +230,9 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         if (!level().isClientSide) {
             boolean hitEntity = hit.getType() == HitResult.Type.ENTITY;
             if (hitEntity) {
-                onHitEntity((EntityHitResult) hit);
+                EntityHitResult entityHit = (EntityHitResult) hit;
+
+                onHitEntity(entityHit, hitPos);
                 float attackDamage = stackBaseDamage(getItem());
                 if (attackDamage <= 1.0F) {
                     dropAndDiscard();
@@ -232,7 +250,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                         return;
                     }
                 } else if (ConfigHelper.ACTIVE.weaponEffect == WeaponEffectType.EMBED) {
-                    EmbeddingEffect.startEmbedding(this, (EntityHitResult) hit);
+                    EmbeddingEffect.startEmbedding(this, entityHit, hitPos);
                     return;
                 }
             }
@@ -243,8 +261,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         }
     }
 
-    @Override
-    protected void onHitEntity(EntityHitResult res) {
+    protected void onHitEntity(EntityHitResult res, Vec3 hitPos) {
         Entity target = res.getEntity();
         ServerLevel world = (ServerLevel) level();
         DamageSource src = world.damageSources().thrown(this, getOwner() == null ? this : getOwner());
@@ -267,8 +284,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
 
         target.hurtServer(world, src, total);
 
-        // Send blood particle packet to nearby players on hit
-        Vec3 hitPos = res.getLocation();
+        // Send blood particles using the pre-calculated clamped hit position
         Vec3 velocity = getDeltaMovement();
         int playersSent = 0;
         for (ServerPlayer player : world.getServer().getPlayerList().getPlayers()) {

@@ -62,9 +62,13 @@ dependencies {
 // Process resources and expand version placeholders
 processResources {
     inputs.property "version", project.version
+    inputs.property "minecraft_version", rootProject.minecraft_version
+    inputs.property "fabric_loader_version", rootProject.fabric_loader_version
 
     filesMatching("fabric.mod.json") {
-        expand "version": inputs.properties.version
+        expand "version": inputs.properties.version,
+                "minecraft_version": inputs.properties.minecraft_version,
+                "fabric_loader_version": inputs.properties.fabric_loader_version
     }
 }
 

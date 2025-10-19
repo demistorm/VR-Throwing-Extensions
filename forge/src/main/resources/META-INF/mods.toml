@@ -26,14 +26,14 @@ Requires Vivecraft mod for VR functionality.
 [[dependencies.vr_throwing_extensions]]
 modId = "forge"
 mandatory = true
-versionRange = "[55.0.0,)"
+versionRange = "[${forge_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.vr_throwing_extensions]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.21.5]"
+versionRange = "[${minecraft_version}]"
 ordering = "NONE"
 side = "BOTH"
 
