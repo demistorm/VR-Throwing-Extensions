@@ -265,7 +265,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             sp.sendSystemMessage(msg, false);
         }
 
-        target.hurtServer(world, src, total);
+        target.hurt(src, total);
 
         // Send blood particle packet to nearby players on hit
         Vec3 hitPos = res.getLocation();

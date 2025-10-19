@@ -243,7 +243,7 @@ public final class EmbeddingEffect {
 
             // Apply bleeding damage
             ServerLevel sw = (ServerLevel) host.level();
-            host.hurtServer(sw, sw.damageSources().generic(), total);
+            host.hurt(sw.damageSources().generic(), total);
 
             // Show bleeding particles
             for (ThrownProjectileEntity p : st.projs) {

@@ -7,6 +7,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.config.ClientOnlyConfig;
 import win.demistorm.network.BleedingParticleData;
@@ -73,9 +74,9 @@ public final class BleedingParticle {
                 );
             } else {
                 // Dark red dust mote
-                int packedColor = packColor(0.6f + rng.nextFloat() * 0.35f, rng.nextFloat() * 0.08f, rng.nextFloat() * 0.06f);
+                Vector3f color = new Vector3f(0.6f + rng.nextFloat() * 0.35f, rng.nextFloat() * 0.08f, rng.nextFloat() * 0.06f);
                 float scale = dustScaleBase + (rng.nextFloat() - 0.5f) * dustScaleVar;
-                DustParticleOptions bloodDust = new DustParticleOptions(packedColor, scale);
+                DustParticleOptions bloodDust = new DustParticleOptions(color, scale);
 
                 mc.level.addParticle(
                         bloodDust,
@@ -84,14 +85,6 @@ public final class BleedingParticle {
                 );
             }
         }
-    }
-
-    // Pack floats [0..1] into 0xRRGGBB
-    private static int packColor(float r, float g, float b) {
-        int ri = Math.max(0, Math.min(255, (int)(r * 255f)));
-        int gi = Math.max(0, Math.min(255, (int)(g * 255f)));
-        int bi = Math.max(0, Math.min(255, (int)(b * 255f)));
-        return (ri << 16) | (gi << 8) | bi;
     }
 
     private BleedingParticle() {}

@@ -3,7 +3,6 @@ package win.demistorm.forge;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -97,7 +96,7 @@ public class VRThrowingExtensionsForge {
                     .sized(0.25f, 0.25f)
                     .clientTrackingRange(64)
                     .updateInterval(5) // Update 4 times per second
-                    .build(ResourceKey.create(Registries.ENTITY_TYPE, entityLocation));
+                    .build("vr_throwing_extensions:generic_thrown_item");
             return VRThrowingExtensions.THROWN_ITEM_TYPE;
         });
 

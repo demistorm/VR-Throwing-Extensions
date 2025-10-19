@@ -8,6 +8,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.config.ClientOnlyConfig;
 import win.demistorm.network.BloodParticleData;
@@ -111,8 +112,8 @@ public final class BloodParticle {
 
                 Vec3 vel = sprayForward.scale(mistVelMultiplier * speed).add(sideways);
 
-                int packedColor = packColor(r, g, b); // 0xRRGGBB
-                DustParticleOptions blood = new DustParticleOptions(packedColor, scale);
+                Vector3f color = new Vector3f(r, g, b);
+                DustParticleOptions blood = new DustParticleOptions(color, scale);
 
                 client.level.addParticle(
                         blood,
@@ -155,14 +156,6 @@ public final class BloodParticle {
 
         Vec3 lateral = basis.u.scale(ct).add(basis.v.scale(st));
         return basis.f.scale(cosAlpha).add(lateral.scale(sinAlpha)).normalize();
-    }
-
-    // Pack floats [0..1] into 0xRRGGBB
-    private static int packColor(float r, float g, float b) {
-        int ri = Math.max(0, Math.min(255, (int)(r * 255f)));
-        int gi = Math.max(0, Math.min(255, (int)(g * 255f)));
-        int bi = Math.max(0, Math.min(255, (int)(b * 255f)));
-        return (ri << 16) | (gi << 8) | bi;
     }
 
     private record Basis(Vec3 f, Vec3 u, Vec3 v) {}
