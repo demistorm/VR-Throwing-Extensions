@@ -59,9 +59,13 @@ dependencies {
 // Process resources and expand version placeholders
 processResources {
     inputs.property "version", project.version
+    inputs.property "minecraft_version", rootProject.minecraft_version
+    inputs.property "neoforge_version", rootProject.neoforge_version
 
     filesMatching("META-INF/neoforge.mods.toml") {
-        expand "version": inputs.properties.version
+        expand "version": inputs.properties.version,
+                "minecraft_version": inputs.properties.minecraft_version,
+                "neoforge_version": inputs.properties.neoforge_version
     }
 
     filesMatching("pack.mcmeta") {
