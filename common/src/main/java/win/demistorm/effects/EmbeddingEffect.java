@@ -23,7 +23,7 @@ public final class EmbeddingEffect {
     public static final float rollApproachPerTick = 20.0f;
     private static final float forwardSpinSpeedDegPerTick = 15.0f;
     // Move weapon toward center of hitbox (0.0 = surface, 1.0 = center)
-    private static final double embedAdjust = 0.45;
+    private static final double embedAdjust = 0.40;
 
     // Bleeding Tunables
     private static final int bleedIntervalTicks = 30; // Bleed every 30 ticks
