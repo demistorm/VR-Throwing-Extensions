@@ -71,10 +71,12 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
             // Use renderStatic method
             try {
+                boolean glint = state.itemStack.isEnchanted();
                 itemRenderer.renderStatic(
                         Minecraft.getInstance().player,
                         state.itemStack,
                         ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
+                        glint,
                         matrices,
                         vcp,
                         Minecraft.getInstance().level,
@@ -141,10 +143,12 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         // Render the model using renderStatic
         try {
+            boolean glint = state.itemStack.isEnchanted();
             itemRenderer.renderStatic(
                     Minecraft.getInstance().player,
                     state.itemStack,
                     ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
+                    glint,
                     matrices,
                     vcp,
                     Minecraft.getInstance().level,
