@@ -51,10 +51,9 @@ dependencies {
     // This provides the actual VR functionality at runtime
     modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
 
-    
-    // Optional: Mod Menu integration for Fabric users
-    // This provides a nice mod list button for our config screen
-    modApi "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
+
+    // Mod Menu integration for Fabric users
+    modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
 
     // MixinExtras for advanced mixin features
 }
