@@ -16,7 +16,7 @@ public class VRThrowingExtensions {
 	public static EntityType<ThrownProjectileEntity> THROWN_ITEM_TYPE;
 
 	// Debug mode switch
-	public static final boolean debugMode = true;
+	public static final boolean debugMode = false;
 
 	static {
 		Configurator.setLevel(MOD_ID, debugMode ? Level.DEBUG : Level.INFO);
