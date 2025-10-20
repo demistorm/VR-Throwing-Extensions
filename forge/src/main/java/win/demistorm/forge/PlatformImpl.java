@@ -132,9 +132,11 @@ public class PlatformImpl {
     // Get Minecraft version
     @SuppressWarnings("unused")
     public static String getMinecraftVersion() {
-        return ModList.get().getModContainerById("minecraft")
-                .map(container -> container.getModInfo().getVersion().toString())
-                .orElse("unknown");
+        var container = ModList.get().getModContainerById("minecraft");
+        if (container.isPresent()) {
+            return container.get().getModInfo().getVersion().toString();
+        }
+        return "unknown";
     }
 
     // Get mod loader name
