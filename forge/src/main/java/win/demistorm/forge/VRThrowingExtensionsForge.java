@@ -6,6 +6,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -30,14 +31,8 @@ public class VRThrowingExtensionsForge {
             .clientAcceptedVersions("1.0"::equals)
             .simpleChannel();
 
-    public VRThrowingExtensionsForge(FMLJavaModLoadingContext context) {
+    public VRThrowingExtensionsForge() {
         log.info("VR Throwing Extensions (FORGE) starting!");
-
-        // Get Forge event bus
-        IEventBus modEventBus = context.getModEventBus();
-
-        // Register entities
-        modEventBus.addListener(this::registerEntities);
 
         // Make sure Vivecraft is installed
         try {
@@ -47,12 +42,6 @@ public class VRThrowingExtensionsForge {
             log.error("Vivecraft not found! VR Throwing Extensions requires Vivecraft to function.");
             throw new RuntimeException("Vivecraft is required for VR Throwing Extensions");
         }
-
-        // Run common setup
-        VRThrowingExtensions.initialize();
-
-        // Start networking
-        Network.initialize();
 
         // Register packet handler using 1.20.1 SimpleChannel pattern
         NETWORK.registerMessage(0, BufferPacket.class,
@@ -64,14 +53,19 @@ public class VRThrowingExtensionsForge {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientSetup.doClientSetup();
             // Register config screen
-            ForgeConfigScreen.register(context);
+            ForgeConfigScreen.register();
         }
 
         log.info("VR Throwing Extensions (FORGE) initialization complete!");
     }
 
     // Add entities using Forge's registration
-    private void registerEntities(RegisterEvent event) {
+    @SubscribeEvent
+    public static void registerEntities(RegisterEvent event) {
+        // Run common setup and networking before entity registration
+        VRThrowingExtensions.initialize();
+        Network.initialize();
+
         // Create thrown projectile entity
         ResourceLocation entityLocation = new ResourceLocation("vr_throwing_extensions", "generic_thrown_item");
 

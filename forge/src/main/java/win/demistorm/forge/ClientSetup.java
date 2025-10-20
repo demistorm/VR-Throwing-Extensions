@@ -24,14 +24,22 @@ public class ClientSetup {
 
         // Set up input cancellation
         Platform.registerClientInputEventHandlers();
+
+        // Register entity renderer after a short delay to ensure entity type is registered
+        VRThrowingExtensions.log.info("Scheduling entity renderer registration...");
     }
 
     // Register entity renderer
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        // Register projectile renderer
-        event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_ITEM_TYPE,
-            win.demistorm.client.ThrownItemRenderer::new);
+        // Register projectile renderer only if entity type is initialized
+        if (win.demistorm.VRThrowingExtensions.THROWN_ITEM_TYPE != null) {
+            event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_ITEM_TYPE,
+                win.demistorm.client.ThrownItemRenderer::new);
+            VRThrowingExtensions.log.info("Registered entity renderer for thrown items");
+        } else {
+            VRThrowingExtensions.log.warn("Entity type not yet initialized, skipping renderer registration");
+        }
     }
 
     // Process incoming packets
