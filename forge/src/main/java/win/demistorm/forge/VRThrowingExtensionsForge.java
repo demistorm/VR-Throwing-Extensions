@@ -37,7 +37,7 @@ public class VRThrowingExtensionsForge {
         // Get Forge event bus
         var modBusGroup = context.getModBusGroup();
 
-        // Register entities - use RegisterEvent.BUS for EventBus 7
+        // Register entities
         RegisterEvent.getBus(modBusGroup).addListener(this::registerEntities);
 
         // Make sure Vivecraft is installed

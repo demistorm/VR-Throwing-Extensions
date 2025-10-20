@@ -157,6 +157,7 @@ public class PlatformImpl {
     // Register input events (handled in client code)
     @SuppressWarnings("unused")
     public static void registerClientInputEventHandlers() {
-        // Implemented in PlatformClientImpl with @SubscribeEvent
+        // Register client input events using EventBus 7 API
+        PlatformClientImpl.register();
     }
 }
