@@ -313,24 +313,23 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     public static float stackBaseDamage(ItemStack stack) {
         final float playerBase = 1.0F;
 
-        EquipmentSlotGroup[] groups = new EquipmentSlotGroup[] {
-                EquipmentSlotGroup.MAINHAND, EquipmentSlotGroup.HAND
+        EquipmentSlot[] slots = new EquipmentSlot[] {
+                EquipmentSlot.MAINHAND,
+                EquipmentSlot.OFFHAND
         };
 
         final float[] add = {0f};
         final float[] mulBase = {0f};
         final float[] mulTotal = {0f};
 
-        for (EquipmentSlotGroup g : groups) {
-            stack.forEachModifier(g, (attr, modifier) -> {
+        for (EquipmentSlot slot : slots) {
+            stack.forEachModifier(slot, (attr, modifier) -> {
                 if (attr.is(Attributes.ATTACK_DAMAGE.unwrapKey().orElseThrow())) {
                     AttributeModifier.Operation op = modifier.operation();
-                    if (op == AttributeModifier.Operation.ADD_VALUE) {
-                        add[0] += (float) modifier.amount();
-                    } else if (op == AttributeModifier.Operation.ADD_MULTIPLIED_BASE) {
-                        mulBase[0] += (float) modifier.amount();
-                    } else if (op == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
-                        mulTotal[0] += (float) modifier.amount();
+                    switch (op) {
+                        case ADD_VALUE -> add[0] += (float) modifier.amount();
+                        case ADD_MULTIPLIED_BASE -> mulBase[0] += (float) modifier.amount();
+                        case ADD_MULTIPLIED_TOTAL -> mulTotal[0] += (float) modifier.amount();
                     }
                 }
             });
@@ -343,6 +342,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
 
         return Math.max(1.0F, result);
     }
+
 
     public void clearSpawnImmunity() {
         this.immunityTicks = 0;

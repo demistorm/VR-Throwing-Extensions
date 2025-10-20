@@ -9,7 +9,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -59,27 +58,20 @@ public class PlatformImpl {
     // Listen for server ticks
     @SuppressWarnings("unused")
     public static void registerServerPostTickListener(Consumer<MinecraftServer> listener) {
-        MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent event) -> {
-            if (event.phase == TickEvent.Phase.END) {
-                listener.accept(event.getServer());
-            }
-        });
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> listener.accept(event.getServer()));
     }
 
     // Listen for player ticks
     @SuppressWarnings("unused")
     public static void registerServerPlayerPostTickListener(Consumer<ServerPlayer> listener) {
-        MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent event) -> {
-            if (event.phase == TickEvent.Phase.END) {
-                event.getServer().getPlayerList().getPlayers().forEach(listener);
-            }
-        });
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event ->
+                event.getServer().getPlayerList().getPlayers().forEach(listener));
     }
 
     // Listen for player joins
     @SuppressWarnings("unused")
     public static void registerServerPlayerJoinListener(Consumer<ServerPlayer> listener) {
-        MinecraftForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
+        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(event -> {
             if (event.getEntity() instanceof ServerPlayer sp) {
                 listener.accept(sp);
             }
@@ -89,7 +81,7 @@ public class PlatformImpl {
     // Listen for player leaves
     @SuppressWarnings("unused")
     public static void registerServerPlayerLeaveListener(Consumer<ServerPlayer> listener) {
-        MinecraftForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent event) -> {
+        PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(event -> {
             if (event.getEntity() instanceof ServerPlayer sp) {
                 listener.accept(sp);
             }
@@ -99,7 +91,7 @@ public class PlatformImpl {
     // Register commands
     @SuppressWarnings("unused")
     public static void registerCommands(Consumer<CommandDispatcher<CommandSourceStack>> listener) {
-        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> listener.accept(event.getDispatcher()));
+        RegisterCommandsEvent.BUS.addListener(event -> listener.accept(event.getDispatcher()));
     }
 
     // Send packet to server

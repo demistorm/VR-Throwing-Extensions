@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -69,7 +70,7 @@ public class PlatformImpl {
     // Send packet to server
     @SuppressWarnings("unused")
     public static void sendToServer(RegistryFriendlyByteBuf buffer) {
-        PacketDistributor.sendToServer(new BufferPacket(buffer));
+        ClientPacketDistributor.sendToServer(new BufferPacket(buffer));
     }
 
     // Send packet to player

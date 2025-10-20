@@ -41,6 +41,9 @@ dependencies {
     // Core Forge dependency
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
 
+    // EventBus 7 annotation processor for compile-time validation
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.7'
+
     // Include the common module with all our shared VR logic
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
@@ -49,8 +52,18 @@ dependencies {
     // This provides the actual VR functionality at runtime on Forge
     modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-forge"
 
-  
+
     // MixinExtras for advanced mixin features
+}
+
+// Add run configurations with EventBus 7 runtime validation
+loom {
+    runs {
+        // applies to all the run configs below
+        configureEach {
+            property 'eventbus.api.strictRuntimeChecks', 'true'
+        }
+    }
 }
 
 // Process resources and expand version placeholders

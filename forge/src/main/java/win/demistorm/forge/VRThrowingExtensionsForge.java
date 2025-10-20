@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -36,10 +35,10 @@ public class VRThrowingExtensionsForge {
         log.info("VR Throwing Extensions (FORGE) starting!");
 
         // Get Forge event bus
-        IEventBus modEventBus = context.getModEventBus();
+        var modBusGroup = context.getModBusGroup();
 
-        // Register entities
-        modEventBus.addListener(this::registerEntities);
+        // Register entities - use RegisterEvent.BUS for EventBus 7
+        RegisterEvent.getBus(modBusGroup).addListener(this::registerEntities);
 
         // Make sure Vivecraft is installed
         try {
