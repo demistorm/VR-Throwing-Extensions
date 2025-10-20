@@ -1,13 +1,15 @@
 package win.demistorm.fabric;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.Platform;
@@ -25,18 +27,14 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
         // Set up entities first
         registerEntities();
 
-        // Register packet types with Fabric
-        PayloadTypeRegistry.playC2S().register(BufferPacket.ID, BufferPacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(BufferPacket.ID, BufferPacket.CODEC);
-
         // Handle incoming packets
-        ServerPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (payload, context) -> {
-            payload.buffer().retain();
-            context.server().execute(() -> {
+        ServerPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (server, player, handler, buf, responseSender) -> {
+            buf.retain();
+            server.execute(() -> {
                 try {
-                    Network.INSTANCE.handlePacket(context.player(), payload.buffer());
+                    Network.INSTANCE.handlePacket(player, buf);
                 } finally {
-                    payload.buffer().release();
+                    buf.release();
                 }
             });
         });
@@ -65,7 +63,7 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
     // Add entity to Fabric's registry
     private void registerEntities() {
         // Create thrown projectile entity type
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath("vr-throwing-extensions", "generic_thrown_item");
+        ResourceLocation entityLocation = new ResourceLocation("vr-throwing-extensions", "generic_thrown_item");
 
         VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
                 .sized(0.25f, 0.25f)

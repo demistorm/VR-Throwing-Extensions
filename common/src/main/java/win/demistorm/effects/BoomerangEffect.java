@@ -49,7 +49,7 @@ public final class BoomerangEffect {
     public static final Set<Item> bounceTools = new HashSet<>();
     static {
         BuiltInRegistries.ITEM.stream().filter(i -> !BuiltInRegistries.ITEM.getKey(i)
-                        .equals(ResourceLocation.withDefaultNamespace("air")))
+                        .equals(new ResourceLocation("minecraft", "air")))
                 .forEach(bounceTools::add);
     }
     public static boolean canBounce(Item i) {

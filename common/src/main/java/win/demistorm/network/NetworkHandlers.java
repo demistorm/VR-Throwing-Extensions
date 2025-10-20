@@ -50,7 +50,7 @@ public final class NetworkHandlers {
         } else {
             if (!player.level().isClientSide()) {
                 player.level().playSound(null, player.blockPosition(),
-                        SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.6f, 1.33f);
+                        SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 0.6f, 1.33f);
             }
         }
 

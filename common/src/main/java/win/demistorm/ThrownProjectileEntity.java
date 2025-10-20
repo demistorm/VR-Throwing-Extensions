@@ -1,8 +1,12 @@
 package win.demistorm;
 
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.EquipmentSlot;
+import com.google.common.collect.Multimap;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -73,16 +77,16 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.FLOAT);
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(HAND_ROLL, 0f);
-        builder.define(IS_CATCHING, false);
-        builder.define(BOUNCE_ACTIVE, false);
-        builder.define(IS_EMBEDDED, false);
-        builder.define(EMBED_YAW, 0f);
-        builder.define(EMBED_PITCH, 0f);
-        builder.define(EMBED_ROLL, 0f);
-        builder.define(EMBED_TILT, 0f);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(HAND_ROLL, 0f);
+        this.entityData.define(IS_CATCHING, false);
+        this.entityData.define(BOUNCE_ACTIVE, false);
+        this.entityData.define(IS_EMBEDDED, false);
+        this.entityData.define(EMBED_YAW, 0f);
+        this.entityData.define(EMBED_PITCH, 0f);
+        this.entityData.define(EMBED_ROLL, 0f);
+        this.entityData.define(EMBED_TILT, 0f);
     }
 
     // Constructor used by server when creating the projectile
@@ -267,10 +271,10 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         DamageSource src = world.damageSources().thrown(this, getOwner() == null ? this : getOwner());
 
         float base = stackBaseDamage(getItem());
-        float total = EnchantmentHelper.modifyDamage(world, getItem(), target, src, base);
-        float enchBonus = total - base;
+        float enchBonus = getEnchantmentDamageBonus(getItem(), target);
+        float total = base + enchBonus;
 
-        log.debug("[VR Throw] Damage dealt: Item={}, Base={}, EnchBonus={}, Final={}, Target={}, State={}",
+        log.debug("[VR Throw] Damage dealt: Item={}, Base={}, Ench={}, Final={}, Target={}, State={}",
                 getItem().getItem(), base, enchBonus, total, target.getName().getString(),
                 bounceActive ? "RETURNING" : "FORWARD");
 
@@ -309,39 +313,40 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         return drop;
     }
 
-    // Returns the item's attack damage when held in hand (player base 1.0 + item modifiers).
+    // Returns the item's attack damage when held in hand (player base 1.0 + item modifiers)
     public static float stackBaseDamage(ItemStack stack) {
-        final float playerBase = 1.0F;
+        float baseDamage = 1.0F; // Player bare hand damage
 
-        EquipmentSlotGroup[] groups = new EquipmentSlotGroup[] {
-                EquipmentSlotGroup.MAINHAND, EquipmentSlotGroup.HAND
-        };
+        // Get damage modifiers from main hand slot in 1.20.1
+        Multimap<Attribute, AttributeModifier> modifiers = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
 
-        final float[] add = {0f};
-        final float[] mulBase = {0f};
-        final float[] mulTotal = {0f};
+        for (Attribute attribute : modifiers.keySet()) {
+            if (attribute.equals(Attributes.ATTACK_DAMAGE)) {
+                for (AttributeModifier modifier : modifiers.get(attribute)) {
+                    double amount = modifier.getAmount();
+                    AttributeModifier.Operation operation = modifier.getOperation();
 
-        for (EquipmentSlotGroup g : groups) {
-            stack.forEachModifier(g, (attr, modifier) -> {
-                if (attr.is(Attributes.ATTACK_DAMAGE.unwrapKey().orElseThrow())) {
-                    AttributeModifier.Operation op = modifier.operation();
-                    if (op == AttributeModifier.Operation.ADD_VALUE) {
-                        add[0] += (float) modifier.amount();
-                    } else if (op == AttributeModifier.Operation.ADD_MULTIPLIED_BASE) {
-                        mulBase[0] += (float) modifier.amount();
-                    } else if (op == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
-                        mulTotal[0] += (float) modifier.amount();
+                    if (operation == AttributeModifier.Operation.ADDITION) {
+                        baseDamage += amount;
+                    } else if (operation == AttributeModifier.Operation.MULTIPLY_BASE) {
+                        baseDamage += baseDamage * amount;
+                    } else if (operation == AttributeModifier.Operation.MULTIPLY_TOTAL) {
+                        baseDamage *= (1.0 + amount);
                     }
                 }
-            });
+            }
         }
 
-        // Combine like vanilla: base, then base-multiplied, then total-multiplied.
-        float result = playerBase + add[0];
-        result += playerBase * mulBase[0];
-        result += result * mulTotal[0];
+        return Math.max(1.0F, baseDamage);
+    }
 
-        return Math.max(1.0F, result);
+    // Calculate enchantment damage bonus using proper 1.20.1 Minecraft API
+    private static float getEnchantmentDamageBonus(ItemStack stack, Entity target) {
+        // Use the proper Minecraft API for enchantment damage calculation
+        // This handles Sharpness, Smite, Bane of Arthropods, etc. correctly
+        // and accounts for target type (undead, arthropods, etc.)
+        MobType mobType = target instanceof LivingEntity ? ((LivingEntity) target).getMobType() : MobType.UNDEFINED;
+        return net.minecraft.world.item.enchantment.EnchantmentHelper.getDamageBonus(stack, mobType);
     }
 
     public void clearSpawnImmunity() {

@@ -8,8 +8,8 @@
 		"Halfstorm"
 	],
 	"contact": {
-		"homepage": "https://github.com/demistorm/VR-Throwing-Extensions-Fabric",
-		"sources": "https://github.com/demistorm/VR-Throwing-Extensions-Fabric"
+		"homepage": "https://github.com/demistorm/VR-Throwing-Extensions",
+		"sources": "https://github.com/demistorm/VR-Throwing-Extensions"
 	},
 	"license": "GPL-3.0",
 	"icon": "assets/vr-throwing-extensions/VRThrowingExtensions.png",
@@ -28,7 +28,7 @@
 	"depends": {
 		"fabricloader": ">=${fabric_loader_version}",
 		"minecraft": "~${minecraft_version}",
-		"java": ">=21",
+		"java": ">=17",
 		"fabric-api": "*",
 		"vivecraft": ">=1.3.0"
 	},

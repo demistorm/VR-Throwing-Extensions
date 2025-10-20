@@ -11,7 +11,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -90,24 +90,14 @@ public class PlatformImpl {
 
     // Send packet to server
     @SuppressWarnings("unused")
-    public static void sendToServer(RegistryFriendlyByteBuf message) {
-        message.retain();
-        try {
-            ClientPlayNetworking.send(new BufferPacket(message));
-        } finally {
-            message.release();
-        }
+    public static void sendToServer(FriendlyByteBuf message) {
+        ClientPlayNetworking.send(BufferPacket.ID, message);
     }
 
     // Send packet to player
     @SuppressWarnings("unused")
-    public static void sendToPlayer(ServerPlayer player, RegistryFriendlyByteBuf message) {
-        message.retain();
-        try {
-            ServerPlayNetworking.send(player, new BufferPacket(message));
-        } finally {
-            message.release();
-        }
+    public static void sendToPlayer(ServerPlayer player, FriendlyByteBuf message) {
+        ServerPlayNetworking.send(player, BufferPacket.ID, message);
     }
 
     

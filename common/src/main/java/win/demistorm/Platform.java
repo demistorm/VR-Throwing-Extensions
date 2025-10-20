@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -79,13 +79,13 @@ public class Platform {
 
     // Send packet from client to server
     @ExpectPlatform
-    public static void sendToServer(RegistryFriendlyByteBuf message) {
+    public static void sendToServer(FriendlyByteBuf message) {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
     // Send packet from server to one player
     @ExpectPlatform
-    public static void sendToPlayer(ServerPlayer player, RegistryFriendlyByteBuf message) {
+    public static void sendToPlayer(ServerPlayer player, FriendlyByteBuf message) {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
@@ -134,6 +134,6 @@ public class Platform {
 
         // Simple context for packet handlers
         // Gives the player who sent the packet and the packet data
-        public record PacketContext(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
+        public record PacketContext(ServerPlayer player, FriendlyByteBuf buffer) {
     }
 }

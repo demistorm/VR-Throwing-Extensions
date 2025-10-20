@@ -19,9 +19,25 @@ subprojects {
     apply plugin: "java"
     apply plugin: "dev.architectury.loom"
 
+    // Use JDK 21 to compile but target Java 17 bytecode
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
     loom {
         // Suppress Mojang mappings license warning
         silentMojangMappingsLicense()
+    }
+
+    // Ensure all Java compilation uses UTF-8 encoding and Java 17
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+        // Force Java 17 bytecode even with JDK 21 toolchain
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        options.release.set(17)
     }
 
     repositories {
@@ -77,12 +93,6 @@ subprojects {
         // Common module uses compileOnly, loader modules use runtime dependency
     }
 
-    // Ensure all Java compilation uses UTF-8 encoding and Java 21
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = "UTF-8"
-        options.release = 21
-    }
-
     // Generate sources JAR for all subprojects (helpful for debugging)
     java {
         withSourcesJar()
@@ -103,7 +113,10 @@ allprojects {
     // Consistent Java compilation settings
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 21
+        // Force Java 17 bytecode even with JDK 21 toolchain
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        options.release.set(17)
     }
 
     // Generate sources for all projects
@@ -132,10 +145,11 @@ tasks.register('collectProductionJars', Copy) {
         exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
     }
 
-    from("neoforge/build/libs") {
-        include "*-neoforge-*.jar"
-        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
-    }
+    // NeoForge disabled for 1.20.1 (NeoForge didn't exist until 1.20.2)
+    // from("neoforge/build/libs") {
+    //     include "*-neoforge-*.jar"
+    //     exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    // }
 
     // Only copy files that exist
     eachFile { file ->
@@ -165,4 +179,5 @@ build.finalizedBy(collectProductionJars)
 // Also collect after each loader module builds
 project(":fabric").build.finalizedBy(collectProductionJars)
 project(":forge").build.finalizedBy(collectProductionJars)
-project(":neoforge").build.finalizedBy(collectProductionJars)
+// NeoForge disabled for 1.20.1
+// project(":neoforge").build.finalizedBy(collectProductionJars)

@@ -7,8 +7,9 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import win.demistorm.VRThrowingExtensions;
@@ -26,13 +27,13 @@ public class PlatformClientImpl implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         // Set up client packet handling
-        ClientPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (payload, context) -> {
-            payload.buffer().retain();
-            context.client().execute(() -> {
+        ClientPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (client, handler, buf, responseSender) -> {
+            buf.retain();
+            client.execute(() -> {
                 try {
-                    handleBufferPacket(payload.buffer());
+                    handleBufferPacket(buf);
                 } finally {
-                    payload.buffer().release();
+                    buf.release();
                 }
             });
         });
@@ -55,7 +56,7 @@ public class PlatformClientImpl implements ClientModInitializer {
 
     
     // Process incoming packets
-    private static void handleBufferPacket(RegistryFriendlyByteBuf buffer) {
+    private static void handleBufferPacket(FriendlyByteBuf buffer) {
         // Get packet type
         int packetId = buffer.readInt();
 

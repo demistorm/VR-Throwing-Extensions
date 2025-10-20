@@ -32,7 +32,7 @@ pluginManagement {
 include("common")
 include("fabric")
 include("forge")
-include("neoforge")
+// include("neoforge") // Disabled for 1.20.1
 
 // Set the root project name (used for artifact naming)
 rootProject.name = "vr-throwing-extensions"

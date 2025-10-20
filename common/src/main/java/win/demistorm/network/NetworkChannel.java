@@ -1,7 +1,7 @@
 package win.demistorm.network;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import win.demistorm.Platform;
 
@@ -20,8 +20,8 @@ public class NetworkChannel {
     // encoder: saves packet data to buffer
     // decoder: loads packet data from buffer
     // handler: runs when packet arrives
-    public <T> void register(Class<T> clazz, BiConsumer<T, RegistryFriendlyByteBuf> encoder,
-                             Function<RegistryFriendlyByteBuf, T> decoder, BiConsumer<T, ServerPlayer> handler) {
+    public <T> void register(Class<T> clazz, BiConsumer<T, FriendlyByteBuf> encoder,
+                             Function<FriendlyByteBuf, T> decoder, BiConsumer<T, ServerPlayer> handler) {
         packets.add(new PacketRegistrationData<>(packets.size(), clazz, encoder, decoder, handler));
     }
 
@@ -32,13 +32,13 @@ public class NetworkChannel {
 
     // Send packet to one player (server to client)
     public <T> void sendToPlayer(ServerPlayer player, T message) {
-        Platform.sendToPlayer(player, encode(message, player.registryAccess()));
+        Platform.sendToPlayer(player, encode(message, player.level().registryAccess()));
     }
 
 
     // Process incoming packet (called by platform code)
     @SuppressWarnings("unchecked")
-    public <T> void handlePacket(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
+    public <T> void handlePacket(ServerPlayer player, FriendlyByteBuf buffer) {
         // Get packet type from buffer
         int packetId = buffer.readInt();
 
@@ -62,12 +62,12 @@ public class NetworkChannel {
     }
 
     // Turn packet into buffer
-    private <T> RegistryFriendlyByteBuf encode(T message, RegistryAccess access) {
+    private <T> FriendlyByteBuf encode(T message, RegistryAccess access) {
         // Find packet registration
         PacketRegistrationData<T> data = getData(message);
 
         // Make buffer with registry access
-        RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), access);
+        FriendlyByteBuf buffer = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
 
         // Save packet type ID
         buffer.writeInt(data.id());
@@ -99,8 +99,8 @@ public class NetworkChannel {
     public record PacketRegistrationData<T>(
         int id,                              // Packet ID number
         Class<T> clazz,                     // Packet class
-        BiConsumer<T, RegistryFriendlyByteBuf> encoder,  // Saves to buffer
-        Function<RegistryFriendlyByteBuf, T> decoder,     // Loads from buffer
+        BiConsumer<T, FriendlyByteBuf> encoder,  // Saves to buffer
+        Function<FriendlyByteBuf, T> decoder,     // Loads from buffer
         BiConsumer<T, ServerPlayer> handler               // Runs when received
     ) {}
 }

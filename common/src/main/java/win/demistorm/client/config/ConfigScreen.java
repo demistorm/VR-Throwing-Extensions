@@ -103,7 +103,7 @@ public final class ConfigScreen {
 
         @Override
         public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-            renderBackground(context, mouseX, mouseY, delta);
+            renderBackground(context);
             super.render(context, mouseX, mouseY, delta);
             // Draw title at top
             context.drawCenteredString(font, title, width / 2, 20, 0xFFFFFF);

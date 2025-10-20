@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -104,18 +104,14 @@ public class PlatformImpl {
 
     // Send packet to server
     @SuppressWarnings("unused")
-    public static void sendToServer(RegistryFriendlyByteBuf message) {
-        // Convert buffer for Forge
-        net.minecraft.network.FriendlyByteBuf forgeBuf = new net.minecraft.network.FriendlyByteBuf(message);
-        VRThrowingExtensionsForge.NETWORK.send(forgeBuf, PacketDistributor.SERVER.noArg());
+    public static void sendToServer(FriendlyByteBuf message) {
+        VRThrowingExtensionsForge.NETWORK.sendToServer(new BufferPacket(message));
     }
 
     // Send packet to player
     @SuppressWarnings("unused")
-    public static void sendToPlayer(ServerPlayer player, RegistryFriendlyByteBuf message) {
-        // Convert buffer for Forge
-        net.minecraft.network.FriendlyByteBuf forgeBuf = new net.minecraft.network.FriendlyByteBuf(message);
-        VRThrowingExtensionsForge.NETWORK.send(forgeBuf, PacketDistributor.PLAYER.with(player));
+    public static void sendToPlayer(ServerPlayer player, FriendlyByteBuf message) {
+        VRThrowingExtensionsForge.NETWORK.send(PacketDistributor.PLAYER.with(() -> player), new BufferPacket(message));
     }
 
     
