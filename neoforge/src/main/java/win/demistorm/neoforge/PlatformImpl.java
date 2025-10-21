@@ -16,7 +16,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import win.demistorm.VRThrowingExtensions;
 
 import java.nio.file.Path;
 import java.util.Objects;
