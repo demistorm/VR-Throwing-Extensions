@@ -67,7 +67,7 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
     // Add entity to Fabric's registry
     private void registerEntities() {
         // Create thrown projectile entity type
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath("vr-throwing-extensions", "generic_thrown_item");
+        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
         VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
                 .sized(0.25f, 0.25f)

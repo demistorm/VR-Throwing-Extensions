@@ -16,6 +16,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import win.demistorm.VRThrowingExtensions;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -70,13 +71,13 @@ public class PlatformImpl {
     // Send packet to server
     @SuppressWarnings("unused")
     public static void sendToServer(RegistryFriendlyByteBuf buffer) {
-        ClientPacketDistributor.sendToServer(new BufferPacket(buffer));
+        ClientPacketDistributor.sendToServer(BufferPacket.toServer(buffer));
     }
 
     // Send packet to player
     @SuppressWarnings("unused")
     public static void sendToPlayer(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
-        PacketDistributor.sendToPlayer(player, new BufferPacket(buffer));
+        PacketDistributor.sendToPlayer(player, BufferPacket.toClient(buffer));
     }
 
 

@@ -22,7 +22,7 @@ import win.demistorm.network.Network;
 import static win.demistorm.VRThrowingExtensions.log;
 
 // NeoForge mod entry point
-@Mod("vr_throwing_extensions")
+@Mod(VRThrowingExtensions.MOD_ID)
 public class VRThrowingExtensionsNeoForge {
 
     public VRThrowingExtensionsNeoForge(IEventBus modEventBus) {
@@ -30,24 +30,25 @@ public class VRThrowingExtensionsNeoForge {
 
         // Set up networking
         modEventBus.addListener((RegisterPayloadHandlersEvent event) -> {
-            final PayloadRegistrar registrar = event.registrar("vr_throwing_extensions").optional();
+            final PayloadRegistrar registrar = event.registrar(VRThrowingExtensions.MOD_ID).optional();
 
-            // Register packet handlers
-            registrar.playBidirectional(BufferPacket.TYPE, BufferPacket.STREAM_CODEC,
-                (packet, context) -> {
-                    if (context.flow().isClientbound()) {
-                        // Server to client packets
+            // --- Serverbound (Client → Server)
+            registrar.playToServer(BufferPacket.SERVERBOUND_TYPE, BufferPacket.STREAM_CODEC,
+                    (packet, context) -> handleServerPacket(packet.buffer(), context));
+
+            // --- Clientbound (Server → Client)
+            registrar.playToClient(BufferPacket.CLIENTBOUND_TYPE, BufferPacket.STREAM_CODEC,
+                    (packet, context) -> {
                         if (FMLEnvironment.dist.isClient()) {
                             ClientSetup.handleNetworkPacket(packet.buffer());
                         }
-                    } else {
-                        // Client to server packets
-                        handleServerPacket(packet.buffer(), context);
-                    }
-                });
+                    });
 
-            log.info("Registered NeoForge network handlers in constructor");
+            log.info("Registered bidirectional NeoForge network handlers for VR Throwing Extensions");
         });
+
+
+
 
         // Register entities
         modEventBus.addListener(this::registerEntities);
@@ -69,9 +70,6 @@ public class VRThrowingExtensionsNeoForge {
         // Run common setup
         VRThrowingExtensions.initialize();
 
-        // Start networking
-        Network.initialize();
-
         // Set up client side
         if (FMLEnvironment.dist.isClient()) {
             ClientSetup.doClientSetup();
@@ -85,7 +83,7 @@ public class VRThrowingExtensionsNeoForge {
     // Add entities using NeoForge registration
     private void registerEntities(RegisterEvent event) {
         // Create thrown projectile entity
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "generic_thrown_item");
+        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
         if (event.getRegistryKey() == Registries.ENTITY_TYPE) {
             event.register(Registries.ENTITY_TYPE, entityLocation, () -> {

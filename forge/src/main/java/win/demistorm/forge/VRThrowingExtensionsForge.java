@@ -22,10 +22,10 @@ import win.demistorm.network.Network;
 import static win.demistorm.VRThrowingExtensions.log;
 
 // Forge mod entry point
-@Mod("vr_throwing_extensions")
+@Mod(VRThrowingExtensions.MOD_ID)
 public class VRThrowingExtensionsForge {
 
-    public static final EventNetworkChannel NETWORK = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "network"))
+    public static final EventNetworkChannel NETWORK = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "network"))
             .acceptedVersions((status, version) -> true)
             .optional()
             .networkProtocolVersion(0)
@@ -89,7 +89,7 @@ public class VRThrowingExtensionsForge {
     // Add entities using Forge's registration
     private void registerEntities(RegisterEvent event) {
         // Create thrown projectile entity
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "generic_thrown_item");
+        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
         event.register(Registries.ENTITY_TYPE, entityLocation, () -> {
             VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
