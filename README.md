@@ -1,14 +1,22 @@
-# VR Throwing Extensions-Fabric
-Fabric mod allowing players to throw and catch any item!
+# VR Throwing Extensions
+Minecraft mod allowing Vivecraft players to throw and catch any item!
 
 Simply hold the attack/destroy keybind, make a throwing motion, and release!
 Hold the place/use keybind at the same time to throw the whole stack. 
 
 To catch a thrown item, reach towards it with an empty hand and simply hold the attack/destroy keybind. Like an opposite throw!
 
-*Requires Vivecraft Mod 1.3.0+. Mod Menu recommended to change clientside settings.*
+*Requires Vivecraft Mod 1.3.0+. Mod Menu recommended to change clientside settings on Fabric.*
 
-**Built for 1.21.5** (Backports coming at some point...)
+---
+
+### Versions Supported
+**1.20.1, 1.21.1, 1.21.4, 1.21.5, 1.21.8, 1.21.10**
+
+*Builds available for Fabric, Forge, and NeoForge*
+
+---
+
 
 
 https://github.com/user-attachments/assets/75e440aa-4229-4cfe-87a1-5609dad33670
