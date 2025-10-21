@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "vr-throwing-extensions",
+	"id": "vr_throwing_extensions",
 	"version": "${version}",
 	"name": "VR Throwing Extensions",
 	"description": "Allows VR players to physically throw weapons and items!",
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/demistorm/VR-Throwing-Extensions-Fabric"
 	},
 	"license": "GPL-3.0",
-	"icon": "assets/vr-throwing-extensions/VRThrowingExtensions.png",
+	"icon": "assets/vr_throwing_extensions/VRThrowingExtensions.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [

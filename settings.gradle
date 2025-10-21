@@ -35,4 +35,4 @@ include("forge")
 include("neoforge")
 
 // Set the root project name (used for artifact naming)
-rootProject.name = "vr-throwing-extensions"
+rootProject.name = "vr_throwing_extensions"
