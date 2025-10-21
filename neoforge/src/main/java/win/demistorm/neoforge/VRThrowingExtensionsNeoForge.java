@@ -50,7 +50,7 @@ public class VRThrowingExtensionsNeoForge {
         modEventBus.addListener(this::registerEntities);
 
         // Register renderer (client only)
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             modEventBus.addListener(this::registerEntityRenderers);
         }
 
@@ -70,7 +70,7 @@ public class VRThrowingExtensionsNeoForge {
         Network.initialize();
 
         // Set up client side
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             ClientSetup.doClientSetup();
             // Register config screen
             NeoForgeConfigScreen.register();
@@ -101,7 +101,7 @@ public class VRThrowingExtensionsNeoForge {
     // Register renderer (client only)
     private void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         // Client-side only
-        if (FMLEnvironment.dist.isClient() && VRThrowingExtensions.THROWN_ITEM_TYPE != null) {
+        if (FMLEnvironment.getDist().isClient() && VRThrowingExtensions.THROWN_ITEM_TYPE != null) {
             event.registerEntityRenderer(VRThrowingExtensions.THROWN_ITEM_TYPE,
                     win.demistorm.client.ThrownItemRenderer::new);
             log.info("Registered thrown item renderer for NeoForge");

@@ -34,13 +34,13 @@ public class PlatformImpl {
     // Check if running on client
     @SuppressWarnings("unused")
     public static boolean isClientSide() {
-        return FMLEnvironment.dist.isClient();
+        return FMLEnvironment.getDist().isClient();
     }
 
     // Check if in dev mode
     @SuppressWarnings("unused")
     public static boolean isDevelopmentEnvironment() {
-        return !FMLEnvironment.production;
+        return !FMLEnvironment.isProduction();
     }
 
     // Check if mod is installed
@@ -55,11 +55,11 @@ public class PlatformImpl {
         return FMLPaths.CONFIGDIR.get();
     }
 
-    // Get Minecraft version
-    @SuppressWarnings("unused")
-    public static String getMinecraftVersion() {
-        return net.neoforged.fml.loading.FMLLoader.versionInfo().mcVersion();
-    }
+    // Get Minecraft version (has issues on 1.21.10 NeoForge but I don't need it currently anyway
+//    @SuppressWarnings("unused")
+//    public static String getMinecraftVersion() {
+//        return net.neoforged.fml.loading.FMLLoader.versionInfo().mcVersion();
+//    }
 
     // Check if Forge-like (true for NeoForge)
     @SuppressWarnings("unused")

@@ -58,14 +58,14 @@ public class PlatformImpl {
     // Listen for server ticks
     @SuppressWarnings("unused")
     public static void registerServerPostTickListener(Consumer<MinecraftServer> listener) {
-        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> listener.accept(event.getServer()));
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> listener.accept(event.server()));
     }
 
     // Listen for player ticks
     @SuppressWarnings("unused")
     public static void registerServerPlayerPostTickListener(Consumer<ServerPlayer> listener) {
         TickEvent.ServerTickEvent.Post.BUS.addListener(event ->
-                event.getServer().getPlayerList().getPlayers().forEach(listener));
+                event.server().getPlayerList().getPlayers().forEach(listener));
     }
 
     // Listen for player joins

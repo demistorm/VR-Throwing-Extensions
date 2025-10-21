@@ -22,7 +22,9 @@ import win.demistorm.ConfigHelper;
 // Fabric client setup and networking
 public class PlatformClientImpl implements ClientModInitializer {
 
+
     @Override
+    @SuppressWarnings("deprecation") // EntityRendererRegistry going out of style apparently
     public void onInitializeClient() {
         // Set up client packet handling
         ClientPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (payload, context) -> {

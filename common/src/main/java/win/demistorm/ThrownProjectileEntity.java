@@ -97,7 +97,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             // Log first few updates to confirm arrival timing
             if (this.tickCount < 40) {
                 VRThrowingExtensions.log.debug("[Client] Data updated for {}: item now {}", getId(), this.getItem());
@@ -227,7 +227,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             return;
         }
 
-        if (!level().isClientSide) {
+        if (!level().isClientSide()) {
             boolean hitEntity = hit.getType() == HitResult.Type.ENTITY;
             if (hitEntity) {
                 EntityHitResult entityHit = (EntityHitResult) hit;
