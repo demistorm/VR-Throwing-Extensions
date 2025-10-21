@@ -22,7 +22,7 @@ import win.demistorm.network.Network;
 import static win.demistorm.VRThrowingExtensions.log;
 
 // NeoForge mod entry point
-@Mod(VRThrowingExtensions.MOD_ID)
+@Mod("vr_throwing_extensions")
 public class VRThrowingExtensionsNeoForge {
 
     public VRThrowingExtensionsNeoForge(IEventBus modEventBus) {
@@ -30,25 +30,21 @@ public class VRThrowingExtensionsNeoForge {
 
         // Set up networking
         modEventBus.addListener((RegisterPayloadHandlersEvent event) -> {
-            final PayloadRegistrar registrar = event.registrar(VRThrowingExtensions.MOD_ID).optional();
+            final PayloadRegistrar registrar = event.registrar("vr_throwing_extensions").optional();
 
-            // --- Serverbound (Client → Server)
-            registrar.playToServer(BufferPacket.SERVERBOUND_TYPE, BufferPacket.STREAM_CODEC,
-                    (packet, context) -> handleServerPacket(packet.buffer(), context));
+            // Register bidirectional packet with separate handlers for each direction
+            registrar.playBidirectional(
+                    BufferPacket.TYPE,
+                    BufferPacket.STREAM_CODEC,
+                    // Handler for SERVERBOUND (packets received on SERVER from client)
+                    (packet, context) -> handleServerPacket(packet.buffer(), context),
+                    // Handler for CLIENTBOUND (packets received on CLIENT from server)
+                    (packet, context) -> context.enqueueWork(() ->
+                            ClientSetup.handleNetworkPacket(packet.buffer()))
+            );
 
-            // --- Clientbound (Server → Client)
-            registrar.playToClient(BufferPacket.CLIENTBOUND_TYPE, BufferPacket.STREAM_CODEC,
-                    (packet, context) -> {
-                        if (FMLEnvironment.dist.isClient()) {
-                            ClientSetup.handleNetworkPacket(packet.buffer());
-                        }
-                    });
-
-            log.info("Registered bidirectional NeoForge network handlers for VR Throwing Extensions");
+            log.info("Registered NeoForge network handlers in constructor");
         });
-
-
-
 
         // Register entities
         modEventBus.addListener(this::registerEntities);
@@ -70,6 +66,9 @@ public class VRThrowingExtensionsNeoForge {
         // Run common setup
         VRThrowingExtensions.initialize();
 
+        // Start networking
+        Network.initialize();
+
         // Set up client side
         if (FMLEnvironment.dist.isClient()) {
             ClientSetup.doClientSetup();
@@ -83,7 +82,7 @@ public class VRThrowingExtensionsNeoForge {
     // Add entities using NeoForge registration
     private void registerEntities(RegisterEvent event) {
         // Create thrown projectile entity
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
+        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "generic_thrown_item");
 
         if (event.getRegistryKey() == Registries.ENTITY_TYPE) {
             event.register(Registries.ENTITY_TYPE, entityLocation, () -> {
@@ -104,7 +103,7 @@ public class VRThrowingExtensionsNeoForge {
         // Client-side only
         if (FMLEnvironment.dist.isClient() && VRThrowingExtensions.THROWN_ITEM_TYPE != null) {
             event.registerEntityRenderer(VRThrowingExtensions.THROWN_ITEM_TYPE,
-                win.demistorm.client.ThrownItemRenderer::new);
+                    win.demistorm.client.ThrownItemRenderer::new);
             log.info("Registered thrown item renderer for NeoForge");
         }
     }
@@ -112,13 +111,13 @@ public class VRThrowingExtensionsNeoForge {
     // Process client packets
     private void handleServerPacket(RegistryFriendlyByteBuf buffer, IPayloadContext context) {
         context.enqueueWork(() -> {
-            ServerPlayer player = (ServerPlayer) context.player();
-
             // Check if entities are ready (NeoForge timing)
             if (VRThrowingExtensions.THROWN_ITEM_TYPE == null) {
                 VRThrowingExtensions.log.error("[NeoForge] THROWN_ITEM_TYPE is null when processing packet! Entity registration may not be complete.");
                 return;
             }
+
+            ServerPlayer player = (ServerPlayer) context.player();
 
             // Handle packet with network system
             Network.INSTANCE.handlePacket(player, buffer);

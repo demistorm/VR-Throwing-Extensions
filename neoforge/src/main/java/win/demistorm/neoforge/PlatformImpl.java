@@ -70,13 +70,13 @@ public class PlatformImpl {
     // Send packet to server
     @SuppressWarnings("unused")
     public static void sendToServer(RegistryFriendlyByteBuf buffer) {
-        ClientPacketDistributor.sendToServer(BufferPacket.toServer(buffer));
+        ClientPacketDistributor.sendToServer(new BufferPacket(buffer));
     }
 
     // Send packet to player
     @SuppressWarnings("unused")
     public static void sendToPlayer(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
-        PacketDistributor.sendToPlayer(player, BufferPacket.toClient(buffer));
+        PacketDistributor.sendToPlayer(player, new BufferPacket(buffer));
     }
 
 
