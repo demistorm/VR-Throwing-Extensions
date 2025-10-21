@@ -2,11 +2,13 @@ package win.demistorm.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
+import win.demistorm.client.ThrownItemRenderer;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
@@ -15,8 +17,9 @@ import win.demistorm.network.BleedingParticleData;
 import win.demistorm.network.ConfigSyncData;
 
 // Forge client setup
-@Mod.EventBusSubscriber(modid = "vr_throwing_extensions", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
+    private static final ResourceLocation THROWN_ITEM_ID =
+            ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
     public static void doClientSetup() {
         // Start client systems
@@ -26,12 +29,19 @@ public class ClientSetup {
         Platform.registerClientInputEventHandlers();
     }
 
-    // Register entity renderer
-    @SubscribeEvent
+    // Register entity renderer using a lookup by id (avoids null field use)
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        // Register projectile renderer
-        event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_ITEM_TYPE,
-            win.demistorm.client.ThrownItemRenderer::new);
+        final EntityType<?> anyType = ForgeRegistries.ENTITY_TYPES.getValue(THROWN_ITEM_ID);
+        if (anyType == null) {
+            VRThrowingExtensions.log.error("Entity type not found during renderer registration: {}", THROWN_ITEM_ID);
+            return; // Avoid inserting a null key
+        }
+
+        // Narrow the type in the smallest possible scope
+        @SuppressWarnings("unchecked")
+        final EntityType<ThrownProjectileEntity> type = (EntityType<ThrownProjectileEntity>) anyType;
+
+        event.registerEntityRenderer(type, ThrownItemRenderer::new);
     }
 
     // Process incoming packets

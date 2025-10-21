@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -39,6 +40,11 @@ public class VRThrowingExtensionsForge {
 
         // Register entities
         RegisterEvent.getBus(modBusGroup).addListener(this::registerEntities);
+
+        // Register renderers
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            EntityRenderersEvent.RegisterRenderers.BUS.addListener(ClientSetup::registerRenderers);
+        }
 
         // Make sure Vivecraft is installed
         try {
@@ -89,7 +95,8 @@ public class VRThrowingExtensionsForge {
     // Add entities using Forge's registration
     private void registerEntities(RegisterEvent event) {
         // Create thrown projectile entity
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
+        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath
+                (VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
         event.register(Registries.ENTITY_TYPE, entityLocation, () -> {
             VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
