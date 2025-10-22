@@ -24,8 +24,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
     public ThrownItemRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
-        this.scale = 0.5f; // Item display scale
-        this.shadowRadius = 0.5f; // Shadow opacity
+        this.scale = 0.7f; // Item display scale
+        this.shadowRadius = 0.0f; // Shadow opacity
     }
 
     @Override
@@ -69,6 +69,9 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             matrices.mulPose(Axis.XP.rotationDegrees(state.embedRollDeg)); // X settle spin
             matrices.scale(scale, scale, scale);
 
+            // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
+            matrices.scale(1.0F, 1.0F, -1.0F);
+
             // Use renderStatic method
             try {
                 boolean glint = state.itemStack.isEnchanted();
@@ -93,7 +96,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             return;
         }
 
-        // Non-embedded path: existing logic
+        // Non-embedded path (existing logic)
         Vec3 vel = state.velocity;
 
         if (vel.length() > 0.001) {
@@ -137,6 +140,9 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             float spin = (state.age * spinSpeed) % 360F;
             matrices.mulPose(Axis.XP.rotationDegrees(spin));
         }
+
+        // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
+        matrices.scale(1.0F, 1.0F, -1.0F);
 
         // Apply scale to item
         matrices.scale(scale, scale, scale);
