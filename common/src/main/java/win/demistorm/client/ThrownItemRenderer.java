@@ -32,8 +32,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
     public ThrownItemRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
         this.itemModelResolver = ctx.getItemModelResolver();
-        this.scale = 0.5f;       // Item display scale
-        this.shadowRadius = 0.5f; // Shadow opacity
+        this.scale = 0.7f;        // Item display scale
+        this.shadowRadius = 0.0f; // Shadow opacity
     }
 
     @Override
@@ -96,6 +96,9 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             matrices.mulPose(Axis.XP.rotationDegrees(state.embedRollDeg));
             matrices.scale(scale, scale, scale);
 
+            // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
+            matrices.scale(1.0F, 1.0F, -1.0F);
+
             // Correct 1.21.10 signature: submit(pose, collector, light, overlay, outlineColor)
             state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 
@@ -137,6 +140,9 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         matrices.scale(scale, scale, scale);
 
+        // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
+        matrices.scale(1.0F, 1.0F, -1.0F);
+
         // Submit prepared item
         state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 
@@ -152,7 +158,6 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
         public float handRollDeg = 0f;
         public boolean isCatching = false;
         public boolean isBounceActive = false;
-
         public boolean isEmbedded = false;
         public float embedYawDeg = 0f;
         public float embedPitchDeg = 0f;
