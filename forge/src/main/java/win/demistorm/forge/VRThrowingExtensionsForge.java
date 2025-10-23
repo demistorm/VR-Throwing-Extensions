@@ -24,6 +24,8 @@ import static win.demistorm.VRThrowingExtensions.log;
 @Mod("vr_throwing_extensions")
 public class VRThrowingExtensionsForge {
 
+    private static final IEventBus MOD_EVENT_BUS = FMLJavaModLoadingContext.get().getModEventBus();
+
     public static final SimpleChannel NETWORK = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation("vr_throwing_extensions", "network"))
             .networkProtocolVersion(() -> "1.0")
@@ -43,11 +45,18 @@ public class VRThrowingExtensionsForge {
             throw new RuntimeException("Vivecraft is required for VR Throwing Extensions");
         }
 
+        // Initialize common systems FIRST
+        VRThrowingExtensions.initialize();
+        // Note: Network.initialize() will be called after entity registration
+
         // Register packet handler using 1.20.1 SimpleChannel pattern
         NETWORK.registerMessage(0, BufferPacket.class,
                 BufferPacket::encode,
                 BufferPacket::decode,
                 BufferPacket::handle);
+
+        // Register entity registration event listener
+        MOD_EVENT_BUS.register(VRThrowingExtensionsForge.class);
 
         // Set up client side
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -62,10 +71,6 @@ public class VRThrowingExtensionsForge {
     // Add entities using Forge's registration
     @SubscribeEvent
     public static void registerEntities(RegisterEvent event) {
-        // Run common setup and networking before entity registration
-        VRThrowingExtensions.initialize();
-        Network.initialize();
-
         // Create thrown projectile entity
         ResourceLocation entityLocation = new ResourceLocation("vr_throwing_extensions", "generic_thrown_item");
 
@@ -75,9 +80,16 @@ public class VRThrowingExtensionsForge {
                     .clientTrackingRange(64)
                     .updateInterval(5) // Update 4 times per second
                     .build("vr_throwing_extensions:generic_thrown_item");
+
+            log.info("Registered entity type: {}", entityLocation);
+            log.info("Entity type created: {}", VRThrowingExtensions.THROWN_ITEM_TYPE);
+
+            // Now that entity type is registered, initialize networking
+            log.info("Initializing networking after entity registration...");
+            Network.initialize();
+
             return VRThrowingExtensions.THROWN_ITEM_TYPE;
         });
 
-        log.info("Registered entity type: {}", entityLocation);
     }
 }

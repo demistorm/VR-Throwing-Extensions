@@ -42,8 +42,13 @@ public class NetworkChannel {
         // Get packet type from buffer
         int packetId = buffer.readInt();
 
+        win.demistorm.VRThrowingExtensions.log.debug("[NetworkChannel] Received packet ID {} from player {}",
+            packetId, player != null ? player.getName().getString() : "null");
+
         // Check if packet type exists
         if (packetId < 0 || packetId >= packets.size()) {
+            win.demistorm.VRThrowingExtensions.log.warn("[NetworkChannel] Invalid packet ID {}, expected 0-{}",
+                packetId, packets.size() - 1);
             return; // Bad packet ID
         }
 
@@ -53,11 +58,17 @@ public class NetworkChannel {
         try {
             // Load packet from buffer
             message = data.decoder.apply(buffer);
+            win.demistorm.VRThrowingExtensions.log.debug("[NetworkChannel] Decoded packet type {} successfully",
+                data.clazz.getSimpleName());
         } catch (Exception e) {
+            win.demistorm.VRThrowingExtensions.log.error("[NetworkChannel] Failed to decode packet {}: {}",
+                packetId, e.getMessage());
             return; // Failed to read packet
         }
 
         // Run packet handler
+        win.demistorm.VRThrowingExtensions.log.debug("[NetworkChannel] Calling handler for packet type {}",
+            data.clazz.getSimpleName());
         data.handler.accept(message, player);
     }
 

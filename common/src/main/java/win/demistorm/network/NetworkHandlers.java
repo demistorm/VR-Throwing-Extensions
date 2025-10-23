@@ -17,48 +17,74 @@ public final class NetworkHandlers {
 
     // Client threw something
     public static void handleThrow(Player player, ThrowData data) {
-        if (player == null || !player.isAlive()) return;
+        log.debug("[NetworkHandlers] handleThrow called for player: {}",
+            player != null ? player.getName().getString() : "null");
 
-        ItemStack heldStack = player.getMainHandItem();
-        if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack)) return;
-
-        ThrownProjectileEntity proj = new ThrownProjectileEntity(
-                player.level(), player, heldStack, data.wholeStack());
-
-        // Make sure item syncs properly on first spawn
-        proj.setItem(heldStack.copyWithCount(1));
-
-        Vec3 pos = new Vec3(data.posX(), data.posY(), data.posZ());
-        Vec3 vel = new Vec3(data.velX(), data.velY(), data.velZ());
-        proj.setPos(pos);
-        proj.setOriginalThrowPos(pos);
-        proj.setDeltaMovement(vel);
-        proj.setHandRoll(data.rollDeg());
-
-        log.debug("[Server] Spawning thrown proj {} with item {}", proj.getId(), proj.getItem());
-
-        player.level().addFreshEntity(proj);
-
-        float attackDamage = ThrownProjectileEntity.stackBaseDamage(heldStack);
-        log.debug("[Network] Thrown item attack damage = {}", attackDamage);
-
-        if (attackDamage <= 1.0F) {
-            if (!player.level().isClientSide()) {
-                player.level().playSound(null, player.blockPosition(),
-                        SoundEvents.WITCH_THROW, SoundSource.PLAYERS, 0.6f, 1.05f);
-            }
-        } else {
-            if (!player.level().isClientSide()) {
-                player.level().playSound(null, player.blockPosition(),
-                        SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 0.6f, 1.33f);
-            }
+        if (player == null || !player.isAlive()) {
+            log.debug("[NetworkHandlers] Returning: player null or not alive (player={}, alive={})",
+                player != null ? "not null" : "null",
+                player != null ? player.isAlive() : "N/A");
+            return;
         }
 
-        if (data.wholeStack()) {
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        } else {
-            if (heldStack.getCount() > 1) heldStack.shrink(1);
-            else player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        ItemStack heldStack = player.getMainHandItem();
+        log.debug("[NetworkHandlers] Player holding: {} (empty={}, disabled={})",
+                heldStack, heldStack.isEmpty(), ModCompat.throwingDisabled(heldStack));
+
+        if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack)) {
+            log.debug("[NetworkHandlers] Returning: empty stack or throwing disabled");
+            return;
+        }
+
+        try {
+            log.debug("[NetworkHandlers] Creating ThrownProjectileEntity...");
+
+            if (win.demistorm.VRThrowingExtensions.THROWN_ITEM_TYPE == null) {
+                throw new IllegalStateException("THROWN_ITEM_TYPE is null - entity registration has not occurred yet");
+            }
+
+            ThrownProjectileEntity proj = new ThrownProjectileEntity(
+                    player.level(), player, heldStack, data.wholeStack());
+
+            log.debug("[NetworkHandlers] Setting item on projectile...");
+            // Make sure item syncs properly on first spawn
+            proj.setItem(heldStack.copyWithCount(1));
+
+            log.debug("[NetworkHandlers] Setting projectile position and velocity...");
+            Vec3 pos = new Vec3(data.posX(), data.posY(), data.posZ());
+            Vec3 vel = new Vec3(data.velX(), data.velY(), data.velZ());
+            proj.setPos(pos);
+            proj.setOriginalThrowPos(pos);
+            proj.setDeltaMovement(vel);
+            proj.setHandRoll(data.rollDeg());
+
+            log.debug("[Server] Spawning thrown proj {} with item {}", proj.getId(), proj.getItem());
+
+            player.level().addFreshEntity(proj);
+
+            float attackDamage = ThrownProjectileEntity.stackBaseDamage(heldStack);
+            log.debug("[Network] Thrown item attack damage = {}", attackDamage);
+
+            if (attackDamage <= 1.0F) {
+                if (!player.level().isClientSide()) {
+                    player.level().playSound(null, player.blockPosition(),
+                            SoundEvents.WITCH_THROW, SoundSource.PLAYERS, 0.6f, 1.05f);
+                }
+            } else {
+                if (!player.level().isClientSide()) {
+                    player.level().playSound(null, player.blockPosition(),
+                            SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 0.6f, 1.33f);
+                }
+            }
+
+            if (data.wholeStack()) {
+                player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            } else {
+                if (heldStack.getCount() > 1) heldStack.shrink(1);
+                else player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
+        } catch (Exception e) {
+            log.error("[NetworkHandlers] Exception while creating thrown projectile: {}", e.getMessage(), e);
         }
     }
 
