@@ -18,12 +18,12 @@ import static win.demistorm.VRThrowingExtensions.log;
 public final class EmbeddingEffect {
 
     // Final roll angle after weapon sticks in target
-    public static final float targetRollDegX = 15.0f;
+    public static final float targetRollDegX = 70.0f;
     // How fast roll angle settles per tick
     public static final float rollApproachPerTick = 20.0f;
     private static final float forwardSpinSpeedDegPerTick = 15.0f;
     // Move weapon toward center of hitbox (0.0 = surface, 1.0 = center)
-    private static final double embedAdjust = 0.40;
+    private static final double embedAdjust = 0.30;
 
     // Bleeding Tunables
     private static final int bleedIntervalTicks = 30; // Bleed every 30 ticks

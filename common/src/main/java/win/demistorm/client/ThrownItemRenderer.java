@@ -25,8 +25,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
     public ThrownItemRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
-        this.scale = 0.5f; // Item display scale
-        this.shadowStrength = 0.5f; // Shadow opacity
+        this.scale = 0.7f; // Item display scale
+        this.shadowStrength = 0.0f; // Shadow opacity
     }
 
     @Override
@@ -57,6 +57,9 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             matrices.mulPose(Axis.XP.rotationDegrees(entity.getEmbedRoll())); // X settle spin
             matrices.scale(scale, scale, scale);
 
+            // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
+            matrices.scale(1.0F, 1.0F, -1.0F);
+
             // Use renderStatic method
             try {
                 itemRenderer.renderStatic(
@@ -78,7 +81,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             return;
         }
 
-        // Non-embedded path: existing logic
+        // Non-embedded path (existing logic)
         if (velocity.length() > 0.001) {
             // Calculate yaw (horizontal rotation)
             float yaw = (float)(Mth.atan2(velocity.z, velocity.x) * 180.0 / Math.PI);
@@ -120,6 +123,9 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             float spin = (age * spinSpeed) % 360F;
             matrices.mulPose(Axis.XP.rotationDegrees(spin));
         }
+
+        // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
+        matrices.scale(1.0F, 1.0F, -1.0F);
 
         // Apply scale to item
         matrices.scale(scale, scale, scale);
