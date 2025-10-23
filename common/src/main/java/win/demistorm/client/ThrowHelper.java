@@ -26,13 +26,12 @@ import static win.demistorm.VRThrowingExtensions.log;
 // Client throw logic
 public class ThrowHelper {
 
-    
+
     // Various literals
     private static boolean active          = false;          // Throwing logic active
     private static boolean catchActive     = false;          // Catching logic active
     private static boolean throwWholeStack = false;          // Whether the whole stack should be thrown
     private static boolean cancelBreaking  = false;          // Cancels breaking after a certain speed
-    private static Vec3 relativeStartPoint = Vec3.ZERO;    // InteractionHand position relative to player when starting
     private static ItemStack heldItem   = ItemStack.EMPTY;   // Checks what item is in hand
     private static ThrownProjectileEntity targetProjectile = null; // The projectile being caught
     private static int ticksHeld  = 0;                       // How long trigger is pressed
@@ -88,30 +87,19 @@ public class ThrowHelper {
                 return; // Skip throwing logic if catching is active
             }
 
-            
+
             // When Attack/Destroy is pressed, start Tracking
             if (!active && attackPressed) {
                 ItemStack held = player.getMainHandItem();
                 if (ModCompat.throwingDisabled(held)) return;
 
-                VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
-                if (pose == null) return;
-
-                VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
-                if (hand == null) return;
-
-                // Store both absolute and relative positions
-                Vec3 handWorldPos = hand.getPos();
-                Vec3 playerPos = player.position();
-
                 // Activates throw states
-                relativeStartPoint = handWorldPos.subtract(playerPos); // Relative start point for distance tracking
                 heldItem = held.copy();
                 ticksHeld = 0;
                 active = true;
                 throwWholeStack = placePressed;    // Throws the whole stack if pressed
                 cancelBreaking = false;            // Doesn't cancel breaking until speed is too fast
-                log.debug("[VR Throw] Hold trace started with item: {} at relative pos: {}", heldItem, relativeStartPoint);
+                log.debug("[VR Throw] Hold trace started with item: {}", heldItem);
             }
 
             // Holding Attack/Destroy
@@ -120,10 +108,11 @@ public class ThrowHelper {
                 throwWholeStack |= placePressed;         // Throws whole stack
 
                 // Checks arm speed to determine if it should cancel block breaking
+                // Uses player relative speed so player movement doesn't trigger this
                 if (!cancelBreaking) {
                     VRPoseHistory hist = VRAPI.instance().getHistoricalVRPoses(player);
                     if (hist != null) {
-                        double speed = hist.averageSpeed(VRBodyPart.MAIN_HAND, 2);
+                        double speed = hist.averageSpeed(VRBodyPart.MAIN_HAND, 2, true);
                         if (speed > speedThreshold) {
                             cancelBreaking = true;
                             log.debug("[VR Throw] speed threshold crossed, mining blocked");
@@ -139,74 +128,70 @@ public class ThrowHelper {
                     if (history != null) {
                         int usedTicks = Math.min(ticksHeld, maxPoseHistoryTicks);
 
-                        // Calculate current relative position
-                        Vec3 currentHandPos = history.averagePosition(VRBodyPart.MAIN_HAND, usedTicks);
-                        Vec3 currentPlayerPos = player.position();
-                        assert currentHandPos != null;
-                        Vec3 currentRelativePos = currentHandPos.subtract(currentPlayerPos);
+                        // Check how far the hand moved relative to the player over the hold duration
+                        Vec3 handMovement = history.netMovement(VRBodyPart.MAIN_HAND, usedTicks, true);
 
-                        // Check relative movement
-                        double relativeMovedDist = relativeStartPoint.distanceTo(currentRelativePos);
+                        if (handMovement != null) {
+                            double relativeMovedDist = handMovement.length();
 
-                        if (relativeMovedDist > minThrowDistance) {
-                            // Subtract horizontal movement from velocity
-                            Vec3 rawHandVel = history.averageVelocity(VRBodyPart.MAIN_HAND, usedTicks);
-                            Vec3 playerHorizontalVel = new Vec3(player.getDeltaMovement().x, 0, player.getDeltaMovement().z);
-                            assert rawHandVel != null;
-                            Vec3 relativeVel = rawHandVel.subtract(playerHorizontalVel);
+                            if (relativeMovedDist > minThrowDistance) {
+                                // Get velocity relative to player (independent of player movement)
+                                Vec3 relativeVel = history.averageVelocity(VRBodyPart.MAIN_HAND, usedTicks, true);
 
-                            double velLength = relativeVel.length();
+                                if (relativeVel != null) {
+                                    double velLength = relativeVel.length();
 
-                            if (velLength >= throwVelocityThreshold) {
-                                Vec3 origin = historicalHandPosition(history);
-                                double dynamicMultiplier = calculateVelocityMultiplier(velLength);
-                                Vec3 launchVel = relativeVel.scale(dynamicMultiplier);
-                                Vec3 assistedVel = AimHelper.applyAimAssist(player, origin, launchVel);
+                                    if (velLength >= throwVelocityThreshold) {
+                                        // Get world space origin for the throw (where projectile spawns)
+                                        Vec3 origin = historicalHandPosition(history);
+                                        double dynamicMultiplier = calculateVelocityMultiplier(velLength);
+                                        Vec3 launchVel = relativeVel.scale(dynamicMultiplier);
+                                        Vec3 assistedVel = AimHelper.applyAimAssist(player, origin, launchVel);
 
-                                // InteractionHand rotation
-                                VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
-                                assert pose != null;
-                                VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
-                                Quaternionfc q = hand.getRotation();
-                                Vector3f fwd = new Vector3f(0, 0, -1).rotate(q).normalize();
-                                Vector3f up  = new Vector3f(0, 1,  0).rotate(q).normalize();
-                                Vector3f projCtrlUp  = up .sub(new Vector3f(fwd).mul(up .dot(fwd))).normalize();
-                                Vector3f projWorldUp = new Vector3f(0, 1, 0)
-                                        .sub(new Vector3f(fwd).mul(fwd.y)).normalize();
-                                float rollRad = projCtrlUp.angleSigned(projWorldUp, fwd);
-                                float rollDeg = (float) Math.toDegrees(rollRad);
+                                        // InteractionHand rotation (world space)
+                                        VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
+                                        assert pose != null;
+                                        VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
+                                        Quaternionfc q = hand.getRotation();
+                                        Vector3f fwd = new Vector3f(0, 0, -1).rotate(q).normalize();
+                                        Vector3f up  = new Vector3f(0, 1,  0).rotate(q).normalize();
+                                        Vector3f projCtrlUp  = up .sub(new Vector3f(fwd).mul(up .dot(fwd))).normalize();
+                                        Vector3f projWorldUp = new Vector3f(0, 1, 0)
+                                                .sub(new Vector3f(fwd).mul(fwd.y)).normalize();
+                                        float rollRad = projCtrlUp.angleSigned(projWorldUp, fwd);
+                                        float rollDeg = (float) Math.toDegrees(rollRad);
 
-                                // Send throw to server
-                                try {
-                                    ClientNetworkHelper.sendToServer(origin, assistedVel, throwWholeStack, rollDeg);
-                                } catch (Exception e) {
-                                    log.error("Error sending throw packet to server: {}", e.getMessage());
-                                    reset(); // Reset throw state on error
-                                    return;
+                                        // Send throw to server
+                                        try {
+                                            ClientNetworkHelper.sendToServer(origin, assistedVel, throwWholeStack, rollDeg);
+                                        } catch (Exception e) {
+                                            log.error("Error sending throw packet to server: {}", e.getMessage());
+                                            reset(); // Reset throw state on error
+                                            return;
+                                        }
+
+                                        // DEBUG
+                                        if (VRThrowingExtensions.debugMode) {
+                                            boolean aimAssistApplied = !assistedVel.equals(launchVel);
+                                            player.displayClientMessage(Component.literal(
+                                                    "[VR Throw] origin=" + origin +
+                                                            " relativeVel=" + relativeVel +
+                                                            " velLength=" + String.format("%.4f", velLength) +
+                                                            " multiplier=" + String.format("%.2f", dynamicMultiplier) +
+                                                            " relativeMovement=" + String.format("%.3f", relativeMovedDist) +
+                                                            " aimAssist=" + aimAssistApplied +
+                                                            " stack=" + throwWholeStack), false);
+                                        }
+
+                                        VRClientAPI.instance().triggerHapticPulse(
+                                                VRBodyPart.fromInteractionHand(InteractionHand.MAIN_HAND), 0.2f);
+                                    } else {
+                                        log.debug("[VR Throw] Relative velocity too slow: {}", velLength);
+                                    }
                                 }
-
-                                // DEBUG
-                                if (VRThrowingExtensions.debugMode) {
-                                    boolean aimAssistApplied = !assistedVel.equals(launchVel);
-                                    player.displayClientMessage(Component.literal(
-                                            "[VR Throw] origin=" + origin +
-                                                    " rawHandVel=" + rawHandVel +
-                                                    " playerHorizontalVel=" + playerHorizontalVel +
-                                                    " relativeVel=" + relativeVel +
-                                                    " velLength=" + String.format("%.4f", velLength) +
-                                                    " multiplier=" + String.format("%.2f", dynamicMultiplier) +
-                                                    " relativeMovement=" + String.format("%.3f", relativeMovedDist) +
-                                                    " aimAssist=" + aimAssistApplied +
-                                                    " stack=" + throwWholeStack), false);
-                                }
-
-                                VRClientAPI.instance().triggerHapticPulse(
-                                        VRBodyPart.fromInteractionHand(InteractionHand.MAIN_HAND), 0.2f);
                             } else {
-                                log.debug("[VR Throw] Relative velocity too slow: {}", velLength);
+                                log.debug("[VR Throw] Insufficient relative movement: {}", relativeMovedDist);
                             }
-                        } else {
-                            log.debug("[VR Throw] Insufficient relative movement: {}", relativeMovedDist);
                         }
                     }
                 } else {
@@ -264,7 +249,7 @@ public class ThrowHelper {
 
         Vec3 handPos = hand.getPos();
 
-        
+
         // When attack is pressed and not already catching, look for projectiles
         if (!catchActive && attackPressed) {
             ThrownProjectileEntity nearestProjectile = findNearestProjectile(player, handPos);
@@ -373,7 +358,7 @@ public class ThrowHelper {
         resetCatch();
     }
 
-    // Checks historical hand positions
+    // Checks historical hand positions (world space for spawn origin)
     private static Vec3 historicalHandPosition(VRPoseHistory hist) {
         try {
             VRPose pose2 = hist.getHistoricalData(2); // Gets pose from 2 ticks back
@@ -399,7 +384,6 @@ public class ThrowHelper {
         active = false;
         throwWholeStack = false;
         cancelBreaking = false;
-        relativeStartPoint = Vec3.ZERO;  // NEW: Reset relative tracking
         heldItem = ItemStack.EMPTY;
         ticksHeld = 0;
     }
