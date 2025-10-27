@@ -51,6 +51,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     private float embeddedLocalYaw = 0f;
     private float embeddedLocalPitch = 0f;
 
+    private boolean damageDealt = false;
+
     public ThrownProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level level) {
         super(type, level);
     }
@@ -250,8 +252,12 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                         return;
                     }
                 } else if (ConfigHelper.ACTIVE.weaponEffect == WeaponEffectType.EMBED) {
-                    EmbeddingEffect.startEmbedding(this, entityHit, hitPos);
-                    return;
+                    if (damageDealt) {
+                        EmbeddingEffect.startEmbedding(this, entityHit, hitPos);
+                        return;
+                    } else {
+                        log.debug("[VR Throw] Damage blocked, not embedding projectile {}", this.getId());
+                    }
                 }
             }
             dropAndDiscard();
@@ -282,7 +288,9 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             sp.sendSystemMessage(msg, false);
         }
 
-        target.hurtServer(world, src, total);
+        damageDealt = target.hurtServer(world, src, total);
+
+        log.debug("[VR Throw] Damage result: dealt={}, target={}", damageDealt, target.getName().getString());
 
         // Send blood particles using the pre-calculated clamped hit position
         Vec3 velocity = getDeltaMovement();
