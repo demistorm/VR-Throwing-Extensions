@@ -14,7 +14,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,6 +53,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     private boolean alreadyDropped = false;
     private float embeddedLocalYaw = 0f;
     private float embeddedLocalPitch = 0f;
+
+    private boolean damageDealt = false;
 
     public ThrownProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level level) {
         super(type, level);
@@ -254,8 +255,12 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                         return;
                     }
                 } else if (ConfigHelper.ACTIVE.weaponEffect == WeaponEffectType.EMBED) {
-                    EmbeddingEffect.startEmbedding(this, entityHit, hitPos);
-                    return;
+                    if (damageDealt) {
+                        EmbeddingEffect.startEmbedding(this, entityHit, hitPos);
+                        return;
+                    } else {
+                        log.debug("[VR Throw] Damage blocked, not embedding projectile {}", this.getId());
+                    }
                 }
             }
             dropAndDiscard();
@@ -286,7 +291,9 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             sp.sendSystemMessage(msg, false);
         }
 
-        target.hurt(src, total);
+        damageDealt = target.hurt(src, total);
+
+        log.debug("[VR Throw] Damage result: dealt={}, target={}", damageDealt, target.getName().getString());
 
         // Send blood particles using the pre-calculated clamped hit position
         Vec3 velocity = getDeltaMovement();
@@ -327,11 +334,11 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                     AttributeModifier.Operation operation = modifier.getOperation();
 
                     if (operation == AttributeModifier.Operation.ADDITION) {
-                        baseDamage += amount;
+                        baseDamage += (float) amount;
                     } else if (operation == AttributeModifier.Operation.MULTIPLY_BASE) {
-                        baseDamage += baseDamage * amount;
+                        baseDamage += (float) (baseDamage * amount);
                     } else if (operation == AttributeModifier.Operation.MULTIPLY_TOTAL) {
-                        baseDamage *= (1.0 + amount);
+                        baseDamage *= (float) (1.0 + amount);
                     }
                 }
             }
@@ -340,11 +347,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         return Math.max(1.0F, baseDamage);
     }
 
-    // Calculate enchantment damage bonus using proper 1.20.1 Minecraft API
+    // Calculate enchantment damage bonus
     private static float getEnchantmentDamageBonus(ItemStack stack, Entity target) {
-        // Use the proper Minecraft API for enchantment damage calculation
-        // This handles Sharpness, Smite, Bane of Arthropods, etc. correctly
-        // and accounts for target type (undead, arthropods, etc.)
         MobType mobType = target instanceof LivingEntity ? ((LivingEntity) target).getMobType() : MobType.UNDEFINED;
         return net.minecraft.world.item.enchantment.EnchantmentHelper.getDamageBonus(stack, mobType);
     }
