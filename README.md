@@ -6,7 +6,18 @@ Hold the place/use keybind at the same time to throw the whole stack.
 
 To catch a thrown item, reach towards it with an empty hand and simply hold the attack/destroy keybind. Like an opposite throw!
 
-*Requires Vivecraft Mod 1.3.0+. Mod Menu recommended to change clientside settings on Fabric.*
+There are multiple weapon effects, **boomerang**, **embedding**, and **off**. The boomerang effect will have weapons/tools arc back to their origin after colliding with an mob/player (default setting). Embedding will embed any weapon or tool that does more than 1 damage into the entity it hit and apply a bleeding effect doing 1 damage every 1.5 seconds. Great against creepers! Off will simply make the weapon drop on impact, similarly to throwing a regular item like dirt. 
+
+---
+
+#### Server Owners:
+The serverside configuration is authoritative for the weapon effect and aim assist options. Whatever you set there will be what the mod does for everyone. Weapon Effect options are OFF | BOOMERANG | EMBED. 
+
+Aim Assist is simply true | false.
+
+---
+
+*Requires Vivecraft Mod 1.3.3+. Mod Menu recommended to change clientside settings on Fabric.*
 
 ---
 
