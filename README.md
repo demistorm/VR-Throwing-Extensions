@@ -1,5 +1,9 @@
-# VR Throwing Extensions
+<img width="2037" height="288" alt="vte-text_full" src="https://github.com/user-attachments/assets/9418006b-395f-49ae-a5a7-1260f9c79f0d" />
+
+---
+
 Minecraft mod allowing Vivecraft players to throw and catch any item!
+Available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/vr-throwing-extensions) and [Modrinth](https://modrinth.com/mod/vr-throwing-extensions).
 
 Simply hold the attack/destroy keybind, make a throwing motion, and release!
 Hold the place/use keybind at the same time to throw the whole stack. 
@@ -28,34 +32,17 @@ Aim Assist is simply true | false.
 
 ---
 
+![vte-1 2 5-showcase00000066](https://github.com/user-attachments/assets/57b9986c-fb20-4ed9-b6d7-e2b169bd371b)
+
+![vte-1 2 5-showcase00010425](https://github.com/user-attachments/assets/ebcdd11a-9e56-4f17-a66b-95e99ae5f0b6)
+![vte-1 2 5-showcase00010062](https://github.com/user-attachments/assets/5537de37-59bc-44eb-ac96-aab84c3412f1)
+![vte-1 2 5-showcase00007765](https://github.com/user-attachments/assets/1ac7e517-4cbb-445d-93aa-c1df74f6dd14)
+![vte-1 2 5-showcase00006758](https://github.com/user-attachments/assets/9bca30fb-ba2b-44e3-b733-4d9b95358fe7)
+![vte-1 2 5-showcase00003860](https://github.com/user-attachments/assets/534bc004-064f-4354-9bc8-1c247c74b519)
+![vte-1 2 5-showcase00003004](https://github.com/user-attachments/assets/11338b8f-bfa0-4a7f-8cda-c69b7bd8cd43)
+![vte-1 2 5-showcase00002366](https://github.com/user-attachments/assets/65675300-ef13-4c60-b73f-b866324ffebe)
+![vte-1 2 5-showcase00002155](https://github.com/user-attachments/assets/1938ca09-9f98-43b6-b597-0031e1684e46)
+![vte-1 2 5-showcase00000880](https://github.com/user-attachments/assets/0a325d20-c0cf-4fae-abfa-0d4b43b3666c)
 
 
-https://github.com/user-attachments/assets/75e440aa-4229-4cfe-87a1-5609dad33670
-
-
-
-https://github.com/user-attachments/assets/d419bead-6e04-4cdb-8a0f-1002e2cc89d8
-
-
-
-https://github.com/user-attachments/assets/92c6fc2c-879b-4667-ad3f-bb2ab422b25c
-
-
-
-https://github.com/user-attachments/assets/67236d5f-d39b-4929-ba6a-75dc38690f97
-
-
-
-https://github.com/user-attachments/assets/78bbc161-dd2e-45fd-b401-ffde3fbc20ea
-
-
-
-https://github.com/user-attachments/assets/e5fc7e68-072c-43d9-813c-6786ec4e3102
-
-
-
-https://github.com/user-attachments/assets/9b2c023e-fb91-4b60-958d-50d2e1167f5c
-
-
-
-<img width="1080" height="1080" alt="VRThrowingExtensions" src="https://github.com/user-attachments/assets/5aef0c1a-aa10-4e27-91eb-cf32459cf91b" />
+<img width="1080" height="1080" alt="logo" src="https://github.com/user-attachments/assets/70f01226-a612-4f6e-94ad-a83428194556" />
