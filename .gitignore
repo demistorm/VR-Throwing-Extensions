@@ -29,6 +29,8 @@ neoforge/run/
 *.ipr
 
 # Misc
+api_keys.txt
+.api_keys.txt.kate-swp
 CLAUDE.md
 .architectury-transformer
 .claude
