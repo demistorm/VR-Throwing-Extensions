@@ -58,17 +58,3 @@ jobs:
           loaders: forge
           github-token: ${{ secrets.GITHUB_TOKEN }}
           changelog-file: CHANGELOG.md
-
-      - name: Publish NeoForge
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          modrinth-id: SDTJzC3Z
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          curseforge-id: 1374432
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          version: ${{ steps.version.outputs.mod_version }}-neoforge
-          name: VR Throwing Extensions (NeoForge ${{ steps.version.outputs.minecraft_version }}-${{ steps.version.outputs.mod_version }})
-          files: neoforge/build/libs/!(*-@(sources|javadoc|dev|shadow)).jar
-          loaders: neoforge
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          changelog-file: CHANGELOG.md
