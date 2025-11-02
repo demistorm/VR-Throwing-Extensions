@@ -144,6 +144,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     public void tick() {
         super.tick();
 
+        if (!isAlive() || isRemoved()) return;
+
         if (immunityTicks > 0) immunityTicks--;
 
         if (isEmbedded() && !isCatching()) {
@@ -359,6 +361,14 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
+    public void remove(RemovalReason reason) {
+        if (isEmbedded() && embeddedTarget != null) {
+            EmbeddingEffect.BleedManager.unregister(embeddedTarget, this);
+        }
+        super.remove(reason);
+    }
+
+    @Override
     protected @NotNull Item getDefaultItem() {
         return net.minecraft.world.item.Items.STICK;
     }
@@ -440,8 +450,9 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         if (!level().isClientSide()) {
             ItemStack dropStack = createDropStack();
             dropStack.setCount(stackSize);
-            level().addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(
-                    level(), getX(), getY(), getZ(), dropStack));
+            net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) level();
+            serverLevel.getServer().execute(() -> serverLevel.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(
+                    serverLevel, getX(), getY(), getZ(), dropStack)));
         }
         discard();
     }
