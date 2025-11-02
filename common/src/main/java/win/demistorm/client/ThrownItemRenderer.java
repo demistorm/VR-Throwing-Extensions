@@ -57,8 +57,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             matrices.mulPose(Axis.XP.rotationDegrees(entity.getEmbedRoll())); // X settle spin
             matrices.scale(scale, scale, scale);
 
-            // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
-            matrices.scale(1.0F, 1.0F, -1.0F);
+            // Attempt a rotation flip instead of a scale hack
+            matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
 
             // Use renderStatic method
             try {
@@ -124,8 +124,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             matrices.mulPose(Axis.XP.rotationDegrees(spin));
         }
 
-        // Undo FIRST_PERSON_RIGHT_HAND Z mirror so world space yaw stays correct
-        matrices.scale(1.0F, 1.0F, -1.0F);
+        // Attempt a rotation flip instead of a scale hack (worked perfectly wow, why didn't I try this before)
+        matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
 
         // Apply scale to item
         matrices.scale(scale, scale, scale);
