@@ -1,0 +1,1 @@
+- Fixes culling issues which makes projectiles look much better visually
