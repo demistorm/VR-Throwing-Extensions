@@ -54,7 +54,7 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: ${{ steps.version.outputs.mod_version }}-forge
           name: VR Throwing Extensions (Forge ${{ steps.version.outputs.minecraft_version }}-${{ steps.version.outputs.mod_version }})
-          files: forge/build/libs/!(*-@(sources|javadoc|dev)).jar
+          files: forge/build/libs/!(*-@(sources|javadoc|dev|shadow)).jar
           loaders: forge
           github-token: ${{ secrets.GITHUB_TOKEN }}
           changelog-file: CHANGELOG.md
@@ -68,7 +68,7 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: ${{ steps.version.outputs.mod_version }}-neoforge
           name: VR Throwing Extensions (NeoForge ${{ steps.version.outputs.minecraft_version }}-${{ steps.version.outputs.mod_version }})
-          files: neoforge/build/libs/!(*-@(sources|javadoc|dev)).jar
+          files: neoforge/build/libs/!(*-@(sources|javadoc|dev|shadow)).jar
           loaders: neoforge
           github-token: ${{ secrets.GITHUB_TOKEN }}
           changelog-file: CHANGELOG.md
