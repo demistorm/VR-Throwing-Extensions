@@ -28,6 +28,13 @@ jobs:
         id: version
         run: echo "mod_version=$(grep 'mod_version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_OUTPUT
 
+      - name: Get JAR filenames
+        id: jars
+        run: |
+          echo "fabric_jar=$(basename $(find fabric/build/libs -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' | head -1))" >> $GITHUB_OUTPUT
+          echo "forge_jar=$(basename $(find forge/build/libs -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' | head -1))" >> $GITHUB_OUTPUT
+          echo "neoforge_jar=$(basename $(find neoforge/build/libs -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' | head -1))" >> $GITHUB_OUTPUT
+
       - name: Publish Fabric
         uses: Kir-Antipov/mc-publish@v3.3
         with:
@@ -36,6 +43,7 @@ jobs:
           curseforge-id: 1374432
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: ${{ steps.version.outputs.mod_version }}-fabric
+          name: ${{ steps.jars.outputs.fabric_jar }}
           files: fabric/build/libs/!(*-@(sources|javadoc|dev)).jar
           loaders: fabric
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,6 +57,7 @@ jobs:
           curseforge-id: 1374432
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: ${{ steps.version.outputs.mod_version }}-forge
+          name: ${{ steps.jars.outputs.forge_jar }}
           files: forge/build/libs/!(*-@(sources|javadoc|dev)).jar
           loaders: forge
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -62,6 +71,7 @@ jobs:
           curseforge-id: 1374432
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: ${{ steps.version.outputs.mod_version }}-neoforge
+          name: ${{ steps.jars.outputs.neoforge_jar }}
           files: neoforge/build/libs/!(*-@(sources|javadoc|dev)).jar
           loaders: neoforge
           github-token: ${{ secrets.GITHUB_TOKEN }}
