@@ -29,6 +29,7 @@ neoforge/run/
 *.ipr
 
 # Misc
+api_keys.txt
 CLAUDE.md
 .architectury-transformer
 .claude
