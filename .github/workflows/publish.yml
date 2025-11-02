@@ -33,6 +33,11 @@ jobs:
           curseforge-id: 1374432
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
+          loaders: |
+            fabric
+            forge
+            neoforge
+
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
           changelog: |
