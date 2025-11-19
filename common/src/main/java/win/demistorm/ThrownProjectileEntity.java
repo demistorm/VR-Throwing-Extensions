@@ -102,7 +102,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (level().isClientSide) {
+        if (level.isClientSide) {
             // Log first few updates to confirm arrival timing
             if (this.tickCount < 40) {
                 VRThrowingExtensions.log.debug("[Client] Data updated for {}: item now {}", getId(), this.getItem());
@@ -234,7 +234,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             return;
         }
 
-        if (!level().isClientSide) {
+        if (!level.isClientSide) {
             boolean hitEntity = hit.getType() == HitResult.Type.ENTITY;
             if (hitEntity) {
                 EntityHitResult entityHit = (EntityHitResult) hit;
@@ -267,14 +267,14 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             }
             dropAndDiscard();
         } else {
-            level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, getItem()),
+            level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, getItem()),
                     getX(), getY(), getZ(), 0.0, 0.0, 0.0);
         }
     }
 
     protected void onHitEntity(EntityHitResult res, Vec3 hitPos) {
         Entity target = res.getEntity();
-        ServerLevel world = (ServerLevel) level();
+        ServerLevel world = (ServerLevel) level;
         DamageSource src = world.damageSources().thrown(this, getOwner() == null ? this : getOwner());
 
         float base = stackBaseDamage(getItem());
@@ -301,7 +301,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         Vec3 velocity = getDeltaMovement();
         int playersSent = 0;
         for (ServerPlayer player : world.getServer().getPlayerList().getPlayers()) {
-            if (player.level() == world && player.distanceToSqr(hitPos) < 4096) { // 64 blocks
+            if (player.level == world && player.distanceToSqr(hitPos) < 4096) { // 64 blocks
                 win.demistorm.network.Network.INSTANCE.sendToPlayer(player,
                     new win.demistorm.network.BloodParticleData(hitPos.x, hitPos.y, hitPos.z, velocity.x, velocity.y, velocity.z));
                 playersSent++;
@@ -403,7 +403,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     }
 
     public void clearEmbedding() {
-        if (!this.level().isClientSide() && this.embeddedTarget != null) {
+        if (!this.level.isClientSide() && this.embeddedTarget != null) {
             win.demistorm.effects.EmbeddingEffect.BleedManager.unregister(this.embeddedTarget, this);
         }
         this.entityData.set(IS_EMBEDDED, false);
@@ -447,10 +447,10 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             return;
         }
         alreadyDropped = true;
-        if (!level().isClientSide()) {
+        if (!level.isClientSide()) {
             ItemStack dropStack = createDropStack();
             dropStack.setCount(stackSize);
-            net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) level();
+            net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) level;
             serverLevel.getServer().execute(() -> serverLevel.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(
                     serverLevel, getX(), getY(), getZ(), dropStack)));
         }
