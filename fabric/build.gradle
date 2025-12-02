@@ -55,7 +55,18 @@ dependencies {
     // Mod Menu integration for Fabric users
     modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
 
-    // MixinExtras for advanced mixin features
+    // Runtime
+    modRuntimeOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
+    modRuntimeOnly "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.21.5-0.6.11-fabric"
+
+    include(implementation('com.electronwill.night-config:toml:3.6.6'))
+    include(implementation('com.electronwill.night-config:core:3.6.6'))
+
+//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}")) { transitive = false }
+//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux")) { transitive = false }
+//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")) { transitive = false }
+//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")) { transitive = false }
 }
 
 // Process resources and expand version placeholders
