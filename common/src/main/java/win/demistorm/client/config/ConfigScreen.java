@@ -8,6 +8,9 @@ import net.minecraft.client.gui.components.Button;
 import win.demistorm.ConfigHelper;
 import win.demistorm.WeaponEffectType;
 
+import java.util.Arrays;
+import java.util.List;
+
 // Settings menu
 public final class ConfigScreen {
 
@@ -56,55 +59,55 @@ public final class ConfigScreen {
             // Weapon effect button
             addRenderableWidget(
                     new Button(weaponEffectButtonX, weaponEffectButtonY, weaponEffectButtonWidth, weaponEffectButtonHeight,
-                                    Component.literal("Weapon Effect: " + weaponEffectValue.name()),
-                                    btn -> {
-                                        // Switch between effects
-                                        weaponEffectValue = switch (weaponEffectValue) {
-                                            case OFF -> WeaponEffectType.BOOMERANG;
-                                            case BOOMERANG -> WeaponEffectType.EMBED;
-                                            case EMBED -> WeaponEffectType.OFF;
-                                        };
-                                        btn.setMessage(Component.literal("Weapon Effect: " + weaponEffectValue.name()));
-                                    }));
+                            Component.literal("Weapon Effect: " + weaponEffectValue.name()),
+                            btn -> {
+                                // Switch between effects
+                                weaponEffectValue = switch (weaponEffectValue) {
+                                    case OFF -> WeaponEffectType.BOOMERANG;
+                                    case BOOMERANG -> WeaponEffectType.EMBED;
+                                    case EMBED -> WeaponEffectType.OFF;
+                                };
+                                btn.setMessage(Component.literal("Weapon Effect: " + weaponEffectValue.name()));
+                            }));
 
             // Aim assist button
             addRenderableWidget(
                     new Button(aimAssistButtonX, aimAssistButtonY, aimAssistButtonWidth, aimAssistButtonHeight,
-                                    Component.literal("Aim Assist: " + (aimAssistValue ? "ON" : "OFF")),
-                                    btn -> {
-                                        aimAssistValue = !aimAssistValue;
-                                        btn.setMessage(Component.literal(
-                                                "Aim Assist: " + (aimAssistValue ? "ON" : "OFF")));
-                                    }));
+                            Component.literal("Aim Assist: " + (aimAssistValue ? "ON" : "OFF")),
+                            btn -> {
+                                aimAssistValue = !aimAssistValue;
+                                btn.setMessage(Component.literal(
+                                        "Aim Assist: " + (aimAssistValue ? "ON" : "OFF")));
+                            }));
 
             // Blood effects button
             addRenderableWidget(
                     new Button(bloodEffectsButtonX, bloodEffectsButtonY, bloodEffectsButtonWidth, bloodEffectsButtonHeight,
-                                    Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")),
-                                    btn -> {
-                                        bloodEffectValue = !bloodEffectValue;
-                                        btn.setMessage(Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")));
-                                    }));
+                            Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")),
+                            btn -> {
+                                bloodEffectValue = !bloodEffectValue;
+                                btn.setMessage(Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")));
+                            }));
 
             // Done button
             addRenderableWidget(
                     new Button(width / 2 - 100, height - 27, 200, 20,
-                                    Component.literal("Done"),
-                                    btn -> {
-                                        ConfigHelper.CLIENT.weaponEffect = weaponEffectValue;
-                                        ConfigHelper.CLIENT.aimAssist = aimAssistValue;
-                                        ConfigHelper.write(ConfigHelper.CLIENT);
+                            Component.literal("Done"),
+                            btn -> {
+                                ConfigHelper.CLIENT.weaponEffect = weaponEffectValue;
+                                ConfigHelper.CLIENT.aimAssist = aimAssistValue;
+                                ConfigHelper.write(ConfigHelper.CLIENT);
 
-                                        // Save blood effect setting
-                                        ClientOnlyConfig.ACTIVE.bloodEffect = bloodEffectValue;
-                                        ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
+                                // Save blood effect setting
+                                ClientOnlyConfig.ACTIVE.bloodEffect = bloodEffectValue;
+                                ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
 
-                                        if (client.hasSingleplayerServer()) {
-                                            ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
-                                            ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
-                                        }
-                                        client.setScreen(parent);
-                                    }));
+                                if (client.hasSingleplayerServer()) {
+                                    ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
+                                    ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
+                                }
+                                client.setScreen(parent);
+                            }));
         }
 
         @Override
@@ -121,31 +124,26 @@ public final class ConfigScreen {
         private void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
             // Check if mouse is over weapon effect button
             if (isMouseOverButton(mouseX, mouseY, weaponEffectButtonX, weaponEffectButtonY, weaponEffectButtonWidth, weaponEffectButtonHeight)) {
-                String effect = weaponEffectValue.name();
-                String tooltip = switch (effect) {
-                    case "OFF" -> "Weapons drop normally";
-                    case "BOOMERANG" -> "Weapons return after hitting (catch them!)";
-                    case "EMBED" -> "Weapons stick in enemies and cause bleeding";
-                    default -> "Weapon effect mode";
-                };
-                Component tooltipText = Component.literal(tooltip);
-                renderTooltip(poseStack, tooltipText, mouseX, mouseY);
+                List<Component> tooltip = Arrays.asList(
+                        Component.literal("OFF: Weapons drop normally"),
+                        Component.literal("BOOMERANG: Weapons return after hitting (catch them!)"),
+                        Component.literal("EMBED: Weapons stick in enemies and cause bleeding")
+                );
+                renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
             }
             // Check if mouse is over aim assist button
             else if (isMouseOverButton(mouseX, mouseY, aimAssistButtonX, aimAssistButtonY, aimAssistButtonWidth, aimAssistButtonHeight)) {
-                Component tooltipText = Component.literal("Helps aim at nearby targets");
-                renderTooltip(poseStack, tooltipText, mouseX, mouseY);
+                renderTooltip(poseStack, Component.literal("Helps aim at nearby targets"), mouseX, mouseY);
             }
             // Check if mouse is over blood effects button
             else if (isMouseOverButton(mouseX, mouseY, bloodEffectsButtonX, bloodEffectsButtonY, bloodEffectsButtonWidth, bloodEffectsButtonHeight)) {
-                Component tooltipText = Component.literal("Show blood particles when weapons hit");
-                renderTooltip(poseStack, tooltipText, mouseX, mouseY);
+                renderTooltip(poseStack, Component.literal("Show blood particles when weapons hit"), mouseX, mouseY);
             }
         }
 
         private boolean isMouseOverButton(int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight) {
             return mouseX >= buttonX && mouseX <= buttonX + buttonWidth &&
-                   mouseY >= buttonY && mouseY <= buttonY + buttonHeight;
+                    mouseY >= buttonY && mouseY <= buttonY + buttonHeight;
         }
     }
 }
