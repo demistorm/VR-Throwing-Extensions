@@ -57,8 +57,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             matrices.mulPose(Vector3f.XP.rotationDegrees(entity.getEmbedRoll())); // X settle spin
             matrices.scale(scale, scale, scale);
 
-            // Attempt a rotation flip instead of a scale hack
-            matrices.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+//            // Attempt a rotation flip instead of a scale hack
+//            matrices.mulPose(Vector3f.YP.rotationDegrees(180.0F)); // Might not need this on 1.19.2
 
             // Use renderStatic method
             try {
@@ -123,8 +123,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
             matrices.mulPose(Vector3f.XP.rotationDegrees(spin));
         }
 
-        // Attempt a rotation flip instead of a scale hack (worked perfectly wow, why didn't I try this before)
-        matrices.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+//        // Attempt a rotation flip instead of a scale hack (worked perfectly wow, why didn't I try this before)
+//        matrices.mulPose(Vector3f.YP.rotationDegrees(180.0F)); // Might not need this on 1.19.2
 
         // Apply scale to item
         matrices.scale(scale, scale, scale);
