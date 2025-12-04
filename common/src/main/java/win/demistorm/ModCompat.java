@@ -45,6 +45,7 @@ public class ModCompat {
                 || itemId.getPath().equals("experience_bottle")
                 || itemId.getPath().startsWith("splash_potion")
                 || itemId.getPath().startsWith("lingering_potion")
-                || itemId.getPath().startsWith("trident");
+                || itemId.getPath().startsWith("trident")
+                || itemId.getPath().startsWith("fishing_rod");
     }
 }
