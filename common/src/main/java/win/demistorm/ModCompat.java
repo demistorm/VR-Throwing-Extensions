@@ -33,7 +33,7 @@ public class ModCompat {
             return true;
         }
 
-        // Block items on our blacklist
+        // Block items on the blacklist
         return blockedItems.contains(id);
     }
 

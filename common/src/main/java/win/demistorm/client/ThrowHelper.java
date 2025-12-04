@@ -40,7 +40,7 @@ public class ThrowHelper {
     // Tunables
     private static final double minThrowDistance        = 0.08; // Min arm movement to activate throw
     private static final int    maxPoseHistoryTicks     = 6;    // How many ticks to look back for velocity
-    private static final double speedThreshold          = 0.10; // How fast you can move your arm before canceling block breaking
+    private static final double speedThreshold          = 0.10; // How fast arm can move before canceling block breaking
     private static final double throwVelocityThreshold  = 0.06; // Min velocity to activate throw
 
     // Velocity multiplier curve tunables
@@ -154,7 +154,7 @@ public class ThrowHelper {
                                         VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
                                         Quaternion q = hand.getRotation();
 
-                                        // Calculate forward and up vectors from hand rotation
+                                        // Get forward and up vectors from hand rotation
                                         Vector3f fwd = new Vector3f(0, 0, -1);
                                         fwd.transform(q);
                                         fwd.normalize();

@@ -41,7 +41,7 @@ public class Platform {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
-    // Get the config folder for our mod
+    // Get the config folder for the mod
     @ExpectPlatform
     public static File getConfigFolder() {
         throw new RuntimeException("@ExpectPlatform should have replaced this");

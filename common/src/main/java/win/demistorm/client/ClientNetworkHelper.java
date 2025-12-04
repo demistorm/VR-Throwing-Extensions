@@ -27,7 +27,7 @@ public final class ClientNetworkHelper {
     }
 
     public static void sendCatchUpdateToServer(ThrownProjectileEntity entity, Vec3 newVelocity, Quaternion handRotation) {
-        // Calculate hand roll from quaternion (same logic as throwing)
+        // Get hand roll from quaternion (same logic as throwing)
         Vector3f fwdTemp = new Vector3f(0, 0, -1);
         fwdTemp.transform(handRotation);
         Vector3f fwd = new Vector3f(fwdTemp.x(), fwdTemp.y(), fwdTemp.z());
