@@ -94,7 +94,10 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     public ThrownProjectileEntity(Level level, LivingEntity owner, ItemStack carried, boolean isWholeStack) {
         super(VRThrowingExtensions.THROWN_ITEM_TYPE, level);
         this.setOwner(owner);
-        this.setItem(carried.copyWithCount(1)); // vanilla sync field in ThrowableItemProjectile
+        // vanilla sync field in ThrowableItemProjectile
+        ItemStack single = carried.copy();
+        single.setCount(1);
+        this.setItem(single);
         this.stackSize = isWholeStack ? carried.getCount() : 1;
     }
 
@@ -275,7 +278,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     protected void onHitEntity(EntityHitResult res, Vec3 hitPos) {
         Entity target = res.getEntity();
         ServerLevel world = (ServerLevel) level;
-        DamageSource src = world.damageSources().thrown(this, getOwner() == null ? this : getOwner());
+        DamageSource src = DamageSource.thrown(this, getOwner() == null ? this : getOwner());
 
         float base = stackBaseDamage(getItem());
         float enchBonus = getEnchantmentDamageBonus(getItem(), target);

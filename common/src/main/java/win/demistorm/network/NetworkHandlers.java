@@ -44,11 +44,13 @@ public final class NetworkHandlers {
             }
 
             ThrownProjectileEntity proj = new ThrownProjectileEntity(
-                    player.level(), player, heldStack, data.wholeStack());
+                    player.level, player, heldStack, data.wholeStack());
 
             log.debug("[NetworkHandlers] Setting item on projectile...");
             // Make sure item syncs properly on first spawn
-            proj.setItem(heldStack.copyWithCount(1));
+            ItemStack single = heldStack.copy();
+            single.setCount(1);
+            proj.setItem(single);
 
             log.debug("[NetworkHandlers] Setting projectile position and velocity...");
             Vec3 pos = new Vec3(data.posX(), data.posY(), data.posZ());
@@ -60,19 +62,19 @@ public final class NetworkHandlers {
 
             log.debug("[Server] Spawning thrown proj {} with item {}", proj.getId(), proj.getItem());
 
-            player.level().addFreshEntity(proj);
+            player.level.addFreshEntity(proj);
 
             float attackDamage = ThrownProjectileEntity.stackBaseDamage(heldStack);
             log.debug("[Network] Thrown item attack damage = {}", attackDamage);
 
             if (attackDamage <= 1.0F) {
-                if (!player.level().isClientSide()) {
-                    player.level().playSound(null, player.blockPosition(),
+                if (!player.level.isClientSide()) {
+                    player.level.playSound(null, player.blockPosition(),
                             SoundEvents.WITCH_THROW, SoundSource.PLAYERS, 0.6f, 1.05f);
                 }
             } else {
-                if (!player.level().isClientSide()) {
-                    player.level().playSound(null, player.blockPosition(),
+                if (!player.level.isClientSide()) {
+                    player.level.playSound(null, player.blockPosition(),
                             SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 0.6f, 1.33f);
                 }
             }
@@ -92,7 +94,7 @@ public final class NetworkHandlers {
     public static void handleCatch(Player player, CatchData data) {
         if (player == null || !player.isAlive()) return;
 
-        ServerLevel world = (ServerLevel) player.level();
+        ServerLevel world = (ServerLevel) player.level;
         if (!(world.getEntity(data.entityId()) instanceof ThrownProjectileEntity projectile)) {
             return;
         }
@@ -108,7 +110,7 @@ public final class NetworkHandlers {
     public static void handleCatchUpdate(Player player, CatchUpdateData data) {
         if (player == null || !player.isAlive()) return;
 
-        ServerLevel world = (ServerLevel) player.level();
+        ServerLevel world = (ServerLevel) player.level;
         if (!(world.getEntity(data.entityId()) instanceof ThrownProjectileEntity projectile)) {
             return;
         }
@@ -127,7 +129,7 @@ public final class NetworkHandlers {
     public static void handleCatchComplete(Player player, CatchCompleteData data) {
         if (player == null || !player.isAlive()) return;
 
-        ServerLevel world = (ServerLevel) player.level();
+        ServerLevel world = (ServerLevel) player.level;
         if (!(world.getEntity(data.entityId()) instanceof ThrownProjectileEntity projectile)) {
             return;
         }
@@ -143,8 +145,8 @@ public final class NetworkHandlers {
         int stackSize = projectile.getStackSize();
 
         // Play catch sound
-        if (!player.level().isClientSide()) {
-            player.level().playSound(null, player.blockPosition(),
+        if (!player.level.isClientSide()) {
+            player.level.playSound(null, player.blockPosition(),
                     SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS,
                     0.5f, 2.0f);
         }
@@ -161,7 +163,7 @@ public final class NetworkHandlers {
     // Show blood particle effects
     public static void handleBloodParticle(Player player, BloodParticleData data) {
         // Spawn particles on client
-        if (player != null && player.level().isClientSide()) {
+        if (player != null && player.level.isClientSide()) {
             win.demistorm.client.particles.BloodParticle.spawnParticles(data);
         }
         log.debug("[Network] Received blood particle packet at ({}, {}, {})",
@@ -171,7 +173,7 @@ public final class NetworkHandlers {
     // Show bleeding particle effects
     public static void handleBleedingParticle(Player player, BleedingParticleData data) {
         // Spawn bleeding particles on client
-        if (player != null && player.level().isClientSide()) {
+        if (player != null && player.level.isClientSide()) {
             win.demistorm.client.particles.BleedingParticle.spawnBleedingParticles(data);
         }
         log.debug("[Network] Received bleeding particle packet at ({}, {}, {})",

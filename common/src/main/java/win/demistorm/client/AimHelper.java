@@ -63,7 +63,7 @@ public final class AimHelper {
         Vec3 max = origin.add(maxAssistDistance, maxAssistDistance, maxAssistDistance);
         AABB searchBox = new AABB(min, max);
 
-        List<LivingEntity> candidates = player.level()
+        List<LivingEntity> candidates = player.level
                 .getEntitiesOfClass(LivingEntity.class, searchBox, entity ->
                         entity != player && entity.isAlive() && !entity.isSpectator());
 

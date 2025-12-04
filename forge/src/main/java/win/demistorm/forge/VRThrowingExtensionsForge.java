@@ -1,6 +1,7 @@
 package win.demistorm.forge;
 
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -74,7 +75,7 @@ public class VRThrowingExtensionsForge {
         // Create thrown projectile entity
         ResourceLocation entityLocation = new ResourceLocation("vr_throwing_extensions", "generic_thrown_item");
 
-        event.register(Registries.ENTITY_TYPE, entityLocation, () -> {
+        event.register(ResourceKey.createRegistryKey(new ResourceLocation("minecraft", "entity_type")), entityLocation, () -> {
             VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
                     .sized(0.25f, 0.25f)
                     .clientTrackingRange(64)

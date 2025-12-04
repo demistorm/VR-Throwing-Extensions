@@ -8,7 +8,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
+import com.mojang.math.Vector3f;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.config.ClientOnlyConfig;
 import win.demistorm.network.BloodParticleData;

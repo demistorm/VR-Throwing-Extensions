@@ -2,7 +2,7 @@ package win.demistorm;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +26,7 @@ public class ModCompat {
         if (stack.isEmpty()) return true;
 
         Item item = stack.getItem();
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        ResourceLocation id = Registry.ITEM.getKey(item);
 
         // If ImmersiveMC is loaded, skip items it handles
         if (IMCLoaded && immersiveMCExceptions(id)) {

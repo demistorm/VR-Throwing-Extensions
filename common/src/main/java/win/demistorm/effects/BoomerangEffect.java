@@ -1,7 +1,7 @@
 package win.demistorm.effects;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.resources.ResourceLocation;
@@ -48,7 +48,7 @@ public final class BoomerangEffect {
     // Items that can boomerang (for future weapon lists)
     public static final Set<Item> bounceTools = new HashSet<>();
     static {
-        BuiltInRegistries.ITEM.stream().filter(i -> !BuiltInRegistries.ITEM.getKey(i)
+        Registry.ITEM.stream().filter(i -> !Registry.ITEM.getKey(i)
                         .equals(new ResourceLocation("minecraft", "air")))
                 .forEach(bounceTools::add);
     }
@@ -116,8 +116,8 @@ public final class BoomerangEffect {
         proj.setDeltaMovement(finalVel);
         proj.setNoGravity(true);
 
-        if (!proj.level().isClientSide()) {
-            proj.level().playSound(null, proj.blockPosition(),
+        if (!proj.level.isClientSide()) {
+            proj.level.playSound(null, proj.blockPosition(),
                     SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS,
                     0.6f, 1.5f);
         }

@@ -2,6 +2,7 @@ package win.demistorm.effects;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.sounds.SoundSource;
@@ -33,7 +34,7 @@ public final class EmbeddingEffect {
 
     // Stick weapon into target entity
     public static void startEmbedding(ThrownProjectileEntity proj, EntityHitResult hit, Vec3 clampedHitPos) {
-        if (proj.level().isClientSide()) return;
+        if (proj.level.isClientSide()) return;
         Entity target = hit.getEntity();
         if (!(target instanceof LivingEntity living)) {
             proj.dropAndDiscard();
@@ -67,10 +68,10 @@ public final class EmbeddingEffect {
         proj.beginEmbedding(living, worldOffset, yaw, pitch, tiltDeg, initialXRollDeg);
 
         // Set up bleeding damage
-        BleedManager.register(living, proj.level().getGameTime(), proj);
+        BleedManager.register(living, proj.level.getGameTime(), proj);
 
         // Sound effect
-        proj.level().playSound(null, proj.blockPosition(),
+        proj.level.playSound(null, proj.blockPosition(),
                 SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.45f, 0.8f);
 
         // DEBUG
@@ -103,7 +104,7 @@ public final class EmbeddingEffect {
     public static void tickEmbedded(ThrownProjectileEntity proj) {
         if (!proj.isEmbedded()) return;
 
-        if (proj.level().isClientSide()) {
+        if (proj.level.isClientSide()) {
             return;
         }
 
@@ -149,7 +150,7 @@ public final class EmbeddingEffect {
         }
 
         // Apply bleeding damage
-        BleedManager.tryApplyBleed(living, proj.level().getGameTime());
+        BleedManager.tryApplyBleed(living, proj.level.getGameTime());
 
         // DEBUG
         if (proj.tickCount % 20 == 0) {
@@ -242,8 +243,8 @@ public final class EmbeddingEffect {
             float total = bleedDamage * activeCount;
 
             // Apply bleeding damage
-            ServerLevel sw = (ServerLevel) host.level();
-            host.hurt(sw.damageSources().generic(), total);
+            ServerLevel sw = (ServerLevel) host.level;
+            host.hurt(DamageSource.GENERIC, total);
 
             // Show bleeding particles
             for (ThrownProjectileEntity p : st.projs) {
@@ -252,7 +253,7 @@ public final class EmbeddingEffect {
 
                 // Send bleeding particle packet to nearby players
                 for (ServerPlayer player : sw.getServer().getPlayerList().getPlayers()) {
-                    if (player.level() == sw && player.distanceToSqr(pos) < 4096) { // 64 blocks
+                    if (player.level == sw && player.distanceToSqr(pos) < 4096) { // 64 blocks
                         win.demistorm.network.Network.INSTANCE.sendToPlayer(player,
                             new win.demistorm.network.BleedingParticleData(pos.x, pos.y, pos.z));
                     }

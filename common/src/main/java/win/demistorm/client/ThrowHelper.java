@@ -7,8 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionfc;
-import org.joml.Vector3f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
@@ -152,13 +152,35 @@ public class ThrowHelper {
                                         VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
                                         assert pose != null;
                                         VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
-                                        Quaternionfc q = hand.getRotation();
-                                        Vector3f fwd = new Vector3f(0, 0, -1).rotate(q).normalize();
-                                        Vector3f up  = new Vector3f(0, 1,  0).rotate(q).normalize();
-                                        Vector3f projCtrlUp  = up .sub(new Vector3f(fwd).mul(up .dot(fwd))).normalize();
-                                        Vector3f projWorldUp = new Vector3f(0, 1, 0)
-                                                .sub(new Vector3f(fwd).mul(fwd.y)).normalize();
-                                        float rollRad = projCtrlUp.angleSigned(projWorldUp, fwd);
+                                        Quaternion q = hand.getRotation();
+                                        Vector3f fwdTemp = new Vector3f(0, 0, -1);
+                                        fwdTemp.transform(q);
+                                        Vector3f fwd = new Vector3f(fwdTemp.x(), fwdTemp.y(), fwdTemp.z());
+
+                                        Vector3f upTemp = new Vector3f(0, 1, 0);
+                                        upTemp.transform(q);
+                                        Vector3f up = new Vector3f(upTemp.x(), upTemp.y(), upTemp.z());
+
+                                        Vector3f projCtrlUpTemp = new Vector3f(up.x(), up.y(), up.z());
+                                        Vector3f fwdCopy = new Vector3f(fwd.x(), fwd.y(), fwd.z());
+                                        fwdCopy.mul(up.dot(fwd));
+                                        projCtrlUpTemp.sub(fwdCopy);
+                                        Vector3f projCtrlUp = new Vector3f(projCtrlUpTemp.x(), projCtrlUpTemp.y(), projCtrlUpTemp.z());
+
+                                        Vector3f projWorldUpTemp = new Vector3f(0, 1, 0);
+                                        Vector3f fwdCopy2 = new Vector3f(fwd.x(), fwd.y(), fwd.z());
+                                        fwdCopy2.mul(fwd.y());
+                                        projWorldUpTemp.sub(fwdCopy2);
+                                        Vector3f projWorldUp = new Vector3f(projWorldUpTemp.x(), projWorldUpTemp.y(), projWorldUpTemp.z());
+                                        Vector3f crossResult = new Vector3f(projCtrlUp.x(), projCtrlUp.y(), projCtrlUp.z());
+                                        crossResult.cross(projWorldUp);
+                                        Vector3f dotResult1 = new Vector3f(crossResult.x(), crossResult.y(), crossResult.z());
+                                        dotResult1.dot(fwd);
+
+                                        Vector3f dotResult2 = new Vector3f(projCtrlUp.x(), projCtrlUp.y(), projCtrlUp.z());
+                                        dotResult2.dot(projWorldUp);
+
+                                        float rollRad = (float) Math.atan2(dotResult1.x(), dotResult2.x());
                                         float rollDeg = (float) Math.toDegrees(rollRad);
 
                                         // Send throw to server
@@ -297,12 +319,12 @@ public class ThrowHelper {
         Vec3 max = handPos.add(catchMaxDistance, catchMaxDistance, catchMaxDistance);
         AABB searchBox = new AABB(min, max);
 
-        return player.level().getEntitiesOfClass(ThrownProjectileEntity.class, searchBox, entity -> {
+        return player.level.getEntitiesOfClass(ThrownProjectileEntity.class, searchBox, entity -> {
                     if (entity.isRemoved()) return false;
                     double distance = entity.position().distanceTo(handPos);
                     return distance <= catchMaxDistance;
                 }).stream()
-                .min(Comparator.comparingDouble(e -> e.position().distanceTo(handPos)))
+                .min(Comparator.comparingDouble((ThrownProjectileEntity e) -> e.position().distanceTo(handPos)))
                 .orElse(null);
     }
 
@@ -317,7 +339,7 @@ public class ThrowHelper {
     }
 
     // Updates magnetism effect during catch
-    private static void updateCatchMagnetism(Vec3 handPos, Quaternionfc handRotation) {
+    private static void updateCatchMagnetism(Vec3 handPos, Quaternion handRotation) {
         if (targetProjectile == null) return;
 
         Vec3 projectilePos = targetProjectile.position();

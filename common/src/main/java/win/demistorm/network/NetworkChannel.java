@@ -32,7 +32,7 @@ public class NetworkChannel {
 
     // Send packet to one player (server to client)
     public <T> void sendToPlayer(ServerPlayer player, T message) {
-        Platform.sendToPlayer(player, encode(message, player.level().registryAccess()));
+        Platform.sendToPlayer(player, encode(message, player.level.registryAccess()));
     }
 
 
