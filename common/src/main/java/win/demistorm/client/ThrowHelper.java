@@ -153,34 +153,41 @@ public class ThrowHelper {
                                         assert pose != null;
                                         VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
                                         Quaternion q = hand.getRotation();
-                                        Vector3f fwdTemp = new Vector3f(0, 0, -1);
-                                        fwdTemp.transform(q);
-                                        Vector3f fwd = new Vector3f(fwdTemp.x(), fwdTemp.y(), fwdTemp.z());
 
-                                        Vector3f upTemp = new Vector3f(0, 1, 0);
-                                        upTemp.transform(q);
-                                        Vector3f up = new Vector3f(upTemp.x(), upTemp.y(), upTemp.z());
+                                        // Calculate forward and up vectors from hand rotation
+                                        Vector3f fwd = new Vector3f(0, 0, -1);
+                                        fwd.transform(q);
+                                        fwd.normalize();
 
-                                        Vector3f projCtrlUpTemp = new Vector3f(up.x(), up.y(), up.z());
-                                        Vector3f fwdCopy = new Vector3f(fwd.x(), fwd.y(), fwd.z());
-                                        fwdCopy.mul(up.dot(fwd));
-                                        projCtrlUpTemp.sub(fwdCopy);
-                                        Vector3f projCtrlUp = new Vector3f(projCtrlUpTemp.x(), projCtrlUpTemp.y(), projCtrlUpTemp.z());
+                                        Vector3f up = new Vector3f(0, 1, 0);
+                                        up.transform(q);
+                                        up.normalize();
 
-                                        Vector3f projWorldUpTemp = new Vector3f(0, 1, 0);
-                                        Vector3f fwdCopy2 = new Vector3f(fwd.x(), fwd.y(), fwd.z());
-                                        fwdCopy2.mul(fwd.y());
-                                        projWorldUpTemp.sub(fwdCopy2);
-                                        Vector3f projWorldUp = new Vector3f(projWorldUpTemp.x(), projWorldUpTemp.y(), projWorldUpTemp.z());
+                                        // Project controller up vector onto plane perpendicular to forward
+                                        // projCtrlUp = up - fwd * (up · fwd)
+                                        Vector3f projCtrlUp = new Vector3f(up.x(), up.y(), up.z());
+                                        Vector3f fwdScaled = new Vector3f(fwd.x(), fwd.y(), fwd.z());
+                                        float upDotFwd = up.x() * fwd.x() + up.y() * fwd.y() + up.z() * fwd.z();
+                                        fwdScaled.mul(upDotFwd);
+                                        projCtrlUp.sub(fwdScaled);
+                                        projCtrlUp.normalize();
+
+                                        // Project world up vector onto plane perpendicular to forward
+                                        // projWorldUp = (0,1,0) - fwd * fwd.y
+                                        Vector3f projWorldUp = new Vector3f(0, 1, 0);
+                                        Vector3f fwdScaled2 = new Vector3f(fwd.x(), fwd.y(), fwd.z());
+                                        fwdScaled2.mul(fwd.y());
+                                        projWorldUp.sub(fwdScaled2);
+                                        projWorldUp.normalize();
+
+                                        // Calculate signed angle between the two projected vectors
+                                        // angle = atan2(cross · fwd, dot)
                                         Vector3f crossResult = new Vector3f(projCtrlUp.x(), projCtrlUp.y(), projCtrlUp.z());
                                         crossResult.cross(projWorldUp);
-                                        Vector3f dotResult1 = new Vector3f(crossResult.x(), crossResult.y(), crossResult.z());
-                                        dotResult1.dot(fwd);
+                                        float crossDotFwd = crossResult.x() * fwd.x() + crossResult.y() * fwd.y() + crossResult.z() * fwd.z();
+                                        float dotProduct = projCtrlUp.x() * projWorldUp.x() + projCtrlUp.y() * projWorldUp.y() + projCtrlUp.z() * projWorldUp.z();
 
-                                        Vector3f dotResult2 = new Vector3f(projCtrlUp.x(), projCtrlUp.y(), projCtrlUp.z());
-                                        dotResult2.dot(projWorldUp);
-
-                                        float rollRad = (float) Math.atan2(dotResult1.x(), dotResult2.x());
+                                        float rollRad = (float) Math.atan2(crossDotFwd, dotProduct);
                                         float rollDeg = (float) Math.toDegrees(rollRad);
 
                                         // Send throw to server
