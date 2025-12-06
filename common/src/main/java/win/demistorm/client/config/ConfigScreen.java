@@ -19,7 +19,6 @@ public final class ConfigScreen {
         private final Minecraft client = Minecraft.getInstance();
         private WeaponEffectType weaponEffectValue = ConfigHelper.CLIENT.weaponEffect;
         private boolean aimAssistValue = ConfigHelper.CLIENT.aimAssist;
-        private boolean throwableProjectilesValue = ConfigHelper.CLIENT.throwableProjectiles;
         private boolean bloodEffectValue = ClientOnlyConfig.ACTIVE.bloodEffect;
 
         protected SimpleToggleScreen(Screen parent) {
@@ -71,13 +70,10 @@ public final class ConfigScreen {
             // Throwable projectiles button
             addRenderableWidget(
                     Button.builder(
-                                    Component.literal("Throwable Projectiles: " + (throwableProjectilesValue ? "ON" : "OFF")),
-                                    btn -> {
-                                        throwableProjectilesValue = !throwableProjectilesValue;
-                                        btn.setMessage(Component.literal("Throwable Projectiles: " + (throwableProjectilesValue ? "ON" : "OFF")));
-                                    })
+                                    Component.literal("Throwable Projectiles..."),
+                                    btn -> client.setScreen(new ThrowableItemsScreen(this)))
                             .bounds(width / 2 - 80, height / 4 + 84, 160, 20)
-                            .tooltip(Tooltip.create(Component.literal("Enable VR control over vanilla projectile items like snowballs and ender pearls")))
+                            .tooltip(Tooltip.create(Component.literal("Toggle and manage items that can be thrown with their vanilla effects")))
                             .build());
 
             // Blood effects button
@@ -98,7 +94,6 @@ public final class ConfigScreen {
                                     btn -> {
                                         ConfigHelper.CLIENT.weaponEffect = weaponEffectValue;
                                         ConfigHelper.CLIENT.aimAssist = aimAssistValue;
-                                        ConfigHelper.CLIENT.throwableProjectiles = throwableProjectilesValue;
                                         ConfigHelper.write(ConfigHelper.CLIENT);
 
                                         // Save blood effect setting
@@ -108,7 +103,6 @@ public final class ConfigScreen {
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
                                             ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
-                                            ConfigHelper.ACTIVE.throwableProjectiles = ConfigHelper.CLIENT.throwableProjectiles;
                                         }
                                         client.setScreen(parent);
                                     })

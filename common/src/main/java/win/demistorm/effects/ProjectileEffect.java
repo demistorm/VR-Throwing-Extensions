@@ -25,6 +25,8 @@ import win.demistorm.VRThrowingExtensions;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,7 +52,7 @@ public final class ProjectileEffect {
 
     // Configuration data class
     private static class ProjectileConfig {
-        public Set<String> projectile_items = Set.of(
+        public List<String> projectile_items = List.of(
             "minecraft:snowball",
             "minecraft:egg",
             "minecraft:ender_pearl",
@@ -265,10 +267,57 @@ public final class ProjectileEffect {
         }
     }
 
-    // Reload configuration (for server commands etc.)
-    public static void reloadConfig() {
+    // Public API methods for config screen integration
+
+    // Get current projectile items as a list
+    public static List<String> getProjectileItemsList() {
+        List<String> items = new ArrayList<>();
+        for (ResourceLocation key : projectileItems) {
+            items.add(key.toString());
+        }
+        return items;
+    }
+
+    // Set projectile items from a list and save to config
+    public static void setProjectileItemsList(List<String> items) {
+        Set<ResourceLocation> newItems = Sets.newHashSet();
+        Set<Item> newCache = Sets.newConcurrentHashSet();
+
+        // Convert string list to ResourceLocation set
+        for (String itemId : items) {
+            try {
+                ResourceLocation key = ResourceLocation.parse(itemId);
+                if (BuiltInRegistries.ITEM.containsKey(key)) {
+                    newItems.add(key);
+                    BuiltInRegistries.ITEM.getOptional(key).ifPresent(newCache::add);
+                } else {
+                    VRThrowingExtensions.log.warn("[ProjectileEffect] Unknown item ID: {}", itemId);
+                }
+            } catch (Exception e) {
+                VRThrowingExtensions.log.warn("[ProjectileEffect] Invalid item ID: {}", itemId, e);
+            }
+        }
+
+        projectileItems = newItems;
+        projectileItemCache = newCache;
+
+        // Save to config file
+        ProjectileConfig config = new ProjectileConfig();
+        config.projectile_items = new ArrayList<>(items);
+        writeConfig(config);
+
+        VRThrowingExtensions.log.info("[ProjectileEffect] Updated {} projectile items in config", newItems.size());
+    }
+
+    // Load projectile items from config file (public for external access)
+    public static void loadProjectileItemsFromConfig() {
         projectileItemCache.clear();
         loadProjectileItems();
+    }
+
+    // Reload configuration (for server commands etc.)
+    public static void reloadConfig() {
+        loadProjectileItemsFromConfig();
     }
 
     private ProjectileEffect() {}

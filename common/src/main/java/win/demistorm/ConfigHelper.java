@@ -89,4 +89,13 @@ public final class ConfigHelper {
      public static void clientDisconnected() {
         copyInto(CLIENT, ACTIVE);
     }
+
+    // Set throwable projectiles enabled state (for UI integration)
+    public static void setThrowableProjectilesEnabled(boolean enabled) {
+        CLIENT.throwableProjectiles = enabled;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set throwable projectiles enabled: {}", enabled);
+    }
 }
