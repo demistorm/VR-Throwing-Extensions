@@ -30,7 +30,8 @@ public class ThrowHelper {
     // Various literals
     private static boolean active          = false;          // Throwing logic active
     private static boolean catchActive     = false;          // Catching logic active
-    private static boolean throwWholeStack = false;          // Whether the whole stack should be thrown
+    private static boolean useBindHeld    = false;          // Place/use keybind was held
+    private static boolean playerCrouched = false;          // Player was crouching when thrown
     private static boolean cancelBreaking  = false;          // Cancels breaking after a certain speed
     private static ItemStack heldItem   = ItemStack.EMPTY;   // Checks what item is in hand
     private static ThrownProjectileEntity targetProjectile = null; // The projectile being caught
@@ -97,7 +98,8 @@ public class ThrowHelper {
                 heldItem = held.copy();
                 ticksHeld = 0;
                 active = true;
-                throwWholeStack = placePressed;    // Throws the whole stack if pressed
+                useBindHeld = placePressed;       // Track if place/use was held
+                playerCrouched = player.isCrouching(); // Track if player is crouching
                 cancelBreaking = false;            // Doesn't cancel breaking until speed is too fast
                 log.debug("[VR Throw] Hold trace started with item: {}", heldItem);
             }
@@ -105,7 +107,8 @@ public class ThrowHelper {
             // Holding Attack/Destroy
             else if (active && attackPressed) {
                 ticksHeld        = Math.min(ticksHeld + 1, maxPoseHistoryTicks);
-                throwWholeStack |= placePressed;         // Throws whole stack
+                useBindHeld |= placePressed;           // Track if place/use is held at any point
+                playerCrouched = player.isCrouching(); // Update crouch state
 
                 // Checks arm speed to determine if it should cancel block breaking
                 // Uses player relative speed so player movement doesn't trigger this
@@ -163,7 +166,7 @@ public class ThrowHelper {
 
                                         // Send throw to server
                                         try {
-                                            ClientNetworkHelper.sendToServer(origin, assistedVel, throwWholeStack, rollDeg);
+                                            ClientNetworkHelper.sendToServer(origin, assistedVel, useBindHeld, playerCrouched, rollDeg);
                                         } catch (Exception e) {
                                             log.error("Error sending throw packet to server: {}", e.getMessage());
                                             reset(); // Reset throw state on error
@@ -180,7 +183,8 @@ public class ThrowHelper {
                                                             " multiplier=" + String.format("%.2f", dynamicMultiplier) +
                                                             " relativeMovement=" + String.format("%.3f", relativeMovedDist) +
                                                             " aimAssist=" + aimAssistApplied +
-                                                            " stack=" + throwWholeStack), false);
+                                                            " useBindHeld=" + useBindHeld +
+                                                            " playerCrouched=" + playerCrouched), false);
                                         }
 
                                         VRClientAPI.instance().triggerHapticPulse(
@@ -382,7 +386,8 @@ public class ThrowHelper {
     // Resets throw variables
     private static void reset() {
         active = false;
-        throwWholeStack = false;
+        useBindHeld = false;
+        playerCrouched = false;
         cancelBreaking = false;
         heldItem = ItemStack.EMPTY;
         ticksHeld = 0;

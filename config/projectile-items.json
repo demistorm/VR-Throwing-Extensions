@@ -1,0 +1,13 @@
+{
+  "_comment": "Items that spawn projectiles when used. Add modded items here to enable VR throwing control for them.",
+  "projectile_items": [
+    "minecraft:snowball",
+    "minecraft:egg",
+    "minecraft:ender_pearl",
+    "minecraft:experience_bottle",
+    "minecraft:potion",
+    "minecraft:splash_potion",
+    "minecraft:lingering_potion",
+    "minecraft:firework_rocket"
+  ]
+}

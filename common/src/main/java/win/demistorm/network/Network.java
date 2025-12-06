@@ -23,14 +23,15 @@ public class Network {
                 buf.writeDouble(data.velX());
                 buf.writeDouble(data.velY());
                 buf.writeDouble(data.velZ());
-                buf.writeBoolean(data.wholeStack());
+                buf.writeBoolean(data.useBindHeld());
+                buf.writeBoolean(data.playerCrouched());
                 buf.writeFloat(data.rollDeg());
             },
             // Load throw data from buffer
             (buf) -> new ThrowData(
                 buf.readDouble(), buf.readDouble(), buf.readDouble(),
                 buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                buf.readBoolean(), buf.readFloat()
+                buf.readBoolean(), buf.readBoolean(), buf.readFloat()
             ),
             // Process throw packet
             (data, player) -> NetworkHandlers.handleThrow(player, data)

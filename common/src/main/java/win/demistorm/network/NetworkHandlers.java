@@ -1,14 +1,18 @@
 package win.demistorm.network;
 
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.Vec3;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.effects.ProjectileEffect;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -22,18 +26,65 @@ public final class NetworkHandlers {
         ItemStack heldStack = player.getMainHandItem();
         if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack)) return;
 
-        ThrownProjectileEntity proj = new ThrownProjectileEntity(
-                player.level(), player, heldStack, data.wholeStack());
+        // Determine throw behavior based on keybinds and item type
+        ProjectileEffect.ThrowBehavior behavior = ProjectileEffect.determineThrowBehavior(
+            heldStack, data.useBindHeld(), data.playerCrouched());
+
+        Vec3 origin = new Vec3(data.posX(), data.posY(), data.posZ());
+        Vec3 velocity = new Vec3(data.velX(), data.velY(), data.velZ());
+        boolean throwWholeStack = (behavior == ProjectileEffect.ThrowBehavior.CUSTOM_PROJECTILE_WHOLE_STACK);
+
+        switch (behavior) {
+            case VANILLA_PROJECTILE -> handleVanillaProjectile(player, heldStack, data);
+            case CUSTOM_PROJECTILE_SINGLE -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), false);
+            case CUSTOM_PROJECTILE_WHOLE_STACK -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), true);
+        }
+    }
+
+    // Handle vanilla projectile behavior with VR position/velocity
+    private static void handleVanillaProjectile(Player player, ItemStack heldStack, ThrowData data) {
+        log.debug("[Network] Handling vanilla projectile for item: {}", heldStack);
+
+        // Start tracking before item use
+        ProjectileEffect.ItemProjectileDetector.startTracking(
+            (ServerPlayer) player, data.useBindHeld(), data.playerCrouched(),
+            new Vec3(data.posX(), data.posY(), data.posZ()),
+            new Vec3(data.velX(), data.velY(), data.velZ()),
+            data.rollDeg()
+        );
+
+        // Call vanilla item use
+        InteractionResult result = heldStack.use(player.level(), player, InteractionHand.MAIN_HAND);
+        if (result != InteractionResult.PASS) {
+            // Item was consumed or changed, update the hand
+            ItemStack newStack = player.getMainHandItem();
+            if (newStack.isEmpty()) {
+                player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
+        }
+
+        // Check for spawned projectiles and redirect them after one tick
+        if (player.getServer() != null) {
+            player.getServer().getTickCount(); // Access server to check if available
+            // Schedule the interception for next tick
+            // Note: This is a simplified approach - in production you might want to use a proper scheduling system
+            ProjectileEffect.ItemProjectileDetector.interceptAndRedirect((ServerPlayer) player);
+        }
+    }
+
+    // Handle custom projectile (our ThrownProjectileEntity)
+    private static void handleCustomProjectile(Player player, ItemStack heldStack, Vec3 origin, Vec3 velocity, float rollDeg, boolean wholeStack) {
+        log.debug("[Network] Handling custom projectile for item: {}", heldStack);
+
+        ThrownProjectileEntity proj = new ThrownProjectileEntity(player.level(), player, heldStack, wholeStack);
 
         // Make sure item syncs properly on first spawn
         proj.setItem(heldStack.copyWithCount(1));
 
-        Vec3 pos = new Vec3(data.posX(), data.posY(), data.posZ());
-        Vec3 vel = new Vec3(data.velX(), data.velY(), data.velZ());
-        proj.setPos(pos);
-        proj.setOriginalThrowPos(pos);
-        proj.setDeltaMovement(vel);
-        proj.setHandRoll(data.rollDeg());
+        proj.setPos(origin);
+        proj.setOriginalThrowPos(origin);
+        proj.setDeltaMovement(velocity);
+        proj.setHandRoll(rollDeg);
 
         log.debug("[Server] Spawning thrown proj {} with item {}", proj.getId(), proj.getItem());
 
@@ -42,19 +93,18 @@ public final class NetworkHandlers {
         float attackDamage = ThrownProjectileEntity.stackBaseDamage(heldStack);
         log.debug("[Network] Thrown item attack damage = {}", attackDamage);
 
-        if (attackDamage <= 1.0F) {
-            if (!player.level().isClientSide()) {
+        if (!player.level().isClientSide()) {
+            if (attackDamage <= 1.0F) {
                 player.level().playSound(null, player.blockPosition(),
                         SoundEvents.WITCH_THROW, SoundSource.PLAYERS, 0.6f, 1.05f);
-            }
-        } else {
-            if (!player.level().isClientSide()) {
+            } else {
                 player.level().playSound(null, player.blockPosition(),
                         SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.6f, 1.33f);
             }
         }
 
-        if (data.wholeStack()) {
+        // Update player inventory
+        if (wholeStack) {
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
             if (heldStack.getCount() > 1) heldStack.shrink(1);

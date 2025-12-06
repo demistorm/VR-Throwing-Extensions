@@ -19,6 +19,7 @@ public final class ConfigScreen {
         private final Minecraft client = Minecraft.getInstance();
         private WeaponEffectType weaponEffectValue = ConfigHelper.CLIENT.weaponEffect;
         private boolean aimAssistValue = ConfigHelper.CLIENT.aimAssist;
+        private boolean throwableProjectilesValue = ConfigHelper.CLIENT.throwableProjectiles;
         private boolean bloodEffectValue = ClientOnlyConfig.ACTIVE.bloodEffect;
 
         protected SimpleToggleScreen(Screen parent) {
@@ -67,6 +68,18 @@ public final class ConfigScreen {
                             .tooltip(Tooltip.create(Component.literal("Helps aim at nearby targets")))
                             .build());
 
+            // Throwable projectiles button
+            addRenderableWidget(
+                    Button.builder(
+                                    Component.literal("Throwable Projectiles: " + (throwableProjectilesValue ? "ON" : "OFF")),
+                                    btn -> {
+                                        throwableProjectilesValue = !throwableProjectilesValue;
+                                        btn.setMessage(Component.literal("Throwable Projectiles: " + (throwableProjectilesValue ? "ON" : "OFF")));
+                                    })
+                            .bounds(width / 2 - 80, height / 4 + 84, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal("Enable VR control over vanilla projectile items like snowballs and ender pearls")))
+                            .build());
+
             // Blood effects button
             addRenderableWidget(
                     Button.builder(
@@ -75,7 +88,7 @@ public final class ConfigScreen {
                                         bloodEffectValue = !bloodEffectValue;
                                         btn.setMessage(Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")));
                                     })
-                            .bounds(width / 2 - 80, height / 4 + 84, 160, 20)
+                            .bounds(width / 2 - 80, height / 4 + 114, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Show blood particles when weapons hit")))
                             .build());
 
@@ -85,6 +98,7 @@ public final class ConfigScreen {
                                     btn -> {
                                         ConfigHelper.CLIENT.weaponEffect = weaponEffectValue;
                                         ConfigHelper.CLIENT.aimAssist = aimAssistValue;
+                                        ConfigHelper.CLIENT.throwableProjectiles = throwableProjectilesValue;
                                         ConfigHelper.write(ConfigHelper.CLIENT);
 
                                         // Save blood effect setting
@@ -94,6 +108,7 @@ public final class ConfigScreen {
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
                                             ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
+                                            ConfigHelper.ACTIVE.throwableProjectiles = ConfigHelper.CLIENT.throwableProjectiles;
                                         }
                                         client.setScreen(parent);
                                     })

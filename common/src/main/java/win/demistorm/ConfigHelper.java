@@ -18,6 +18,7 @@ public final class ConfigHelper {
         // What weapons do when thrown (boomerang is default)
         public WeaponEffectType weaponEffect = WeaponEffectType.BOOMERANG;
         public boolean aimAssist = true;       // Aim assist is on by default
+        public boolean throwableProjectiles = true; // Throwable projectiles system is on by default
     }
 
     private static final Gson  GSON      = new GsonBuilder().setPrettyPrinting().create();
@@ -69,6 +70,7 @@ public final class ConfigHelper {
     public static void copyInto(Data from, Data to) {
         to.weaponEffect = from.weaponEffect;
         to.aimAssist = from.aimAssist;
+        to.throwableProjectiles = from.throwableProjectiles;
     }
 
     // Send current config to a player

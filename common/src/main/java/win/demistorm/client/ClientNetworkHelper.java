@@ -15,9 +15,9 @@ import static win.demistorm.VRThrowingExtensions.log;
 public final class ClientNetworkHelper {
     private ClientNetworkHelper() {}
 
-    public static void sendToServer(Vec3 pos, Vec3 velocity, boolean wholeStack, float rollDeg) {
-        log.debug("ClientNetworkHelper: Sending throw. pos={} vel={} all={}", pos, velocity, wholeStack);
-        Network.INSTANCE.sendToServer(new ThrowData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, wholeStack, rollDeg));
+    public static void sendToServer(Vec3 pos, Vec3 velocity, boolean useBindHeld, boolean playerCrouched, float rollDeg) {
+        log.debug("ClientNetworkHelper: Sending throw. pos={} vel={} useBindHeld={} playerCrouched={}", pos, velocity, useBindHeld, playerCrouched);
+        Network.INSTANCE.sendToServer(new ThrowData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, useBindHeld, playerCrouched, rollDeg));
     }
 
     public static void sendCatchToServer(ThrownProjectileEntity entity, boolean startCatch) {
