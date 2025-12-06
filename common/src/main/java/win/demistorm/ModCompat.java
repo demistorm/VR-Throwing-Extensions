@@ -19,8 +19,6 @@ public class ModCompat {
     static {
         // Block bows since they have their own throwing
         blockedItems.add(new ResourceLocation("minecraft", "bow"));
-        blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "bow"));
-        blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "crossbow"));
     }
 
     // Check if an item can't be thrown
