@@ -1,4 +1,4 @@
-package win.demistorm.client;
+package win.demistorm.client.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-// Client-side command to report the held item's full item_id
+// Clientside command to report the held item's full item_id
 public final class ItemIdCommand {
 
     private ItemIdCommand() {}
@@ -25,7 +25,7 @@ public final class ItemIdCommand {
         );
     }
 
-    // Execute the command - show held item ID
+    // Execute the command (show held item ID)
     private static int executeItemId(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
@@ -52,9 +52,6 @@ public final class ItemIdCommand {
             "§aHeld Item: §f%s§7 (ID: §f%s§7) Count: §f%d§7",
             itemName, itemId, stackSize
         )), false);
-
-        // Item always has some components in modern Minecraft, so we'll skip NBT detection
-        // for now to avoid compatibility issues
 
         return 1;
     }
