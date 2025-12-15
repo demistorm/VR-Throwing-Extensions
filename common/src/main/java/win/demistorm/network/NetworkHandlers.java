@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.effects.ProjectileEffect;
+import win.demistorm.effects.PlaceEffect;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -26,7 +27,49 @@ public final class NetworkHandlers {
         ItemStack heldStack = player.getMainHandItem();
         if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack)) return;
 
-        // Determine throw behavior based on keybinds and item type
+        // PlaceEffect logic
+        PlaceEffect.BlockThrowResult blockResult = PlaceEffect.determineBlockThrowLogic(heldStack, data.useBindHeld(), data.playerCrouched());
+
+        if (blockResult.shouldHandle) {
+            // PlaceEffect will handle this throw
+            Vec3 origin = new Vec3(data.posX(), data.posY(), data.posZ());
+            Vec3 velocity = new Vec3(data.velX(), data.velY(), data.velZ());
+
+            ThrownProjectileEntity proj = new ThrownProjectileEntity(
+                player.level(), player, heldStack, blockResult.throwWholeStack,
+                data.useBindHeld(), data.playerCrouched(), blockResult.shouldPlaceBlock
+            );
+
+            // Make sure item syncs properly on first spawn
+            proj.setItem(heldStack.copyWithCount(1));
+
+            proj.setPos(origin);
+            proj.setOriginalThrowPos(origin);
+            proj.setDeltaMovement(velocity);
+            proj.setHandRoll(data.rollDeg());
+
+            log.debug("[Server] Spawning block placement proj {} with item {} (placement: {})",
+                proj.getId(), proj.getItem(), blockResult.shouldPlaceBlock);
+
+            player.level().addFreshEntity(proj);
+
+            // Play throw sound
+            if (!player.level().isClientSide()) {
+                player.level().playSound(null, player.blockPosition(),
+                        SoundEvents.WITCH_THROW, SoundSource.PLAYERS, 0.6f, 1.05f);
+            }
+
+            // Update player inventory
+            if (blockResult.throwWholeStack) {
+                player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            } else {
+                if (heldStack.getCount() > 1) heldStack.shrink(1);
+                else player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
+            return;
+        }
+
+        // If PlaceEffect didn't handle it, use existing projectile logic
         ProjectileEffect.ThrowBehavior behavior = ProjectileEffect.determineThrowBehavior(
             heldStack, data.useBindHeld(), data.playerCrouched());
 
@@ -36,8 +79,8 @@ public final class NetworkHandlers {
 
         switch (behavior) {
             case VANILLA_PROJECTILE -> handleVanillaProjectile(player, heldStack, data);
-            case CUSTOM_PROJECTILE_SINGLE -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), false);
-            case CUSTOM_PROJECTILE_WHOLE_STACK -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), true);
+            case CUSTOM_PROJECTILE_SINGLE -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), false, data.useBindHeld(), data.playerCrouched());
+            case CUSTOM_PROJECTILE_WHOLE_STACK -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), true, data.useBindHeld(), data.playerCrouched());
         }
     }
 
@@ -72,11 +115,11 @@ public final class NetworkHandlers {
         }
     }
 
-    // Handle custom projectile (our ThrownProjectileEntity)
-    private static void handleCustomProjectile(Player player, ItemStack heldStack, Vec3 origin, Vec3 velocity, float rollDeg, boolean wholeStack) {
+    // Handle custom projectile (ThrownProjectileEntity)
+    private static void handleCustomProjectile(Player player, ItemStack heldStack, Vec3 origin, Vec3 velocity, float rollDeg, boolean wholeStack, boolean useBindHeld, boolean playerCrouched) {
         log.debug("[Network] Handling custom projectile for item: {}", heldStack);
 
-        ThrownProjectileEntity proj = new ThrownProjectileEntity(player.level(), player, heldStack, wholeStack);
+        ThrownProjectileEntity proj = new ThrownProjectileEntity(player.level(), player, heldStack, wholeStack, useBindHeld, playerCrouched);
 
         // Make sure item syncs properly on first spawn
         proj.setItem(heldStack.copyWithCount(1));

@@ -19,6 +19,8 @@ public final class ConfigHelper {
         public WeaponEffectType weaponEffect = WeaponEffectType.BOOMERANG;
         public boolean aimAssist = true;       // Aim assist is on by default
         public boolean throwableProjectiles = true; // Throwable projectiles system is on by default
+        public boolean placeBlocksOnThrow = false; // Place blocks on throw is off by default
+        public boolean onlyPlaceLights = false; // Only place lights is off by default
     }
 
     private static final Gson  GSON      = new GsonBuilder().setPrettyPrinting().create();
@@ -71,6 +73,8 @@ public final class ConfigHelper {
         to.weaponEffect = from.weaponEffect;
         to.aimAssist = from.aimAssist;
         to.throwableProjectiles = from.throwableProjectiles;
+        to.placeBlocksOnThrow = from.placeBlocksOnThrow;
+        to.onlyPlaceLights = from.onlyPlaceLights;
     }
 
     // Send current config to a player
@@ -97,5 +101,23 @@ public final class ConfigHelper {
         // Also update ACTIVE if not connected to server
         copyInto(CLIENT, ACTIVE);
         VRThrowingExtensions.log.debug("[ConfigHelper] Set throwable projectiles enabled: {}", enabled);
+    }
+
+    // Set place blocks on throw enabled state (for UI integration)
+    public static void setPlaceBlocksOnThrowEnabled(boolean enabled) {
+        CLIENT.placeBlocksOnThrow = enabled;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set place blocks on throw enabled: {}", enabled);
+    }
+
+    // Set only place lights enabled state (for UI integration)
+    public static void setOnlyPlaceLightsEnabled(boolean enabled) {
+        CLIENT.onlyPlaceLights = enabled;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set only place lights enabled: {}", enabled);
     }
 }

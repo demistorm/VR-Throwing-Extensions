@@ -88,6 +88,15 @@ public final class ConfigScreen {
                             .tooltip(Tooltip.create(Component.literal("Show blood particles when weapons hit")))
                             .build());
 
+            // Extras button
+            addRenderableWidget(
+                    Button.builder(
+                                    Component.literal("Extras..."),
+                                    btn -> client.setScreen(new ExtrasScreen.ExtrasToggleScreen(this)))
+                            .bounds(width / 2 - 80, height / 4 + 144, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal("Additional features and settings")))
+                            .build());
+
             // Done button
             addRenderableWidget(
                     Button.builder(Component.literal("Done"),
