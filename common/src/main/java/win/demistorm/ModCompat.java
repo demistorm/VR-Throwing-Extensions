@@ -17,7 +17,7 @@ public class ModCompat {
     private static final Set<ResourceLocation> blockedItems = new HashSet<>();
 
     static {
-        // Block bows since they have their own throwing
+        // Block bows since they need the inputs for shooting
         blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "bow"));
         blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "crossbow"));
     }
@@ -38,7 +38,7 @@ public class ModCompat {
         return blockedItems.contains(id);
     }
 
-    // Items that ImmersiveMC already handles throwing for
+    // Items that ImmersiveMC already handles
     private static boolean immersiveMCExceptions(ResourceLocation itemId) {
         return itemId.getPath().equals("snowball")
                 || itemId.getPath().equals("ender_pearl")
