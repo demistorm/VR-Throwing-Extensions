@@ -4,6 +4,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -292,7 +293,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                 net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
                 Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
 
-                if (PlaceEffect.placeBlock(level(), getItem(), blockHit, impactPos)) {
+                if (PlaceEffect.placeBlock(level(), getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit, impactPos)) {
                     // Block was successfully placed, consume the item
                     if (stackSize > 1) {
                         stackSize--;
