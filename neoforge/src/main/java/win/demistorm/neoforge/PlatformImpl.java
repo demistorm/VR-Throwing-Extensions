@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -148,13 +148,13 @@ public class PlatformImpl {
 
     // Register packet handlers (handled in main mod class)
     @SuppressWarnings("unused")
-    public static void registerC2SPacketHandler(ResourceLocation packetId, Consumer<win.demistorm.Platform.PacketContext> handler) {
+    public static void registerC2SPacketHandler(Identifier packetId, Consumer<win.demistorm.Platform.PacketContext> handler) {
         // Registration happens in main mod class with RegisterPayloadHandlersEvent
     }
 
     // Register client packet handlers (handled in main mod class)
     @SuppressWarnings("unused")
-    public static void registerS2CPacketHandler(ResourceLocation packetId, Consumer<win.demistorm.Platform.PacketContext> handler) {
+    public static void registerS2CPacketHandler(Identifier packetId, Consumer<win.demistorm.Platform.PacketContext> handler) {
         // Registration happens in main mod class with RegisterPayloadHandlersEvent
     }
 }

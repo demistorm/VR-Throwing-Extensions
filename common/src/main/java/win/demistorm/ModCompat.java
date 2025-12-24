@@ -3,7 +3,7 @@ package win.demistorm;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,11 +14,11 @@ public class ModCompat {
     private static final boolean IMCLoaded = Platform.isModLoaded("immersivemc");
 
     // Items that can't be thrown
-    private static final Set<ResourceLocation> blockedItems = new HashSet<>();
+    private static final Set<Identifier> blockedItems = new HashSet<>();
 
     static {
         // Block bows since they have their own throwing
-        blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "bow"));
+        blockedItems.add(Identifier.fromNamespaceAndPath("minecraft", "bow"));
     }
 
     // Check if an item can't be thrown
@@ -26,7 +26,7 @@ public class ModCompat {
         if (stack.isEmpty()) return true;
 
         Item item = stack.getItem();
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
 
         // If ImmersiveMC is loaded, skip items it handles
         if (IMCLoaded && immersiveMCExceptions(id)) {
@@ -38,7 +38,7 @@ public class ModCompat {
     }
 
     // Items that ImmersiveMC already handles throwing for
-    private static boolean immersiveMCExceptions(ResourceLocation itemId) {
+    private static boolean immersiveMCExceptions(Identifier itemId) {
         return itemId.getPath().equals("snowball")
                 || itemId.getPath().equals("ender_pearl")
                 || itemId.getPath().equals("egg")

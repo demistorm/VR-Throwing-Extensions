@@ -7,7 +7,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -113,13 +113,13 @@ public class PlatformImpl {
     
     // Register packet handlers (handled in main mod class)
     @SuppressWarnings("unused")
-    public static void registerC2SPacketHandler(ResourceLocation packetId, Consumer<Platform.PacketContext> handler) {
+    public static void registerC2SPacketHandler(Identifier packetId, Consumer<Platform.PacketContext> handler) {
         // Registration happens in main mod class with ChannelBuilder
     }
 
     // Register client packet handlers (handled in main mod class)
     @SuppressWarnings("unused")
-    public static void registerS2CPacketHandler(ResourceLocation packetId, Consumer<Platform.PacketContext> handler) {
+    public static void registerS2CPacketHandler(Identifier packetId, Consumer<Platform.PacketContext> handler) {
         // Registration happens in main mod class with ChannelBuilder
     }
 

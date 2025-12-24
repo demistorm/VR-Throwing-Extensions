@@ -7,7 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import win.demistorm.VRThrowingExtensions;
@@ -67,7 +67,7 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
     // Add entity to Fabric's registry
     private void registerEntities() {
         // Create thrown projectile entity type
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
+        Identifier entityLocation = Identifier.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
         VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
                 .sized(0.25f, 0.25f)

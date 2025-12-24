@@ -2,7 +2,7 @@ package win.demistorm.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -18,8 +18,8 @@ import win.demistorm.network.ConfigSyncData;
 
 // Forge client setup
 public class ClientSetup {
-    private static final ResourceLocation THROWN_ITEM_ID =
-            ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
+    private static final Identifier THROWN_ITEM_ID =
+            Identifier.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
     public static void doClientSetup() {
         // Start client systems

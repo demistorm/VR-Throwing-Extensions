@@ -4,7 +4,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import win.demistorm.ThrownProjectileEntity;
@@ -49,7 +49,7 @@ public final class BoomerangEffect {
     public static final Set<Item> bounceTools = new HashSet<>();
     static {
         BuiltInRegistries.ITEM.stream().filter(i -> !BuiltInRegistries.ITEM.getKey(i)
-                        .equals(ResourceLocation.withDefaultNamespace("air")))
+                        .equals(Identifier.withDefaultNamespace("air")))
                 .forEach(bounceTools::add);
     }
     public static boolean canBounce(Item i) {

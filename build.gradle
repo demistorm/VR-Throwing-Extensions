@@ -4,9 +4,9 @@
 
 plugins {
     // Architectury plugin enables multi-loader builds
-    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "architectury-plugin" version "$architectury_plugin_version"
     // Loom plugin for Minecraft modding (applied to subprojects)
-    id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "$loom_version" apply false
 }
 
 // Tell Architectury which Minecraft version we're targeting

@@ -14,7 +14,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import win.demistorm.Platform;
 
 import java.io.File;
@@ -113,13 +113,13 @@ public class PlatformImpl {
     
     // Register packet handlers (handled in mod initializer now)
     @SuppressWarnings("unused")
-    public static void registerC2SPacketHandler(ResourceLocation packetId, Consumer<Platform.PacketContext> handler) {
+    public static void registerC2SPacketHandler(Identifier packetId, Consumer<Platform.PacketContext> handler) {
         // Registration happens in VRThrowingExtensionsFabric.onInitialize()
     }
 
     // Register client packet handlers (handled in client init)
     @SuppressWarnings("unused")
-    public static void registerS2CPacketHandler(ResourceLocation packetId, Consumer<Platform.PacketContext> handler) {
+    public static void registerS2CPacketHandler(Identifier packetId, Consumer<Platform.PacketContext> handler) {
         // Registration happens in PlatformClientImpl.onInitializeClient()
     }
 

@@ -4,7 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -26,7 +26,7 @@ import static win.demistorm.VRThrowingExtensions.log;
 @Mod(VRThrowingExtensions.MOD_ID)
 public class VRThrowingExtensionsForge {
 
-    public static final EventNetworkChannel NETWORK = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "network"))
+    public static final EventNetworkChannel NETWORK = ChannelBuilder.named(Identifier.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "network"))
             .acceptedVersions((status, version) -> true)
             .optional()
             .networkProtocolVersion(0)
@@ -95,7 +95,7 @@ public class VRThrowingExtensionsForge {
     // Add entities using Forge's registration
     private void registerEntities(RegisterEvent event) {
         // Create thrown projectile entity
-        ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath
+        Identifier entityLocation = Identifier.fromNamespaceAndPath
                 (VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
         event.register(Registries.ENTITY_TYPE, entityLocation, () -> {

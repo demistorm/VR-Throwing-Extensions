@@ -7,7 +7,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -92,13 +92,13 @@ public class Platform {
     
     // Register a packet handler for client-to-server packets
     @ExpectPlatform
-    public static void registerC2SPacketHandler(ResourceLocation packetId, Consumer<PacketContext> handler) {
+    public static void registerC2SPacketHandler(Identifier packetId, Consumer<PacketContext> handler) {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
     // Register a packet handler for server-to-client packets
     @ExpectPlatform
-    public static void registerS2CPacketHandler(ResourceLocation packetId, Consumer<PacketContext> handler) {
+    public static void registerS2CPacketHandler(Identifier packetId, Consumer<PacketContext> handler) {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
