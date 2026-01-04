@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.chat.Component;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.effects.ProjectileEffect;
@@ -250,5 +251,19 @@ public final class NetworkHandlers {
         // Update client config
         win.demistorm.ConfigHelper.clientReceivedRemote(data.json());
         log.debug("[Network] Received config sync packet for player: {}", player.getName().getString());
+    }
+
+    // Client threw lit TNT with flint & steel
+    public static void handleThrowTNT(Player player, ThrowTNTData data) {
+        if (player == null || !player.isAlive()) return;
+
+        // Part 1: Debug message confirmation
+        log.debug("[Network] Received lit TNT throw packet from {}", player.getName().getString());
+
+        if (win.demistorm.VRThrowingExtensions.debugMode) {
+            player.displayClientMessage(Component.literal("Received lit TNT throw packet from " + player.getName().getString()), true);
+        }
+
+        // TODO Part 2: Spawn actual lit TNT entity with explosion logic
     }
 }

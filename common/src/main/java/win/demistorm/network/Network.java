@@ -113,5 +113,24 @@ public class Network {
             },
             (data, player) -> NetworkHandlers.handleConfigSync(player, data)
         );
+
+        // Throw lit TNT packet (client throws lit TNT with flint & steel)
+        INSTANCE.register(ThrowTNTData.class,
+            (data, buf) -> {
+                buf.writeDouble(data.posX());
+                buf.writeDouble(data.posY());
+                buf.writeDouble(data.posZ());
+                buf.writeDouble(data.velX());
+                buf.writeDouble(data.velY());
+                buf.writeDouble(data.velZ());
+                buf.writeFloat(data.rollDeg());
+            },
+            (buf) -> new ThrowTNTData(
+                buf.readDouble(), buf.readDouble(), buf.readDouble(),
+                buf.readDouble(), buf.readDouble(), buf.readDouble(),
+                buf.readFloat()
+            ),
+            (data, player) -> NetworkHandlers.handleThrowTNT(player, data)
+        );
     }
 }

@@ -3,6 +3,7 @@ package win.demistorm.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.AABB;
@@ -37,6 +38,7 @@ public class ThrowHelper {
     private static ThrownProjectileEntity targetProjectile = null; // The projectile being caught
     private static int ticksHeld  = 0;                       // How long trigger is pressed
     private static int catchTicksHeld = 0;                   // How long trigger is pressed for catching
+    private static final TNTHelper tntHelper = new TNTHelper(); // TNT lighting tracker
 
     // Tunables
     private static final double minThrowDistance        = 0.08; // Min arm movement to activate throw
@@ -94,6 +96,15 @@ public class ThrowHelper {
                 ItemStack held = player.getMainHandItem();
                 if (ModCompat.throwingDisabled(held)) return;
 
+                // Check if holding TNT for special handling
+                boolean holdingTNT = held.is(Items.TNT);
+
+                // Start TNT tracking if holding TNT
+                if (holdingTNT) {
+                    tntHelper.startTracking(player);
+                    log.debug("[VR Throw] Started tracking TNT with flint & steel");
+                }
+
                 // Activates throw states
                 heldItem = held.copy();
                 ticksHeld = 0;
@@ -109,6 +120,16 @@ public class ThrowHelper {
                 ticksHeld        = Math.min(ticksHeld + 1, maxPoseHistoryTicks);
                 useBindHeld |= placePressed;           // Track if place/use is held at any point
                 playerCrouched = player.isCrouching(); // Update crouch state
+
+                // Check for swipe motion if tracking TNT
+                if (tntHelper.isTracking()) {
+                    if (tntHelper.checkSwipeMotion(player)) {
+                        if (VRThrowingExtensions.debugMode) {
+                            player.displayClientMessage(Component.literal("TNT lit!"), true);
+                        }
+                        log.debug("[VR Throw] TNT lit via flint & steel swipe!");
+                    }
+                }
 
                 // Checks arm speed to determine if it should cancel block breaking
                 // Uses player relative speed so player movement doesn't trigger this
@@ -166,7 +187,18 @@ public class ThrowHelper {
 
                                         // Send throw to server
                                         try {
-                                            ClientNetworkHelper.sendToServer(origin, assistedVel, useBindHeld, playerCrouched, rollDeg);
+                                            // Check if throwing lit TNT
+                                            if (tntHelper.isLit()) {
+                                                // Send lit TNT throw packet
+                                                ClientNetworkHelper.sendThrowTNTPacket(origin, assistedVel, rollDeg);
+                                                if (VRThrowingExtensions.debugMode) {
+                                                    player.displayClientMessage(Component.literal("Thrown lit TNT!"), true);
+                                                }
+                                                log.debug("[VR Throw] Thrown lit TNT!");
+                                            } else {
+                                                // Send normal throw packet
+                                                ClientNetworkHelper.sendToServer(origin, assistedVel, useBindHeld, playerCrouched, rollDeg);
+                                            }
                                         } catch (Exception e) {
                                             log.error("Error sending throw packet to server: {}", e.getMessage());
                                             reset(); // Reset throw state on error
@@ -391,5 +423,6 @@ public class ThrowHelper {
         cancelBreaking = false;
         heldItem = ItemStack.EMPTY;
         ticksHeld = 0;
+        tntHelper.stopTracking(); // Reset TNT tracking state
     }
 }

@@ -5,6 +5,7 @@ import org.joml.Quaternionfc;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.network.Network;
 import win.demistorm.network.ThrowData;
+import win.demistorm.network.ThrowTNTData;
 import win.demistorm.network.CatchData;
 import win.demistorm.network.CatchUpdateData;
 import win.demistorm.network.CatchCompleteData;
@@ -45,5 +46,10 @@ public final class ClientNetworkHelper {
     public static void sendCatchCompleteToServer(ThrownProjectileEntity entity) {
         log.debug("ClientNetworkHelper: Sending catch complete. entity={}", entity.getId());
         Network.INSTANCE.sendToServer(new CatchCompleteData(entity.getId()));
+    }
+
+    public static void sendThrowTNTPacket(Vec3 pos, Vec3 velocity, float rollDeg) {
+        log.debug("ClientNetworkHelper: Sending lit TNT throw. pos={} vel={} roll={}", pos, velocity, rollDeg);
+        Network.INSTANCE.sendToServer(new ThrowTNTData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, rollDeg));
     }
 }
