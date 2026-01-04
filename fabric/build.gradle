@@ -18,7 +18,11 @@ archivesBaseName = rootProject.archives_base_name + "-fabric"
 
 // Loom configuration for the Fabric module
 loom {
-    // No access widener needed - we use only public Minecraft APIs and Vivecraft API
+    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
+    def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
 }
 
 configurations {

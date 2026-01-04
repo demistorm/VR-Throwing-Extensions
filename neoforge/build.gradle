@@ -24,9 +24,11 @@ repositories {
 
 // Loom configuration for the NeoForge module
 loom {
-    // No access widener needed - we use only public Minecraft APIs and Vivecraft API
-    // NeoForge-specific configurations can go here
-    // (currently none needed for our VR throwing mod)
+    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
+    def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
 }
 
 configurations {

@@ -17,8 +17,11 @@ architectury {
 archivesBaseName = rootProject.archives_base_name + "-forge"
 
 loom {
-    // No access wideners or mixin configs needed for our VR throwing mod
-    // We use only public Minecraft APIs and Vivecraft API
+    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
+    def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
 }
 
 configurations {
