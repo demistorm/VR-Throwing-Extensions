@@ -85,6 +85,7 @@ shadowJar {
 // Remap shadow JAR to proper NeoForge format
 remapJar {
     input.set shadowJar.archiveFile
+    atAccessWideners.add loom.accessWidenerPath.get().asFile.name
     dependsOn shadowJar
     archiveClassifier = null
 }
