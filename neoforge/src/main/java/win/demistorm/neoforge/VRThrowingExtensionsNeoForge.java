@@ -16,7 +16,9 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
+import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.network.Network;
 
 import static win.demistorm.VRThrowingExtensions.log;
@@ -98,6 +100,20 @@ public class VRThrowingExtensionsNeoForge {
             });
 
             log.info("Registered entity type: {}", entityLocation);
+
+            // Create thrown primed TNT entity
+            ResourceLocation tntEntityLocation = ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "thrown_primed_tnt");
+
+            event.register(Registries.ENTITY_TYPE, tntEntityLocation, () -> {
+                VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.<ThrownTNTEntity>of(ThrownTNTEntity::new, MobCategory.MISC)
+                        .sized(0.98f, 0.98f)
+                        .clientTrackingRange(64)
+                        .updateInterval(5)
+                        .build(ResourceKey.create(Registries.ENTITY_TYPE, tntEntityLocation));
+                return VRThrowingExtensions.THROWN_TNT_TYPE;
+            });
+
+            log.info("Registered entity type: {}", tntEntityLocation);
         }
     }
 
@@ -108,6 +124,12 @@ public class VRThrowingExtensionsNeoForge {
             event.registerEntityRenderer(VRThrowingExtensions.THROWN_ITEM_TYPE,
                 win.demistorm.client.ThrownItemRenderer::new);
             log.info("Registered thrown item renderer for NeoForge");
+        }
+
+        if (FMLEnvironment.dist.isClient() && VRThrowingExtensions.THROWN_TNT_TYPE != null) {
+            event.registerEntityRenderer(VRThrowingExtensions.THROWN_TNT_TYPE,
+                ThrownTNTRenderer::new);
+            log.info("Registered thrown primed TNT renderer for NeoForge");
         }
     }
 

@@ -4,7 +4,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -13,8 +12,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
+import win.demistorm.VRThrowingExtensions;
 import win.demistorm.effects.ProjectileEffect;
 import win.demistorm.effects.PlaceEffect;
+import win.demistorm.network.data.*;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -253,17 +255,77 @@ public final class NetworkHandlers {
         log.debug("[Network] Received config sync packet for player: {}", player.getName().getString());
     }
 
+    // Client lit TNT with flint & steel swipe
+    public static void handleTNTLit(Player player, TNTLitData data) {
+        if (player == null || !player.isAlive()) return;
+
+        log.debug("[Network] {} lit TNT with flint & steel", player.getName().getString());
+
+        // Start the fuse timer
+        TNTServer.instance().startTNTTimer((ServerPlayer) player);
+
+        if (VRThrowingExtensions.debugMode) {
+            player.displayClientMessage(Component.literal("TNT lit! Throw it or BOOM!"), true);
+        }
+    }
+
     // Client threw lit TNT with flint & steel
     public static void handleThrowTNT(Player player, ThrowTNTData data) {
         if (player == null || !player.isAlive()) return;
 
-        // Part 1: Debug message confirmation
-        log.debug("[Network] Received lit TNT throw packet from {}", player.getName().getString());
+        log.debug("[Network] {} threw lit TNT", player.getName().getString());
 
-        if (win.demistorm.VRThrowingExtensions.debugMode) {
-            player.displayClientMessage(Component.literal("Received lit TNT throw packet from " + player.getName().getString()), true);
+        // Get remaining fuse ticks from server timer
+        int remainingTicks = TNTServer.instance().getRemainingTicks((ServerPlayer) player);
+
+        if (remainingTicks <= 0) {
+            log.warn("[Network] Received throw TNT packet but no active timer for {}",
+                    player.getName().getString());
+            return;
         }
 
-        // TODO Part 2: Spawn actual lit TNT entity with explosion logic
+        // Check player is still holding TNT
+        ItemStack heldStack = player.getMainHandItem();
+        if (!heldStack.is(net.minecraft.world.item.Items.TNT)) {
+            log.warn("[Network] Player {} tried to throw TNT but not holding TNT",
+                    player.getName().getString());
+            TNTServer.instance().cancelTNTTimer((ServerPlayer) player);
+            return;
+        }
+
+        // Spawn ThrownTNTEntity with custom properties
+        ServerLevel level = (ServerLevel) player.level();
+        ThrownTNTEntity tnt = new ThrownTNTEntity(VRThrowingExtensions.THROWN_TNT_TYPE, level);
+
+        // Set position, velocity, and data
+        tnt.setPos(data.posX(), data.posY(), data.posZ());
+        tnt.setDeltaMovement(data.velX(), data.velY(), data.velZ());
+        tnt.setFuse(remainingTicks);
+        tnt.setHandRoll(data.rollDeg());
+
+        // Spawn the TNT
+        level.addFreshEntity(tnt);
+
+        // Play throw sound
+        level.playSound(null, player.blockPosition(),
+                SoundEvents.WITCH_THROW, SoundSource.PLAYERS, 0.6f, 1.05f);
+
+        // Consume 1 TNT from player's hand
+        if (heldStack.getCount() > 1) {
+            heldStack.shrink(1);
+        } else {
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        }
+
+        // Cancel the fuse timer (TNT is now thrown entity with its own fuse)
+        TNTServer.instance().cancelTNTTimer((ServerPlayer) player);
+
+        log.debug("[Network] Spawned lit PrimedTnt with {} tick fuse at ({}, {}, {})",
+                remainingTicks, data.posX(), data.posY(), data.posZ());
+
+        if (VRThrowingExtensions.debugMode) {
+            player.displayClientMessage(
+                    Component.literal("Thrown lit TNT with " + remainingTicks + " tick fuse!"), true);
+        }
     }
 }

@@ -4,11 +4,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.network.Network;
-import win.demistorm.network.ThrowData;
-import win.demistorm.network.ThrowTNTData;
-import win.demistorm.network.CatchData;
-import win.demistorm.network.CatchUpdateData;
-import win.demistorm.network.CatchCompleteData;
+import win.demistorm.network.data.ThrowData;
+import win.demistorm.network.data.ThrowTNTData;
+import win.demistorm.network.data.TNTLitData;
+import win.demistorm.network.data.CatchData;
+import win.demistorm.network.data.CatchUpdateData;
+import win.demistorm.network.data.CatchCompleteData;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -46,6 +47,11 @@ public final class ClientNetworkHelper {
     public static void sendCatchCompleteToServer(ThrownProjectileEntity entity) {
         log.debug("ClientNetworkHelper: Sending catch complete. entity={}", entity.getId());
         Network.INSTANCE.sendToServer(new CatchCompleteData(entity.getId()));
+    }
+
+    public static void sendTNTLitPacket() {
+        log.debug("ClientNetworkHelper: Sending TNT lit event");
+        Network.INSTANCE.sendToServer(new TNTLitData());
     }
 
     public static void sendThrowTNTPacket(Vec3 pos, Vec3 velocity, float rollDeg) {

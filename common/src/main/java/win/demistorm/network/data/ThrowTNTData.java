@@ -1,4 +1,4 @@
-package win.demistorm.network;
+package win.demistorm.network.data;
 
 // Data for lit TNT throw packets (client to server)
 public record ThrowTNTData(

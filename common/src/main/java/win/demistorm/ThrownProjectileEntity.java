@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import win.demistorm.effects.BoomerangEffect;
 import win.demistorm.effects.EmbeddingEffect;
 import win.demistorm.effects.PlaceEffect;
+import win.demistorm.network.data.BloodParticleData;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -343,7 +344,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         for (ServerPlayer player : world.getServer().getPlayerList().getPlayers()) {
             if (player.level() == world && player.distanceToSqr(hitPos) < 4096) { // 64 blocks
                 win.demistorm.network.Network.INSTANCE.sendToPlayer(player,
-                    new win.demistorm.network.BloodParticleData(hitPos.x, hitPos.y, hitPos.z, velocity.x, velocity.y, velocity.z));
+                    new BloodParticleData(hitPos.x, hitPos.y, hitPos.z, velocity.x, velocity.y, velocity.z));
                 playersSent++;
             }
         }

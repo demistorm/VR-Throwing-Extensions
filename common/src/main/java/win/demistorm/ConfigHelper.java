@@ -3,7 +3,7 @@ package win.demistorm;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraft.server.level.ServerPlayer;
-import win.demistorm.network.ConfigSyncData;
+import win.demistorm.network.data.ConfigSyncData;
 import win.demistorm.network.Network;
 
 import java.io.IOException;

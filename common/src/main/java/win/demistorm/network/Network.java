@@ -1,5 +1,7 @@
 package win.demistorm.network;
 
+import win.demistorm.network.data.*;
+
 // Handles all networking between client and server
 public class Network {
 
@@ -112,6 +114,15 @@ public class Network {
                 return new ConfigSyncData(buf.readUtf(length));
             },
             (data, player) -> NetworkHandlers.handleConfigSync(player, data)
+        );
+
+        // TNT lit packet (client lit TNT with flint & steel swipe)
+        INSTANCE.register(TNTLitData.class,
+            (data, buf) -> {
+                // Empty packet, no data to write
+            },
+            (buf) -> new TNTLitData(),
+            (data, player) -> NetworkHandlers.handleTNTLit(player, data)
         );
 
         // Throw lit TNT packet (client throws lit TNT with flint & steel)

@@ -79,6 +79,10 @@ public class TNTHelper {
 
         if (swipeDetected && !isLit) {
             isLit = true;
+
+            // Send packet to server to start fuse timer
+            ClientNetworkHelper.sendTNTLitPacket();
+
             return true;
         }
 

@@ -9,7 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.Vec3;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.config.ClientOnlyConfig;
-import win.demistorm.network.BleedingParticleData;
+import win.demistorm.network.data.BleedingParticleData;
 
 import java.util.concurrent.ThreadLocalRandom;
 
