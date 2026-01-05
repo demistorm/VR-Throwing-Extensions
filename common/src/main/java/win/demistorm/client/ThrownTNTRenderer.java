@@ -1,5 +1,6 @@
 package win.demistorm.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -78,6 +79,8 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
 
         // Apply scale
         matrices.scale(scale, scale, scale);
+
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // Render TNT as an item using item renderer
         ItemStack tntItemStack = new ItemStack(Items.TNT);
