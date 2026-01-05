@@ -109,11 +109,10 @@ public final class NetworkHandlers {
             }
         }
 
-        // Check for spawned projectiles and redirect them after one tick
+        // Check for spawned projectiles and redirect after one tick
         if (player.getServer() != null) {
             player.getServer().getTickCount(); // Access server to check if available
             // Schedule the interception for next tick
-            // Note: This is a simplified approach - in production you might want to use a proper scheduling system
             ProjectileEffect.ItemProjectileDetector.interceptAndRedirect((ServerPlayer) player);
         }
     }

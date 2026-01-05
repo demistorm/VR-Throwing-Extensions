@@ -83,7 +83,7 @@ public class TNTServer {
         int remaining = getRemainingTicks(player) - 1;
 
         if (remaining <= 0) {
-            // Time's up, explode!
+            // Fuse expired, explode
             explodeTNT(player);
             cancelTNTTimer(player);
         } else {
@@ -102,7 +102,7 @@ public class TNTServer {
     private void explodeTNT(ServerPlayer player) {
         Level level = player.level();
 
-        log.debug("[TNTServer] BOOM! TNT exploded at {}'s position", player.getName().getString());
+        log.debug("[TNTServer] TNT exploded at {}'s position", player.getName().getString());
 
         // Create explosion with vanilla TNT force
         // Note: Using TNT explosion type which doesn't destroy blocks as aggressively

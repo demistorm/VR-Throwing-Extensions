@@ -92,10 +92,10 @@ public class ThrownTNTEntity extends PrimedTnt {
         int remainingFuse = this.getFuse();
 
         // Calculate color based on remaining fuse (100 ticks max)
-        // Phase 1: 100-75 ticks → Black/dark gray (0.05-0.15)
-        // Phase 2: 75-50 ticks → Dark red to bright red (0.0, 0.0-0.5, 0.0)
-        // Phase 3: 50-25 ticks → Red to orange (1.0, 0.0-0.5, 0.0)
-        // Phase 4: 25-0 ticks → Orange to white (1.0, 0.5-1.0, 0.0-1.0)
+        // Phase 1 (100-75 ticks): Black/dark gray (0.05-0.15)
+        // Phase 2 (75-50 ticks): Dark red to bright red (0.0, 0.0-0.5, 0.0)
+        // Phase 3 (50-25 ticks): Red to orange (1.0, 0.0-0.5, 0.0)
+        // Phase 4 (25-0 ticks): Orange to white (1.0, 0.5-1.0, 0.0-1.0)
 
         float r, g, b;
 
@@ -118,14 +118,14 @@ public class ThrownTNTEntity extends PrimedTnt {
             g = (1.0f - t) * 0.5f;  // 0.5 to 0.0
             b = 0.0f;
         } else {
-            // Orange to white phase (final countdown!)
+            // Orange to white phase
             float t = remainingFuse / 25.0f; // 1.0 to 0.0
             r = 1.0f;
             g = 0.5f + (1.0f - t) * 0.5f;  // 0.5 to 1.0
             b = (1.0f - t);  // 0.0 to 1.0
         }
 
-        // Spawn the colored smoke particle using our custom particle class
+        // Spawn the colored smoke particle using custom particle class
         win.demistorm.client.particles.TNTSmokeParticle.spawnColoredSmoke(
                 r, g, b,
                 this.getX(),
