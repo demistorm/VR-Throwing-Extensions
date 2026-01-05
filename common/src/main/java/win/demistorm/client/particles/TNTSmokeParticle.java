@@ -9,14 +9,19 @@ public final class TNTSmokeParticle {
 
     // Spawn a single colored smoke particle (identical behavior to vanilla SMOKE)
     public static void spawnColoredSmoke(float r, float g, float b, double x, double y, double z) {
+        spawnColoredSmoke(r, g, b, x, y, z, 1.0f);
+    }
+
+    // Spawn a single colored smoke particle with custom scale
+    public static void spawnColoredSmoke(float r, float g, float b, double x, double y, double z, float scale) {
         Minecraft client = Minecraft.getInstance();
         if (client.level == null) return;
 
         // Pack RGB into 0xRRGGBB format
         int packedColor = packColor(r, g, b);
 
-        // Create dust particle with color (scale 1.0 for normal smoke size)
-        DustParticleOptions coloredSmoke = new DustParticleOptions(packedColor, 1.0f);
+        // Create dust particle with color and custom scale
+        DustParticleOptions coloredSmoke = new DustParticleOptions(packedColor, scale);
 
         // Spawn particle with zero velocity (same as vanilla SMOKE)
         client.level.addParticle(

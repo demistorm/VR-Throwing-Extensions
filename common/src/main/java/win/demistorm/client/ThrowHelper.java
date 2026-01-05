@@ -90,6 +90,10 @@ public class ThrowHelper {
                 return; // Skip throwing logic if catching is active
             }
 
+            // Emit smoke particles from hand if TNT is lit
+            if (tntHelper.isLit()) {
+                tntHelper.emitSmokeParticles(player);
+            }
 
             // When Attack/Destroy is pressed, start Tracking
             if (!active && attackPressed) {
