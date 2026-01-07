@@ -50,7 +50,7 @@ public final class ExtrasScreen {
                                     // Update config immediately
                                     ConfigHelper.setPlaceBlocksOnThrowEnabled(placeBlocksOnThrowValue);
                                 })
-                        .bounds(width / 2 - 165, height / 4 + 24, 160, 20)
+                        .bounds(width / 2 - 165, height / 6 - 10, 160, 20)
                         .tooltip(Tooltip.create(Component.literal("Place blocks when thrown into other blocks")))
                         .build();
             addRenderableWidget(placeBlocksButton);
@@ -66,7 +66,7 @@ public final class ExtrasScreen {
                                         // Update config immediately
                                         ConfigHelper.setOnlyPlaceLightsEnabled(onlyPlaceLightsValue);
                                     })
-                            .bounds(width / 2 + 5, height / 4 + 24, 160, 20)
+                            .bounds(width / 2 + 5, height / 6 - 10, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Only place torches/lanterns when thrown")))
                             .build();
             onlyLightsButton.active = placeBlocksOnThrowValue;
@@ -84,11 +84,11 @@ public final class ExtrasScreen {
                                                 "Crouch Behavior: " + crouchBehaviorPlaceBlocksValue.name()));
                                         ConfigHelper.setCrouchBehaviorPlaceBlocks(crouchBehaviorPlaceBlocksValue);
                                     })
-                            .bounds(width / 2 - 165, height / 4 + 54, 160, 20)
+                            .bounds(width / 2 - 165, height / 6 + 11, 160, 20)
                             .tooltip(Tooltip.create(Component.literal(
                                     """
-                                        NORMAL: Crouch to activate
-                                        INVERTED: Crouch throws projectile without effect""")))
+                                        NORMAL: Crouch throws projectile without effect
+                                        INVERTED: Crouch activates effect""")))
                             .build();
             crouchBehaviorButton.active = placeBlocksOnThrowValue;
             addRenderableWidget(crouchBehaviorButton);
@@ -102,7 +102,7 @@ public final class ExtrasScreen {
                                         btn.setMessage(Component.literal(
                                                 "Blood Particles: " + (bloodEffectValue ? "ON" : "OFF")));
                                     })
-                            .bounds(width / 2 - 80, height / 4 + 84, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 32, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Show blood particles when weapons hit")))
                             .build());
 
@@ -116,7 +116,7 @@ public final class ExtrasScreen {
                                                 "Throwable TNT: " + (throwableTNTValue ? "ON" : "OFF")));
                                         ConfigHelper.setThrowableTNTEnabled(throwableTNTValue);
                                     })
-                            .bounds(width / 2 - 80, height / 4 + 114, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 53, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Enable/disable immersive TNT throwing")))
                             .build());
 
@@ -125,7 +125,7 @@ public final class ExtrasScreen {
                     Button.builder(
                                     Component.literal("Compat Toggles..."),
                                     btn -> client.setScreen(new CompatScreen.CompatToggleScreen(this)))
-                            .bounds(width / 2 - 80, height / 4 + 144, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 74, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Mod Compatibility Settings")))
                             .build());
 
@@ -149,7 +149,7 @@ public final class ExtrasScreen {
                                         }
                                         client.setScreen(parent);
                                     })
-                            .bounds(width / 2 - 50, height - 50, 100, 20)
+                            .bounds(width / 2 - 100, height - 30, 200, 20)
                             .build());
         }
 

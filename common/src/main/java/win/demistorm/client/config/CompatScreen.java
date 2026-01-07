@@ -39,7 +39,7 @@ public final class CompatScreen {
                                         btn.setMessage(Component.literal(
                                                 "ImmersiveMC Throwables: " + (immersiveMCThrowablesValue ? "ON" : "OFF")));
                                     })
-                            .bounds(width / 2 - 80, height / 4 + 24, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 - 10, 160, 20)
                             .tooltip(Tooltip.create(Component.literal(
                                     """
                                         ON: ImmersiveMC handles throwable projectiles.
@@ -59,7 +59,7 @@ public final class CompatScreen {
                                         }
                                         client.setScreen(parent);
                                     })
-                            .bounds(width / 2 - 50, height - 50, 100, 20)
+                            .bounds(width / 2 - 100, height - 30, 200, 20)
                             .build());
         }
 

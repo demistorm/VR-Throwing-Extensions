@@ -44,8 +44,8 @@ public class ThrowableItemsScreen extends Screen {
     @Override
     protected void init() {
         int topY = 40;
-        int listTopY = topY + 60; // More space between controls and list
-        int bottomMargin = 70; // Space at bottom for Done button
+        int listTopY = topY + 80; // Start list right after controls
+        int bottomMargin = 70; // Space at bottom for Done button (prevents overlap)
 
         // Text input for new items (left side)
         itemIdInput = new EditBox(
@@ -97,8 +97,8 @@ public class ThrowableItemsScreen extends Screen {
             .bounds(width - 180, topY + 23, 160, 18)
             .tooltip(Tooltip.create(Component.literal(
                     """
-                            NORMAL: Crouch to activate
-                            INVERTED: Crouch throws projectile without effect""")))
+                            NORMAL: Crouch throws projectile without effect
+                            INVERTED: Crouch activates effect""")))
             .build());
 
         // Create scrollable item list (two columns) - starts below the controls
@@ -120,7 +120,7 @@ public class ThrowableItemsScreen extends Screen {
                     ProjectileEffect.setProjectileItemsList(projectileItems);
                     client.setScreen(parent);
                 })
-            .bounds(width / 2 - 50, height - 50, 100, 20)
+            .bounds(width / 2 - 100, height - 30, 200, 20)
             .build());
     }
 
@@ -161,10 +161,10 @@ public class ThrowableItemsScreen extends Screen {
         context.drawString(font, "Add Item ID:", 20, 28, 0xFFFFFF);
 
         // Label for item list
-        context.drawString(font, "Custom Projectile Items:", 20, listTopY - 10, 0xFFFFFF);
+        context.drawString(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFF);
 
         // Show count of items
-        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY - 10, 0xAAAAAA);
+        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xAAAAAA);
     }
 
     @Override

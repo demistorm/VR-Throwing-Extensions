@@ -21,16 +21,15 @@ public final class ConfigHelper {
 
     // Config settings
     public static final class Data {
-        // What weapons do when thrown (boomerang is default)
-        public WeaponEffectType weaponEffect = WeaponEffectType.BOOMERANG;
+        public WeaponEffectType weaponEffect = WeaponEffectType.BOOMERANG; // What weapons do when thrown (boomerang is default)
         public boolean aimAssist = true;       // Aim assist is on by default
         public boolean throwableProjectiles = true; // Throwable projectiles system is on by default
         public boolean placeBlocksOnThrow = false; // Place blocks on throw is off by default
         public boolean onlyPlaceLights = false; // Only place lights is off by default
         public boolean throwableTNT = true;   // Throwable TNT is on by default
         public boolean immersiveMCThrowables = true; // ImmersiveMC throwables compat on by default
-        public CrouchBehavior crouchBehaviorProjectiles = CrouchBehavior.INVERTED; // Crouch behavior for projectiles (INVERTED by default)
-        public CrouchBehavior crouchBehaviorPlaceBlocks = CrouchBehavior.NORMAL; // Crouch behavior for place blocks
+        public CrouchBehavior crouchBehaviorProjectiles = CrouchBehavior.NORMAL; // Crouch behavior for projectiles (NORMAL by default)
+        public CrouchBehavior crouchBehaviorPlaceBlocks = CrouchBehavior.INVERTED; // Crouch behavior for place blocks
     }
 
     private static final Gson  GSON      = new GsonBuilder().setPrettyPrinting().create();
