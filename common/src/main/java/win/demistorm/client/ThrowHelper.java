@@ -17,6 +17,7 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
+import win.demistorm.ConfigHelper;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
@@ -100,8 +101,8 @@ public class ThrowHelper {
                 ItemStack held = player.getMainHandItem();
                 if (ModCompat.throwingDisabled(held)) return;
 
-                // Check if holding TNT for special handling
-                boolean holdingTNT = held.is(Items.TNT);
+                // Check if holding TNT for special handling (only if feature enabled)
+                boolean holdingTNT = ConfigHelper.ACTIVE.throwableTNT && held.is(Items.TNT);
 
                 // Start TNT tracking if holding TNT
                 if (holdingTNT) {
@@ -191,8 +192,8 @@ public class ThrowHelper {
 
                                         // Send throw to server
                                         try {
-                                            // Check if throwing lit TNT
-                                            if (tntHelper.isLit()) {
+                                            // Check if throwing lit TNT (only if feature enabled)
+                                            if (ConfigHelper.ACTIVE.throwableTNT && tntHelper.isLit()) {
                                                 // Send lit TNT throw packet
                                                 ClientNetworkHelper.sendThrowTNTPacket(origin, assistedVel, rollDeg);
                                                 if (VRThrowingExtensions.debugMode) {

@@ -19,7 +19,6 @@ public final class ConfigScreen {
         private final Minecraft client = Minecraft.getInstance();
         private WeaponEffectType weaponEffectValue = ConfigHelper.CLIENT.weaponEffect;
         private boolean aimAssistValue = ConfigHelper.CLIENT.aimAssist;
-        private boolean bloodEffectValue = ClientOnlyConfig.ACTIVE.bloodEffect;
 
         protected SimpleToggleScreen(Screen parent) {
             super(Component.literal("VR Throwing Extensions Configuration"));
@@ -73,19 +72,7 @@ public final class ConfigScreen {
                                     Component.literal("Throwable Projectiles..."),
                                     btn -> client.setScreen(new ThrowableItemsScreen(this)))
                             .bounds(width / 2 - 80, height / 4 + 84, 160, 20)
-                            .tooltip(Tooltip.create(Component.literal("Toggle and manage items that can be thrown with their vanilla effects")))
-                            .build());
-
-            // Blood effects button
-            addRenderableWidget(
-                    Button.builder(
-                                    Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")),
-                                    btn -> {
-                                        bloodEffectValue = !bloodEffectValue;
-                                        btn.setMessage(Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")));
-                                    })
-                            .bounds(width / 2 - 80, height / 4 + 114, 160, 20)
-                            .tooltip(Tooltip.create(Component.literal("Show blood particles when weapons hit")))
+                            .tooltip(Tooltip.create(Component.literal("Toggle and manage vanilla and modded items to be thrown immersively")))
                             .build());
 
             // Extras button
@@ -93,8 +80,8 @@ public final class ConfigScreen {
                     Button.builder(
                                     Component.literal("Extras..."),
                                     btn -> client.setScreen(new ExtrasScreen.ExtrasToggleScreen(this)))
-                            .bounds(width / 2 - 80, height / 4 + 144, 160, 20)
-                            .tooltip(Tooltip.create(Component.literal("Additional features and settings")))
+                            .bounds(width / 2 - 80, height / 4 + 114, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal("More features and settings")))
                             .build());
 
             // Done button
@@ -104,10 +91,6 @@ public final class ConfigScreen {
                                         ConfigHelper.CLIENT.weaponEffect = weaponEffectValue;
                                         ConfigHelper.CLIENT.aimAssist = aimAssistValue;
                                         ConfigHelper.write(ConfigHelper.CLIENT);
-
-                                        // Save blood effect setting
-                                        ClientOnlyConfig.ACTIVE.bloodEffect = bloodEffectValue;
-                                        ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
 
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;

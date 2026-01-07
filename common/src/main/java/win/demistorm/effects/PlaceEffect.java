@@ -51,7 +51,13 @@ public final class PlaceEffect {
             return new BlockThrowResult(false, false, false);
         }
 
-        if (playerCrouched) {
+        // Check crouch behavior based on config
+        boolean shouldFeatureBeActive = switch (ConfigHelper.ACTIVE.crouchBehaviorPlaceBlocks) {
+            case NORMAL -> !playerCrouched;    // Feature active when NOT crouching
+            case INVERTED -> playerCrouched;   // Feature active when crouching
+        };
+
+        if (!shouldFeatureBeActive) {
             return new BlockThrowResult(false, false, false);
         }
 

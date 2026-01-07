@@ -192,13 +192,19 @@ public final class ProjectileEffect {
         boolean isProjectile = isProjectileItem(stack);
 
         if (isProjectile) {
+            // Determine if crouch modifier is active based on config
+            boolean crouchModifierActive = switch (ConfigHelper.ACTIVE.crouchBehaviorProjectiles) {
+                case NORMAL -> playerCrouched;       // Crouch activates the feature
+                case INVERTED -> !playerCrouched;   // Not crouching activates the feature
+            };
+
             // Default throw (no modifiers) → Vanilla projectile behavior
-            if (!useBindHeld && !playerCrouched) {
+            if (!useBindHeld && !crouchModifierActive) {
                 return ThrowBehavior.VANILLA_PROJECTILE;
             }
             // Any modifier held → Force custom projectile
-            if (useBindHeld || playerCrouched) {
-                return useBindHeld && playerCrouched ?
+            if (useBindHeld || crouchModifierActive) {
+                return useBindHeld && crouchModifierActive ?
                     ThrowBehavior.CUSTOM_PROJECTILE_WHOLE_STACK :
                     ThrowBehavior.CUSTOM_PROJECTILE_SINGLE;
             }

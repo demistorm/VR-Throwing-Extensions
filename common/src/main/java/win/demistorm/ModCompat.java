@@ -4,6 +4,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import win.demistorm.effects.ProjectileEffect;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,13 +31,30 @@ public class ModCompat {
         Item item = stack.getItem();
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
 
-        // If ImmersiveMC is loaded, skip items it handles
+        // If ImmersiveMC is loaded, check compatibility toggle
         if (IMCLoaded && immersiveMCExceptions(id)) {
-            return true;
+            // If toggle is ON, let ImmersiveMC handle it (block our mod)
+            // If toggle is OFF and item is in projectile-items config, let our mod handle it
+            if (ConfigHelper.ACTIVE.immersiveMCThrowables) {
+                return true; // Toggle ON: block our mod, let ImmersiveMC handle
+            } else {
+                // Toggle OFF: only block if NOT in projectile-items config
+                return !isThrowableProjectileItem(stack);
+            }
         }
 
         // Block items on our blacklist
         return blockedItems.contains(id);
+    }
+
+    // Check if an item is in the throwable projectiles config
+    private static boolean isThrowableProjectileItem(ItemStack stack) {
+        // Check if the item is in the projectile items list
+        Item item = stack.getItem();
+        ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
+
+        // Get the list of configured projectile items
+        return ProjectileEffect.getProjectileItemsList().contains(itemKey.toString());
     }
 
     // Items that ImmersiveMC already handles

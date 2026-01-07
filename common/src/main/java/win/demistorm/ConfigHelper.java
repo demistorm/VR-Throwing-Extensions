@@ -13,6 +13,12 @@ import java.nio.file.Path;
 // Handles server config file and syncs settings to players
 public final class ConfigHelper {
 
+    // Crouch behavior options
+    public enum CrouchBehavior {
+        NORMAL,    // Crouch activates the feature
+        INVERTED   // Not crouching activates the feature
+    }
+
     // Config settings
     public static final class Data {
         // What weapons do when thrown (boomerang is default)
@@ -21,6 +27,10 @@ public final class ConfigHelper {
         public boolean throwableProjectiles = true; // Throwable projectiles system is on by default
         public boolean placeBlocksOnThrow = false; // Place blocks on throw is off by default
         public boolean onlyPlaceLights = false; // Only place lights is off by default
+        public boolean throwableTNT = true;   // Throwable TNT is on by default
+        public boolean immersiveMCThrowables = true; // ImmersiveMC throwables compat on by default
+        public CrouchBehavior crouchBehaviorProjectiles = CrouchBehavior.INVERTED; // Crouch behavior for projectiles (INVERTED by default)
+        public CrouchBehavior crouchBehaviorPlaceBlocks = CrouchBehavior.NORMAL; // Crouch behavior for place blocks
     }
 
     private static final Gson  GSON      = new GsonBuilder().setPrettyPrinting().create();
@@ -75,6 +85,10 @@ public final class ConfigHelper {
         to.throwableProjectiles = from.throwableProjectiles;
         to.placeBlocksOnThrow = from.placeBlocksOnThrow;
         to.onlyPlaceLights = from.onlyPlaceLights;
+        to.throwableTNT = from.throwableTNT;
+        to.immersiveMCThrowables = from.immersiveMCThrowables;
+        to.crouchBehaviorProjectiles = from.crouchBehaviorProjectiles;
+        to.crouchBehaviorPlaceBlocks = from.crouchBehaviorPlaceBlocks;
     }
 
     // Send current config to a player
@@ -119,5 +133,41 @@ public final class ConfigHelper {
         // Also update ACTIVE if not connected to server
         copyInto(CLIENT, ACTIVE);
         VRThrowingExtensions.log.debug("[ConfigHelper] Set only place lights enabled: {}", enabled);
+    }
+
+    // Set throwable TNT enabled state (for UI integration)
+    public static void setThrowableTNTEnabled(boolean enabled) {
+        CLIENT.throwableTNT = enabled;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set throwable TNT enabled: {}", enabled);
+    }
+
+    // Set immersiveMC throwables enabled state (for UI integration)
+    public static void setImmersiveMCThrowables(boolean enabled) {
+        CLIENT.immersiveMCThrowables = enabled;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set immersiveMC throwables enabled: {}", enabled);
+    }
+
+    // Set crouch behavior for projectiles (for UI integration)
+    public static void setCrouchBehaviorProjectiles(CrouchBehavior behavior) {
+        CLIENT.crouchBehaviorProjectiles = behavior;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set crouch behavior projectiles: {}", behavior);
+    }
+
+    // Set crouch behavior for place blocks (for UI integration)
+    public static void setCrouchBehaviorPlaceBlocks(CrouchBehavior behavior) {
+        CLIENT.crouchBehaviorPlaceBlocks = behavior;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set crouch behavior place blocks: {}", behavior);
     }
 }

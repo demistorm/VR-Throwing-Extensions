@@ -30,6 +30,7 @@ public class ThrowableItemsScreen extends Screen {
     // Data
     private List<String> projectileItems;
     private boolean throwableProjectilesEnabled;
+    private ConfigHelper.CrouchBehavior crouchBehaviorValue = ConfigHelper.CLIENT.crouchBehaviorProjectiles;
 
     protected ThrowableItemsScreen(Screen parent) {
         super(Component.literal("Configure Throwable Projectiles"));
@@ -81,6 +82,25 @@ public class ThrowableItemsScreen extends Screen {
         .build();
         addRenderableWidget(toggleButton);
 
+        // Crouch behavior toggle (below Throwable Projectiles toggle)
+        addRenderableWidget(
+            Button.builder(
+                Component.literal("Crouch Behavior: " + crouchBehaviorValue.name()),
+                btn -> {
+                    // Switch between NORMAL and INVERTED
+                    crouchBehaviorValue = crouchBehaviorValue == ConfigHelper.CrouchBehavior.NORMAL
+                        ? ConfigHelper.CrouchBehavior.INVERTED
+                        : ConfigHelper.CrouchBehavior.NORMAL;
+                    btn.setMessage(Component.literal("Crouch Behavior: " + crouchBehaviorValue.name()));
+                    ConfigHelper.setCrouchBehaviorProjectiles(crouchBehaviorValue);
+                })
+            .bounds(width - 180, topY + 23, 160, 18)
+            .tooltip(Tooltip.create(Component.literal(
+                    """
+                            NORMAL: Crouch to activate
+                            INVERTED: Crouch throws projectile without effect""")))
+            .build());
+
         // Create scrollable item list (two columns) - starts below the controls
         int listBottom = height - bottomMargin;
         itemList = new ItemListWidget(client, width, height, listTopY, listBottom);
@@ -92,6 +112,10 @@ public class ThrowableItemsScreen extends Screen {
             Button.builder(
                 Component.literal("Done"),
                 btn -> {
+                    // Save crouch behavior
+                    ConfigHelper.CLIENT.crouchBehaviorProjectiles = crouchBehaviorValue;
+                    ConfigHelper.write(ConfigHelper.CLIENT);
+
                     // Save any changes to projectile items
                     ProjectileEffect.setProjectileItemsList(projectileItems);
                     client.setScreen(parent);
