@@ -1,4 +1,1 @@
-- Disabled throwing Fishing Rod when immersiveMC is installed (so that immersive fishing works!)
-- Updated Discord invite link
-- Potentially fixed a crash caused by entity tracking
-- Added 1.19.2 version
+- Updated to 1.21.11
