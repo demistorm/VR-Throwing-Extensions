@@ -33,7 +33,7 @@ public final class ConfigHelper {
     }
 
     private static final Gson  GSON      = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path  CONFIGDIR = Path.of("config");
+    private static final Path  CONFIGDIR = Path.of("config/vr-throwing-extensions");
     private static final Path  FILE      = CONFIGDIR.resolve("vr-throwing-extensions.json");
 
     // Client singleplayer settings
