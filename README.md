@@ -5,17 +5,24 @@
 Minecraft mod allowing Vivecraft players to throw and catch any item!
 Available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/vr-throwing-extensions) and [Modrinth](https://modrinth.com/mod/vr-throwing-extensions).
 
+---
+
+#### How to Use:
 Simply hold the attack/destroy keybind, make a throwing motion, and release!
-Hold the place/use keybind at the same time to throw the whole stack. 
+Hold the place/use keybind at the same time to throw the whole stack.
 
 To catch a thrown item, reach towards it with an empty hand and simply hold the attack/destroy keybind. Like an opposite throw!
 
+To throw TNT, hold the throw keybind like a regular throw, then swipe flint and steel in the offhand over the tnt in your main hand to light it. Fair warning, you have 5 seconds before it goes boom!
+
 There are multiple weapon effects, **boomerang**, **embedding**, and **off**. The boomerang effect will have weapons/tools arc back to their origin after colliding with an mob/player (default setting). Embedding will embed any weapon or tool that does more than 1 damage into the entity it hit and apply a bleeding effect doing 1 damage every 1.5 seconds. Great against creepers! Off will simply make the weapon drop on impact, similarly to throwing a regular item like dirt. 
+
+More info is available on the wiki here: (MAKE WIKI)
 
 ---
 
 #### Server Owners:
-The serverside configuration is authoritative for the weapon effect and aim assist options. Whatever you set there will be what the mod does for everyone. Weapon Effect options are OFF | BOOMERANG | EMBED. 
+The serverside configuration is authoritative. Whatever you set there will be what the mod does for everyone. Weapon Effect options are OFF | BOOMERANG | EMBED. crouchBehavior options are NORMAL | INVERTED
 
 Aim Assist is simply true | false.
 
@@ -26,7 +33,7 @@ Aim Assist is simply true | false.
 ---
 
 ### Versions Supported
-**1.19.2, 1.20.1, 1.21.1, 1.21.4, 1.21.5, 1.21.8, 1.21.10**
+**1.19.2, 1.20.1, 1.21.1, 1.21.4, 1.21.5, 1.21.8, 1.21.10, 1.21.11**
 
 *Builds available for Fabric, Forge, and NeoForge*
 
