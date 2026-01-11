@@ -53,13 +53,15 @@ public final class ProjectileEffect {
     // Configuration data class
     private static class ProjectileConfig {
         public List<String> projectile_items = List.of(
+            // Tridents not present, their charging function does not work with the throwable projectiles system
             "minecraft:snowball",
             "minecraft:egg",
             "minecraft:ender_pearl",
             "minecraft:experience_bottle",
-            "minecraft:potion",
             "minecraft:splash_potion",
             "minecraft:lingering_potion",
+            "minecraft:fishing_rod",
+            "minecraft:wind_charge",
             "minecraft:firework_rocket"
         );
     }

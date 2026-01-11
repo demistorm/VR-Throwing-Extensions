@@ -33,12 +33,11 @@ public class ModCompat {
 
         // If ImmersiveMC is loaded, check compatibility toggle
         if (IMCLoaded && immersiveMCExceptions(id)) {
-            // If toggle is ON, let ImmersiveMC handle it (block our mod)
-            // If toggle is OFF and item is in projectile-items config, let our mod handle it
+            // If toggle is ON, let ImmersiveMC handle it (block this mod)
+            // If toggle is OFF and item is in projectile-items config, let this mod handle it
             if (ConfigHelper.ACTIVE.immersiveMCThrowables) {
-                return true; // Toggle ON: block our mod, let ImmersiveMC handle
+                return true;
             } else {
-                // Toggle OFF: only block if NOT in projectile-items config
                 return !isThrowableProjectileItem(stack);
             }
         }
