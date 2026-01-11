@@ -1,4 +1,4 @@
-<img width="2037" height="288" alt="vte-text_full" src="https://github.com/user-attachments/assets/9418006b-395f-49ae-a5a7-1260f9c79f0d" />
+<img width="100%" height="100%" alt="vte-text_full" src="https://github.com/user-attachments/assets/9418006b-395f-49ae-a5a7-1260f9c79f0d" />
 
 ---
 
@@ -13,18 +13,18 @@ Hold the place/use keybind at the same time to throw the whole stack.
 
 To catch a thrown item, reach towards it with an empty hand and simply hold the attack/destroy keybind. Like an opposite throw!
 
-To throw TNT, hold the throw keybind like a regular throw, then swipe flint and steel in the offhand over the tnt in your main hand to light it. Fair warning, you have 5 seconds before it goes boom!
+There are multiple weapon effects, **boomerang**, **embedding**, and **off**. The boomerang effect will have weapons/tools arc back (default). Embedding will embed any weapon or tool into the entity and apply a bleeding effect doing 1 damage every 1.5 seconds. Great against creepers! Off will simply make the weapon drop on impact, similarly to throwing a regular item like dirt. 
 
-There are multiple weapon effects, **boomerang**, **embedding**, and **off**. The boomerang effect will have weapons/tools arc back to their origin after colliding with an mob/player (default setting). Embedding will embed any weapon or tool that does more than 1 damage into the entity it hit and apply a bleeding effect doing 1 damage every 1.5 seconds. Great against creepers! Off will simply make the weapon drop on impact, similarly to throwing a regular item like dirt. 
+There are several other features including throwable TNT, placing blocks, and immersively throwing vanilla and modded projectiles.
 
-More info is available on the wiki here: (MAKE WIKI)
+More info is available on the wiki: [VTE Wiki](https://github.com/demistorm/VR-Throwing-Extensions/wiki)
 
 ---
 
 #### Server Owners:
-The serverside configuration is authoritative. Whatever you set there will be what the mod does for everyone. Weapon Effect options are OFF | BOOMERANG | EMBED. crouchBehavior options are NORMAL | INVERTED
+The serverside configuration is authoritative. Whatever you set there will be what the mod does for everyone.
 
-Aim Assist is simply true | false.
+See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://github.com/demistorm/VR-Throwing-Extensions/wiki/Server-Owners)
 
 ---
 
@@ -39,17 +39,30 @@ Aim Assist is simply true | false.
 
 ---
 
-![vte-1 2 5-showcase00000066](https://github.com/user-attachments/assets/57b9986c-fb20-4ed9-b6d7-e2b169bd371b)
+<p style="text-align: center;">
+  <img src="https://github.com/user-attachments/assets/5537de37-59bc-44eb-ac96-aab84c3412f1" width="50%" />
+</p>
 
-![vte-1 2 5-showcase00010425](https://github.com/user-attachments/assets/ebcdd11a-9e56-4f17-a66b-95e99ae5f0b6)
-![vte-1 2 5-showcase00010062](https://github.com/user-attachments/assets/5537de37-59bc-44eb-ac96-aab84c3412f1)
-![vte-1 2 5-showcase00007765](https://github.com/user-attachments/assets/1ac7e517-4cbb-445d-93aa-c1df74f6dd14)
-![vte-1 2 5-showcase00006758](https://github.com/user-attachments/assets/9bca30fb-ba2b-44e3-b733-4d9b95358fe7)
-![vte-1 2 5-showcase00003860](https://github.com/user-attachments/assets/534bc004-064f-4354-9bc8-1c247c74b519)
-![vte-1 2 5-showcase00003004](https://github.com/user-attachments/assets/11338b8f-bfa0-4a7f-8cda-c69b7bd8cd43)
-![vte-1 2 5-showcase00002366](https://github.com/user-attachments/assets/65675300-ef13-4c60-b73f-b866324ffebe)
-![vte-1 2 5-showcase00002155](https://github.com/user-attachments/assets/1938ca09-9f98-43b6-b597-0031e1684e46)
-![vte-1 2 5-showcase00000880](https://github.com/user-attachments/assets/0a325d20-c0cf-4fae-abfa-0d4b43b3666c)
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/57b9986c-fb20-4ed9-b6d7-e2b169bd371b" width="33%" />
+  <img src="https://github.com/user-attachments/assets/ebcdd11a-9e56-4f17-a66b-95e99ae5f0b6" width="33%" />
+  <img src="https://github.com/user-attachments/assets/0a325d20-c0cf-4fae-abfa-0d4b43b3666c" width="33%" />
+</p>
 
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/1ac7e517-4cbb-445d-93aa-c1df74f6dd14" width="33%" />
+  <img src="https://github.com/user-attachments/assets/9bca30fb-ba2b-44e3-b733-4d9b95358fe7" width="33%" />
+  <img src="https://github.com/user-attachments/assets/534bc004-064f-4354-9bc8-1c247c74b519" width="33%" />
+</p>
 
-<img width="1080" height="1080" alt="logo" src="https://github.com/user-attachments/assets/70f01226-a612-4f6e-94ad-a83428194556" />
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/11338b8f-bfa0-4a7f-8cda-c69b7bd8cd43" width="33%" />
+  <img src="https://github.com/user-attachments/assets/65675300-ef13-4c60-b73f-b866324ffebe" width="33%" />
+  <img src="https://github.com/user-attachments/assets/1938ca09-9f98-43b6-b597-0031e1684e46" width="33%" />
+</p>
+
+---
+
+<p style="text-align: center;">
+  <img src="https://github.com/user-attachments/assets/70f01226-a612-4f6e-94ad-a83428194556" width="75%" />
+</p>
