@@ -39,7 +39,7 @@ See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://
 
 ---
 
-<p style="text-align: center;">
+<p align="center">
   <img src="https://github.com/user-attachments/assets/5537de37-59bc-44eb-ac96-aab84c3412f1" width="50%" />
 </p>
 
@@ -63,6 +63,6 @@ See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://
 
 ---
 
-<p style="text-align: center;">
+<p align="center">
   <img src="https://github.com/user-attachments/assets/70f01226-a612-4f6e-94ad-a83428194556" width="75%" />
 </p>
