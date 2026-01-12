@@ -163,12 +163,12 @@ public final class ProjectileEffect {
     }
 
     // Check if an item should use projectile interception
-    public static boolean isProjectileItem(ItemStack stack) {
+    public static boolean isProjectileItem(ItemStack stack, boolean playerCrouched, boolean placePressed) {
         if (!ConfigHelper.ACTIVE.throwableProjectiles) {
             return false;
         }
 
-        if (ModCompat.throwingDisabled(stack)) {
+        if (ModCompat.throwingDisabled(stack, playerCrouched, placePressed)) {
             return false;
         }
 
@@ -191,7 +191,7 @@ public final class ProjectileEffect {
 
     // Determine throw behavior based on keybinds and item type
     public static ThrowBehavior determineThrowBehavior(ItemStack stack, boolean useBindHeld, boolean playerCrouched) {
-        boolean isProjectile = isProjectileItem(stack);
+        boolean isProjectile = isProjectileItem(stack, playerCrouched, useBindHeld);
 
         if (isProjectile) {
             // Determine if crouch modifier is active based on config

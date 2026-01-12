@@ -51,6 +51,7 @@ public final class ConfigScreen {
                                         ConfigHelper.CLIENT.onlyPlaceLights = false;
                                         ConfigHelper.CLIENT.throwableTNT = true;
                                         ConfigHelper.CLIENT.immersiveMCThrowables = true;
+                                        ConfigHelper.CLIENT.throwConflictingItems = true;
                                         ConfigHelper.CLIENT.crouchBehaviorProjectiles = ConfigHelper.CrouchBehavior.NORMAL;
                                         ConfigHelper.CLIENT.crouchBehaviorPlaceBlocks = ConfigHelper.CrouchBehavior.INVERTED;
                                         ConfigHelper.write(ConfigHelper.CLIENT);

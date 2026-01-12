@@ -17,6 +17,7 @@ public final class CompatScreen {
         private final Screen parent;
         private final Minecraft client = Minecraft.getInstance();
         private boolean immersiveMCThrowablesValue = ConfigHelper.CLIENT.immersiveMCThrowables;
+        private boolean throwConflictingItemsValue = ConfigHelper.CLIENT.throwConflictingItems;
 
         protected CompatToggleScreen(Screen parent) {
             super(Component.literal("VR Throwing Extensions - Compat Toggles"));
@@ -42,8 +43,25 @@ public final class CompatScreen {
                             .bounds(width / 2 - 80, height / 6 - 10, 160, 20)
                             .tooltip(Tooltip.create(Component.literal(
                                     """
-                                        ON: ImmersiveMC handles throwable projectiles.
+                                        ON: ImmersiveMC handles throwable projectiles
                                         OFF: For when ImmersiveMC throwing is disabled, allows VTE to throw vanilla projectiles
+                                        """)))
+                            .build());
+
+            // Throw Conflicting Items toggle
+            addRenderableWidget(
+                    Button.builder(
+                                    Component.literal("Throw Conflicting Items: " + (throwConflictingItemsValue ? "ON" : "OFF")),
+                                    btn -> {
+                                        throwConflictingItemsValue = !throwConflictingItemsValue;
+                                        btn.setMessage(Component.literal(
+                                                "Throw Conflicting Items: " + (throwConflictingItemsValue ? "ON" : "OFF")));
+                                    })
+                            .bounds(width / 2 - 80, height / 6 + 11, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal(
+                                    """
+                                        ON: Allow throwing conflicting items (Climbing Claws, bows, etc.) when crouched and holding place/use keybind
+                                        OFF: Always block these items from being thrown
                                         """)))
                             .build());
 
@@ -52,10 +70,12 @@ public final class CompatScreen {
                     Button.builder(Component.literal("Done"),
                                     btn -> {
                                         ConfigHelper.CLIENT.immersiveMCThrowables = immersiveMCThrowablesValue;
+                                        ConfigHelper.CLIENT.throwConflictingItems = throwConflictingItemsValue;
                                         ConfigHelper.write(ConfigHelper.CLIENT);
 
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.immersiveMCThrowables = ConfigHelper.CLIENT.immersiveMCThrowables;
+                                            ConfigHelper.ACTIVE.throwConflictingItems = ConfigHelper.CLIENT.throwConflictingItems;
                                         }
                                         client.setScreen(parent);
                                     })

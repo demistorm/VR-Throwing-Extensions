@@ -28,6 +28,7 @@ public final class ConfigHelper {
         public boolean onlyPlaceLights = false; // Only place lights is off by default
         public boolean throwableTNT = true;   // Throwable TNT is on by default
         public boolean immersiveMCThrowables = true; // ImmersiveMC throwables compat on by default
+        public boolean throwConflictingItems = true; // Throw conflicting items on by default
         public CrouchBehavior crouchBehaviorProjectiles = CrouchBehavior.NORMAL; // Crouch behavior for projectiles (NORMAL by default)
         public CrouchBehavior crouchBehaviorPlaceBlocks = CrouchBehavior.INVERTED; // Crouch behavior for place blocks
     }
@@ -86,6 +87,7 @@ public final class ConfigHelper {
         to.onlyPlaceLights = from.onlyPlaceLights;
         to.throwableTNT = from.throwableTNT;
         to.immersiveMCThrowables = from.immersiveMCThrowables;
+        to.throwConflictingItems = from.throwConflictingItems;
         to.crouchBehaviorProjectiles = from.crouchBehaviorProjectiles;
         to.crouchBehaviorPlaceBlocks = from.crouchBehaviorPlaceBlocks;
     }
@@ -143,15 +145,6 @@ public final class ConfigHelper {
         VRThrowingExtensions.log.debug("[ConfigHelper] Set throwable TNT enabled: {}", enabled);
     }
 
-    // Set immersiveMC throwables enabled state (for UI integration)
-    public static void setImmersiveMCThrowables(boolean enabled) {
-        CLIENT.immersiveMCThrowables = enabled;
-        write(CLIENT);
-        // Also update ACTIVE if not connected to server
-        copyInto(CLIENT, ACTIVE);
-        VRThrowingExtensions.log.debug("[ConfigHelper] Set immersiveMC throwables enabled: {}", enabled);
-    }
-
     // Set crouch behavior for projectiles (for UI integration)
     public static void setCrouchBehaviorProjectiles(CrouchBehavior behavior) {
         CLIENT.crouchBehaviorProjectiles = behavior;
@@ -169,4 +162,5 @@ public final class ConfigHelper {
         copyInto(CLIENT, ACTIVE);
         VRThrowingExtensions.log.debug("[ConfigHelper] Set crouch behavior place blocks: {}", behavior);
     }
+
 }

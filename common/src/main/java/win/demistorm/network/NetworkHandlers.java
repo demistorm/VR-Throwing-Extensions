@@ -28,7 +28,7 @@ public final class NetworkHandlers {
         if (player == null || !player.isAlive()) return;
 
         ItemStack heldStack = player.getMainHandItem();
-        if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack)) return;
+        if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack, data.playerCrouched(), data.useBindHeld())) return;
 
         // PlaceEffect logic
         PlaceEffect.BlockThrowResult blockResult = PlaceEffect.determineBlockThrowLogic(heldStack, data.useBindHeld(), data.playerCrouched());

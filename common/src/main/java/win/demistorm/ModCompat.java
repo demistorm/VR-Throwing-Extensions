@@ -26,7 +26,7 @@ public class ModCompat {
     }
 
     // Check if an item can't be thrown
-    public static boolean throwingDisabled(ItemStack stack) {
+    public static boolean throwingDisabled(ItemStack stack, boolean isCrouching, boolean placePressed) {
         if (stack.isEmpty()) return true;
 
         Item item = stack.getItem();
@@ -44,12 +44,26 @@ public class ModCompat {
         }
 
         // Check Vivecraft items
-        if (isVivecraftItem(stack)) {
-            return true;
+        boolean isVivecraftDisabled = isVivecraftItem(stack);
+        if (isVivecraftDisabled) {
+            // Allow throwing if enabled, crouched and place/use held
+            if (ConfigHelper.ACTIVE.throwConflictingItems && isCrouching && placePressed) {
+                return false; // Allow throwing
+            }
+            return true; // Block Vivecraft items
         }
 
-        // Block items on our blacklist
-        return blockedItems.contains(id);
+        // Block items in blacklist
+        boolean isBlocked = blockedItems.contains(id);
+        if (isBlocked) {
+            // Allow throwing if enabled, crouched and place/use held
+            if (ConfigHelper.ACTIVE.throwConflictingItems && isCrouching && placePressed) {
+                return false; // Allow throwing
+            }
+            return true; // Block blacklisted items
+        }
+
+        return false; // Item is not blocked
     }
 
     // Check if an item is in the throwable projectiles config
