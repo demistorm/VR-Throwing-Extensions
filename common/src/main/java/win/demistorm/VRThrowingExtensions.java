@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import win.demistorm.command.ItemInfoCommand;
 import win.demistorm.network.Network;
 import win.demistorm.network.TNTServer;
 
@@ -35,6 +36,11 @@ public class VRThrowingExtensions {
 
 		// Start the networking system
 		Network.initialize();
+
+		// Register commands
+		Platform.registerCommands(dispatcher -> {
+			ItemInfoCommand.register(dispatcher);
+		});
 
 		// Set up server events for config sync
 		registerServerEventHandlers();

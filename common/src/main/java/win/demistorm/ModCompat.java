@@ -4,6 +4,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import win.demistorm.effects.ProjectileEffect;
 
 import java.util.HashSet;
@@ -19,7 +20,7 @@ public class ModCompat {
     private static final Set<ResourceLocation> blockedItems = new HashSet<>();
 
     static {
-        // Block bows since they need the inputs for shooting
+        // Items that are blocked since they need the inputs for their various functions
         blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "bow"));
         blockedItems.add(ResourceLocation.fromNamespaceAndPath("minecraft", "crossbow"));
     }
@@ -40,6 +41,11 @@ public class ModCompat {
             } else {
                 return !isThrowableProjectileItem(stack);
             }
+        }
+
+        // Check Vivecraft items
+        if (isVivecraftItem(stack)) {
+            return true;
         }
 
         // Block items on our blacklist
@@ -66,5 +72,21 @@ public class ModCompat {
                 || itemId.getPath().startsWith("lingering_potion")
                 || itemId.getPath().startsWith("trident")
                 || itemId.getPath().startsWith("fishing_rod");
+    }
+
+    // Check by translation key (works for any language)
+    private static boolean isVivecraftItem(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+
+        // Check if the hover name has a Vivecraft translation key
+        if (stack.getHoverName().getContents() instanceof TranslatableContents translatableContent) {
+            String translationKey = translatableContent.getKey();
+            return translationKey.equals("vivecraft.item.climbclaws") ||
+                   translationKey.equals("vivecraft.item.jumpboots");
+        }
+
+        return false;
     }
 }
