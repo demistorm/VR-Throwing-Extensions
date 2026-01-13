@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.network.data.BleedingParticleData;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -255,7 +256,7 @@ public final class EmbeddingEffect {
                 for (ServerPlayer player : sw.getServer().getPlayerList().getPlayers()) {
                     if (player.level == sw && player.distanceToSqr(pos) < 4096) { // 64 blocks
                         win.demistorm.network.Network.INSTANCE.sendToPlayer(player,
-                            new win.demistorm.network.BleedingParticleData(pos.x, pos.y, pos.z));
+                            new BleedingParticleData(pos.x, pos.y, pos.z));
                     }
                 }
             }

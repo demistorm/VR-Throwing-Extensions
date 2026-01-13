@@ -1,9 +1,13 @@
 package win.demistorm;
 
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import win.demistorm.effects.ProjectileEffect;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,27 +21,64 @@ public class ModCompat {
     private static final Set<ResourceLocation> blockedItems = new HashSet<>();
 
     static {
-        // Block bows since they have their own throwing
+        // Items that are blocked since they need the inputs for their various functions
         blockedItems.add(new ResourceLocation("minecraft", "bow"));
+        blockedItems.add(new ResourceLocation("minecraft", "crossbow"));
     }
 
     // Check if an item can't be thrown
-    public static boolean throwingDisabled(ItemStack stack) {
+    public static boolean throwingDisabled(ItemStack stack, boolean isCrouching, boolean placePressed) {
         if (stack.isEmpty()) return true;
 
         Item item = stack.getItem();
         ResourceLocation id = Registry.ITEM.getKey(item);
 
-        // If ImmersiveMC is loaded, skip items it handles
+        // If ImmersiveMC is loaded, check compatibility toggle
         if (IMCLoaded && immersiveMCExceptions(id)) {
-            return true;
+            // If toggle is ON, let ImmersiveMC handle it (block this mod)
+            // If toggle is OFF and item is in projectile-items config, let this mod handle it
+            if (ConfigHelper.ACTIVE.immersiveMCThrowables) {
+                return true;
+            } else {
+                return !isThrowableProjectileItem(stack);
+            }
         }
 
-        // Block items on the blacklist
-        return blockedItems.contains(id);
+        // Check Vivecraft items
+        boolean isVivecraftDisabled = isVivecraftItem(stack);
+        if (isVivecraftDisabled) {
+            // Allow throwing if enabled, crouched and place/use held
+            if (ConfigHelper.ACTIVE.throwConflictingItems && isCrouching && placePressed) {
+                return false; // Allow throwing
+            }
+            return true; // Block Vivecraft items
+        }
+
+        // Block items in blacklist
+        boolean isBlocked = blockedItems.contains(id);
+        if (isBlocked) {
+            // Allow throwing if enabled, crouched and place/use held
+            if (ConfigHelper.ACTIVE.throwConflictingItems && isCrouching && placePressed) {
+                return false; // Allow throwing
+            }
+            return true; // Block blacklisted items
+        }
+
+        return false; // Item is not blocked
     }
 
-    // Items that ImmersiveMC already handles throwing for
+    // Items that ImmersiveMC already handles
+    // Check if an item is in the throwable projectiles config
+    private static boolean isThrowableProjectileItem(ItemStack stack) {
+        // Check if the item is in the projectile items list
+        Item item = stack.getItem();
+        ResourceLocation itemKey = Registry.ITEM.getKey(item);
+
+        // Get the list of configured projectile items
+        return ProjectileEffect.getProjectileItemsList().contains(itemKey.toString());
+    }
+
+    // Items that ImmersiveMC already handles
     private static boolean immersiveMCExceptions(ResourceLocation itemId) {
         return itemId.getPath().equals("snowball")
                 || itemId.getPath().equals("ender_pearl")
@@ -47,5 +88,21 @@ public class ModCompat {
                 || itemId.getPath().startsWith("lingering_potion")
                 || itemId.getPath().startsWith("trident")
                 || itemId.getPath().startsWith("fishing_rod");
+    }
+
+    // Check by translation key (works for any language)
+    private static boolean isVivecraftItem(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+
+        // Check if the hover name has a Vivecraft translation key
+        if (stack.getHoverName().getContents() instanceof TranslatableContents translatableContent) {
+            String translationKey = translatableContent.getKey();
+            return translationKey.equals("vivecraft.item.climbclaws") ||
+                   translationKey.equals("vivecraft.item.jumpboots");
+        }
+
+        return false;
     }
 }

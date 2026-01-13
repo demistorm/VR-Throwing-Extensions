@@ -14,6 +14,7 @@
 	},
 	"license": "GPL-3.0",
 	"icon": "vte-static-logo.png",
+	"accessWidener": "vr-throwing-extensions.accesswidener",
 	"environment": "*",
 	"entrypoints": {
 		"main": [

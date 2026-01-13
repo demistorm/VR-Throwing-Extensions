@@ -1,4 +1,4 @@
-package win.demistorm.network;
+package win.demistorm.network.data;
 
 // Data for bleeding particle packets (server to client)
 // Used for drip effects when weapons are stuck in enemies

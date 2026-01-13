@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import com.mojang.math.Vector3f;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.config.ClientOnlyConfig;
-import win.demistorm.network.BloodParticleData;
+import win.demistorm.network.data.BloodParticleData;
 
 import java.util.concurrent.ThreadLocalRandom;
 
