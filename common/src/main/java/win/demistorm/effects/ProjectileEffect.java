@@ -46,12 +46,14 @@ public final class ProjectileEffect {
         loadProjectileItems();
     }
 
-    // Configuration data class
+    // Configuration data (default throwable projectile items)
     private static class ProjectileConfig {
         public List<String> projectile_items = List.of(
             // Tridents not present, their charging function does not work with the throwable projectiles system
             "minecraft:snowball",
             "minecraft:egg",
+            "minecraft:blue_egg",
+            "minecraft:brown_egg",
             "minecraft:ender_pearl",
             "minecraft:experience_bottle",
             "minecraft:splash_potion",
@@ -127,7 +129,7 @@ public final class ProjectileEffect {
                 if (entity instanceof Projectile projectile && isEntityOwnedByPlayer(entity, player)) {
                     UUID entityId = entity.getUUID();
 
-                    // Check if this is a new entity
+                    // Check if new entity
                     if (!tracking.entitiesBeforeUse.contains(entityId)) {
                         VRThrowingExtensions.log.debug("[ProjectileEffect] Found new projectile {} for player {}",
                             entityId, player.getName().getString());
@@ -148,20 +150,19 @@ public final class ProjectileEffect {
 
         private static void redirectProjectile(Projectile projectile, ThrowTracking tracking) {
             // Cast to Entity for chunk tracking access
-            Entity entity = (Entity) projectile;
 
             // Cast to ServerLevel for chunk source access
             ServerLevel serverLevel = (ServerLevel) projectile.level;
 
             // Remove from client tracking (preventing wrong spawn packet from being sent)
-            serverLevel.getChunkSource().removeEntity(entity);
+            serverLevel.getChunkSource().removeEntity(projectile);
 
             // Override position and velocity with throw data
             projectile.setPos(tracking.throwOrigin);
             projectile.setDeltaMovement(tracking.throwVelocity);
 
             // Add back to client tracking (sends spawn packet with updated data)
-            serverLevel.getChunkSource().addEntity(entity);
+            serverLevel.getChunkSource().addEntity(projectile);
 
             VRThrowingExtensions.log.debug("[ProjectileEffect] Redirected projectile {} to pos {} vel {}",
                 projectile.getId(), tracking.throwOrigin, tracking.throwVelocity);
