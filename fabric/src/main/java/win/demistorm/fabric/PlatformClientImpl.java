@@ -15,10 +15,11 @@ import net.minecraft.world.InteractionResultHolder;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.client.ThrownItemRenderer;
+import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.ThrowHelper;
-import win.demistorm.network.BloodParticleData;
-import win.demistorm.network.BleedingParticleData;
-import win.demistorm.network.ConfigSyncData;
+import win.demistorm.network.data.BloodParticleData;
+import win.demistorm.network.data.BleedingParticleData;
+import win.demistorm.network.data.ConfigSyncData;
 import win.demistorm.ConfigHelper;
 
 // Fabric client setup and networking
@@ -46,6 +47,9 @@ public class PlatformClientImpl implements ClientModInitializer {
 
         // Register projectile renderer
         EntityRendererRegistry.register(VRThrowingExtensions.THROWN_ITEM_TYPE, ThrownItemRenderer::new);
+
+        // Register thrown primed TNT renderer
+        EntityRendererRegistry.register(VRThrowingExtensions.THROWN_TNT_TYPE, ThrownTNTRenderer::new);
 
         // Handle disconnect events (restore local config)
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {

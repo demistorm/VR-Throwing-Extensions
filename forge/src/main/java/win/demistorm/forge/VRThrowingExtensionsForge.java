@@ -12,9 +12,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
-
 import net.minecraftforge.registries.RegisterEvent;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.network.Network;
 
@@ -47,7 +47,7 @@ public class VRThrowingExtensionsForge {
 
         // Initialize common systems FIRST
         VRThrowingExtensions.initialize();
-        // Note: Network.initialize() will be called after entity registration
+        // Network.initialize() will be called after entity registration
 
         // Register packet handler using 1.20.1 SimpleChannel pattern
         NETWORK.registerMessage(0, BufferPacket.class,
@@ -91,5 +91,20 @@ public class VRThrowingExtensionsForge {
             return VRThrowingExtensions.THROWN_ITEM_TYPE;
         });
 
+        log.info("Registered entity type: {}", entityLocation);
+
+        // Create thrown primed TNT entity
+        ResourceLocation tntEntityLocation = new ResourceLocation("vr_throwing_extensions", "thrown_primed_tnt");
+
+        event.register(Registries.ENTITY_TYPE, tntEntityLocation, () -> {
+            VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.<ThrownTNTEntity>of(ThrownTNTEntity::new, MobCategory.MISC)
+                    .sized(0.98f, 0.98f)
+                    .clientTrackingRange(64)
+                    .updateInterval(5)
+                    .build("vr_throwing_extensions:thrown_primed_tnt");
+            return VRThrowingExtensions.THROWN_TNT_TYPE;
+        });
+
+        log.info("Registered entity type: {}", tntEntityLocation);
     }
 }

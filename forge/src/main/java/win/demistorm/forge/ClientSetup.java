@@ -7,12 +7,13 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import win.demistorm.VRThrowingExtensions;
+import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
-import win.demistorm.network.BloodParticleData;
-import win.demistorm.network.BleedingParticleData;
-import win.demistorm.network.ConfigSyncData;
+import win.demistorm.network.data.BloodParticleData;
+import win.demistorm.network.data.BleedingParticleData;
+import win.demistorm.network.data.ConfigSyncData;
 
 // Forge client setup
 @Mod.EventBusSubscriber(modid = "vr_throwing_extensions", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -39,6 +40,15 @@ public class ClientSetup {
             VRThrowingExtensions.log.info("Registered entity renderer for thrown items");
         } else {
             VRThrowingExtensions.log.warn("Entity type not yet initialized, skipping renderer registration");
+        }
+
+        if (win.demistorm.VRThrowingExtensions.THROWN_TNT_TYPE != null) {
+            // Register thrown primed TNT renderer
+            event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_TNT_TYPE,
+                    win.demistorm.client.ThrownTNTRenderer::new);
+            VRThrowingExtensions.log.info("Registered entity renderer for thrown TNT");
+        } else {
+            VRThrowingExtensions.log.warn("TNT Entity type not yet initialized, skipping renderer registration");
         }
     }
 

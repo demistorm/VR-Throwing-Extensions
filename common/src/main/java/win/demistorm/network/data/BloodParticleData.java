@@ -1,4 +1,4 @@
-package win.demistorm.network;
+package win.demistorm.network.data;
 
 // Data for blood particle packets (server to client)
 public record BloodParticleData(

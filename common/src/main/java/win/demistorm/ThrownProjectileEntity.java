@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.EquipmentSlot;
 import com.google.common.collect.Multimap;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,6 +29,8 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.effects.BoomerangEffect;
 import win.demistorm.effects.EmbeddingEffect;
+import win.demistorm.effects.PlaceEffect;
+import win.demistorm.network.data.BloodParticleData;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -55,6 +58,11 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     private float embeddedLocalPitch = 0f;
 
     private boolean damageDealt = false;
+
+    // Throw conditions for block placement logic
+    private boolean useBindHeld = false;
+    private boolean playerCrouched = false;
+    private boolean shouldAttemptPlacement = false;
 
     public ThrownProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level level) {
         super(type, level);
@@ -92,10 +100,23 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
 
     // Constructor used by server when creating the projectile
     public ThrownProjectileEntity(Level level, LivingEntity owner, ItemStack carried, boolean isWholeStack) {
+        this(level, owner, carried, isWholeStack, false, false, false);
+    }
+
+    // Constructor used by server when creating the projectile with throw conditions
+    public ThrownProjectileEntity(Level level, LivingEntity owner, ItemStack carried, boolean isWholeStack, boolean useBindHeld, boolean playerCrouched) {
+        this(level, owner, carried, isWholeStack, useBindHeld, playerCrouched, false);
+    }
+
+    // Constructor used by server when creating the projectile with all conditions including placement
+    public ThrownProjectileEntity(Level level, LivingEntity owner, ItemStack carried, boolean isWholeStack, boolean useBindHeld, boolean playerCrouched, boolean shouldAttemptPlacement) {
         super(VRThrowingExtensions.THROWN_ITEM_TYPE, level);
         this.setOwner(owner);
         this.setItem(carried.copyWithCount(1)); // vanilla sync field in ThrowableItemProjectile
         this.stackSize = isWholeStack ? carried.getCount() : 1;
+        this.useBindHeld = useBindHeld;
+        this.playerCrouched = playerCrouched;
+        this.shouldAttemptPlacement = shouldAttemptPlacement;
     }
 
     // Client-side: help verify when the stack actually arrives
@@ -236,6 +257,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
 
         if (!level().isClientSide) {
             boolean hitEntity = hit.getType() == HitResult.Type.ENTITY;
+            boolean hitBlock = hit.getType() == HitResult.Type.BLOCK;
+
             if (hitEntity) {
                 EntityHitResult entityHit = (EntityHitResult) hit;
 
@@ -264,7 +287,28 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                         log.debug("[VR Throw] Damage blocked, not embedding projectile {}", this.getId());
                     }
                 }
+                dropAndDiscard();
+                return;
             }
+
+            // Handle block placement for block hits
+            if (hitBlock && shouldAttemptPlacement) {
+                // Attempt block placement
+                net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
+                Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
+
+                if (PlaceEffect.placeBlock(level(), getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit, impactPos)) {
+                    // Block was successfully placed, consume the item
+                    if (stackSize > 1) {
+                        stackSize--;
+                    }
+                    discard();
+                    return;
+                } else {
+                    log.debug("[VR Throw] Failed to place block, dropping normally");
+                }
+            }
+
             dropAndDiscard();
         } else {
             level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, getItem()),
@@ -303,7 +347,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         for (ServerPlayer player : world.getServer().getPlayerList().getPlayers()) {
             if (player.level() == world && player.distanceToSqr(hitPos) < 4096) { // 64 blocks
                 win.demistorm.network.Network.INSTANCE.sendToPlayer(player,
-                    new win.demistorm.network.BloodParticleData(hitPos.x, hitPos.y, hitPos.z, velocity.x, velocity.y, velocity.z));
+                    new BloodParticleData(hitPos.x, hitPos.y, hitPos.z, velocity.x, velocity.y, velocity.z));
                 playersSent++;
             }
         }

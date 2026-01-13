@@ -10,6 +10,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.Platform;
@@ -74,5 +75,18 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.ENTITY_TYPE, entityLocation, VRThrowingExtensions.THROWN_ITEM_TYPE);
 
         log.info("Registered entity type: {}", entityLocation);
+
+        // Create thrown primed TNT entity type
+        ResourceLocation tntEntityLocation = new ResourceLocation("vr-throwing-extensions", "thrown_primed_tnt");
+
+        VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.<ThrownTNTEntity>of(ThrownTNTEntity::new, MobCategory.MISC)
+                .sized(0.98f, 0.98f)
+                .clientTrackingRange(64)
+                .updateInterval(5)
+                .build("vr-throwing-extensions:thrown_primed_tnt");
+
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, tntEntityLocation, VRThrowingExtensions.THROWN_TNT_TYPE);
+
+        log.info("Registered entity type: {}", tntEntityLocation);
     }
 }
