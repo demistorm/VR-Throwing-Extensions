@@ -2,6 +2,8 @@ package win.demistorm.client;
 
 import org.vivecraft.api.client.VRClientAPI;
 import win.demistorm.client.config.ClientConfigHelper;
+import win.demistorm.client.commands.ItemIdCommand;
+import win.demistorm.client.commands.AddProjectileItemCommand;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -19,6 +21,8 @@ public class VRThrowingExtensionsClient {
 		registerTracker();
 		// Register projectile renderer
 		registerEntityRenderer();
+		// Register client-side commands
+		registerCommands();
 	}
 
 	// Platform-specific renderer registration
@@ -31,5 +35,13 @@ public class VRThrowingExtensionsClient {
 	private static void registerTracker() {
 		VRClientAPI.instance().addClientRegistrationHandler(event ->
 				event.registerTrackers(new ThrowHelper.ThrowTracker()));
+	}
+
+	// Register clientside commands
+	private static void registerCommands() {
+		win.demistorm.Platform.registerCommands(dispatcher -> {
+			ItemIdCommand.register(dispatcher);
+			AddProjectileItemCommand.register(dispatcher);
+		});
 	}
 }

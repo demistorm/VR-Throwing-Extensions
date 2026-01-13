@@ -3,6 +3,7 @@ package win.demistorm.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.AABB;
@@ -16,6 +17,7 @@ import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
+import win.demistorm.ConfigHelper;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
@@ -30,12 +32,14 @@ public class ThrowHelper {
     // Various literals
     private static boolean active          = false;          // Throwing logic active
     private static boolean catchActive     = false;          // Catching logic active
-    private static boolean throwWholeStack = false;          // Whether the whole stack should be thrown
+    private static boolean useBindHeld    = false;          // Place/use keybind was held
+    private static boolean playerCrouched = false;          // Player was crouching when thrown
     private static boolean cancelBreaking  = false;          // Cancels breaking after a certain speed
     private static ItemStack heldItem   = ItemStack.EMPTY;   // Checks what item is in hand
     private static ThrownProjectileEntity targetProjectile = null; // The projectile being caught
     private static int ticksHeld  = 0;                       // How long trigger is pressed
     private static int catchTicksHeld = 0;                   // How long trigger is pressed for catching
+    private static final TNTHelper tntHelper = new TNTHelper(); // TNT lighting tracker
 
     // Tunables
     private static final double minThrowDistance        = 0.08; // Min arm movement to activate throw
@@ -87,17 +91,31 @@ public class ThrowHelper {
                 return; // Skip throwing logic if catching is active
             }
 
+            // Emit smoke particles from hand if TNT is lit
+            if (tntHelper.isLit()) {
+                tntHelper.emitSmokeParticles(player);
+            }
 
             // When Attack/Destroy is pressed, start Tracking
             if (!active && attackPressed) {
                 ItemStack held = player.getMainHandItem();
-                if (ModCompat.throwingDisabled(held)) return;
+                if (ModCompat.throwingDisabled(held, player.isCrouching(), placePressed)) return;
+
+                // Check if holding TNT for special handling (only if feature enabled)
+                boolean holdingTNT = ConfigHelper.ACTIVE.throwableTNT && held.is(Items.TNT);
+
+                // Start TNT tracking if holding TNT
+                if (holdingTNT) {
+                    tntHelper.startTracking(player);
+                    log.debug("[VR Throw] Started tracking TNT with flint & steel");
+                }
 
                 // Activates throw states
                 heldItem = held.copy();
                 ticksHeld = 0;
                 active = true;
-                throwWholeStack = placePressed;    // Throws the whole stack if pressed
+                useBindHeld = placePressed;       // Track if place/use was held
+                playerCrouched = player.isCrouching(); // Track if player is crouching
                 cancelBreaking = false;            // Doesn't cancel breaking until speed is too fast
                 log.debug("[VR Throw] Hold trace started with item: {}", heldItem);
             }
@@ -105,7 +123,18 @@ public class ThrowHelper {
             // Holding Attack/Destroy
             else if (active && attackPressed) {
                 ticksHeld        = Math.min(ticksHeld + 1, maxPoseHistoryTicks);
-                throwWholeStack |= placePressed;         // Throws whole stack
+                useBindHeld |= placePressed;           // Track if place/use is held at any point
+                playerCrouched = player.isCrouching(); // Update crouch state
+
+                // Check for swipe motion if tracking TNT
+                if (tntHelper.isTracking()) {
+                    if (tntHelper.checkSwipeMotion(player)) {
+                        if (VRThrowingExtensions.debugMode) {
+                            player.displayClientMessage(Component.literal("TNT lit!"), true);
+                        }
+                        log.debug("[VR Throw] TNT lit via flint & steel swipe!");
+                    }
+                }
 
                 // Checks arm speed to determine if it should cancel block breaking
                 // Uses player relative speed so player movement doesn't trigger this
@@ -163,7 +192,18 @@ public class ThrowHelper {
 
                                         // Send throw to server
                                         try {
-                                            ClientNetworkHelper.sendToServer(origin, assistedVel, throwWholeStack, rollDeg);
+                                            // Check if throwing lit TNT (only if feature enabled)
+                                            if (ConfigHelper.ACTIVE.throwableTNT && tntHelper.isLit()) {
+                                                // Send lit TNT throw packet
+                                                ClientNetworkHelper.sendThrowTNTPacket(origin, assistedVel, rollDeg);
+                                                if (VRThrowingExtensions.debugMode) {
+                                                    player.displayClientMessage(Component.literal("Thrown lit TNT!"), true);
+                                                }
+                                                log.debug("[VR Throw] Thrown lit TNT!");
+                                            } else {
+                                                // Send normal throw packet
+                                                ClientNetworkHelper.sendToServer(origin, assistedVel, useBindHeld, playerCrouched, rollDeg);
+                                            }
                                         } catch (Exception e) {
                                             log.error("Error sending throw packet to server: {}", e.getMessage());
                                             reset(); // Reset throw state on error
@@ -180,7 +220,8 @@ public class ThrowHelper {
                                                             " multiplier=" + String.format("%.2f", dynamicMultiplier) +
                                                             " relativeMovement=" + String.format("%.3f", relativeMovedDist) +
                                                             " aimAssist=" + aimAssistApplied +
-                                                            " stack=" + throwWholeStack), false);
+                                                            " useBindHeld=" + useBindHeld +
+                                                            " playerCrouched=" + playerCrouched), false);
                                         }
 
                                         VRClientAPI.instance().triggerHapticPulse(
@@ -382,9 +423,11 @@ public class ThrowHelper {
     // Resets throw variables
     private static void reset() {
         active = false;
-        throwWholeStack = false;
+        useBindHeld = false;
+        playerCrouched = false;
         cancelBreaking = false;
         heldItem = ItemStack.EMPTY;
         ticksHeld = 0;
+        tntHelper.stopTracking(); // Reset TNT tracking state
     }
 }
