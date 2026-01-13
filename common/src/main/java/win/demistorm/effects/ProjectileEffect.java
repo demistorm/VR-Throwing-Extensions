@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -146,11 +147,21 @@ public final class ProjectileEffect {
         }
 
         private static void redirectProjectile(Projectile projectile, ThrowTracking tracking) {
-            // Override position and velocity with VR throw data
+            // Cast to Entity for chunk tracking access
+            Entity entity = (Entity) projectile;
+
+            // Cast to ServerLevel for chunk source access
+            ServerLevel serverLevel = (ServerLevel) projectile.level();
+
+            // Remove from client tracking (preventing wrong spawn packet from being sent)
+            serverLevel.getChunkSource().removeEntity(entity);
+
+            // Override position and velocity with throw data
             projectile.setPos(tracking.throwOrigin);
             projectile.setDeltaMovement(tracking.throwVelocity);
 
-            // Preserve other properties but give it our VR data
+            // Add back to client tracking (sends spawn packet with updated data)
+            serverLevel.getChunkSource().addEntity(entity);
 
             VRThrowingExtensions.log.debug("[ProjectileEffect] Redirected projectile {} to pos {} vel {}",
                 projectile.getId(), tracking.throwOrigin, tracking.throwVelocity);
