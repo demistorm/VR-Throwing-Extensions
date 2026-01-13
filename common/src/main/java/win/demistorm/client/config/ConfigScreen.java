@@ -19,7 +19,8 @@ public final class ConfigScreen {
         private final Minecraft client = Minecraft.getInstance();
         private WeaponEffectType weaponEffectValue = ConfigHelper.CLIENT.weaponEffect;
         private boolean aimAssistValue = ConfigHelper.CLIENT.aimAssist;
-        private boolean bloodEffectValue = ClientOnlyConfig.ACTIVE.bloodEffect;
+        private Button weaponEffectButton;
+        private Button aimAssistButton;
 
         protected SimpleToggleScreen(Screen parent) {
             super(Component.literal("VR Throwing Extensions Configuration"));
@@ -33,9 +34,46 @@ public final class ConfigScreen {
 
         @Override
         protected void init() {
-            // Weapon effect button
+            // Reset config button (top right)
             addRenderableWidget(
                     Button.builder(
+                                    Component.literal("Reset"),
+                                    btn -> {
+                                        // Reset all config values to defaults
+                                        weaponEffectValue = WeaponEffectType.BOOMERANG;
+                                        aimAssistValue = true;
+
+                                        // Reset ConfigHelper.CLIENT to defaults
+                                        ConfigHelper.CLIENT.weaponEffect = WeaponEffectType.BOOMERANG;
+                                        ConfigHelper.CLIENT.aimAssist = true;
+                                        ConfigHelper.CLIENT.throwableProjectiles = true;
+                                        ConfigHelper.CLIENT.placeBlocksOnThrow = false;
+                                        ConfigHelper.CLIENT.onlyPlaceLights = false;
+                                        ConfigHelper.CLIENT.throwableTNT = true;
+                                        ConfigHelper.CLIENT.immersiveMCThrowables = true;
+                                        ConfigHelper.CLIENT.throwConflictingItems = true;
+                                        ConfigHelper.CLIENT.crouchBehaviorProjectiles = ConfigHelper.CrouchBehavior.NORMAL;
+                                        ConfigHelper.CLIENT.crouchBehaviorPlaceBlocks = ConfigHelper.CrouchBehavior.INVERTED;
+                                        ConfigHelper.write(ConfigHelper.CLIENT);
+
+                                        // Reset ClientOnlyConfig to defaults
+                                        ClientOnlyConfig.ACTIVE.bloodEffect = true;
+                                        ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
+
+                                        // Update button messages immediately
+                                        if (weaponEffectButton != null) {
+                                            weaponEffectButton.setMessage(Component.literal("Weapon Effect: " + weaponEffectValue.name()));
+                                        }
+                                        if (aimAssistButton != null) {
+                                            aimAssistButton.setMessage(Component.literal("Aim Assist: " + (aimAssistValue ? "ON" : "OFF")));
+                                        }
+                                    })
+                            .bounds(width - 50, 5, 45, 20)
+                            .tooltip(Tooltip.create(Component.literal("Reset all settings to default")))
+                            .build());
+
+            // Weapon effect button
+            weaponEffectButton = Button.builder(
                                     Component.literal("Weapon Effect: " + weaponEffectValue.name()),
                                     btn -> {
                                         // Switch between effects
@@ -46,37 +84,44 @@ public final class ConfigScreen {
                                         };
                                         btn.setMessage(Component.literal("Weapon Effect: " + weaponEffectValue.name()));
                                     })
-                            .bounds(width / 2 - 80, height / 4 + 24, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 - 10, 160, 20)
                             .tooltip(Tooltip.create(Component.literal(
                                     """
                                             OFF: Weapons drop normally
                                             BOOMERANG: Weapons return after hitting (catch them!)
                                             EMBED: Weapons stick in enemies and cause bleeding""")))
-                            .build());
+                            .build();
+            addRenderableWidget(weaponEffectButton);
 
             // Aim assist button
-            addRenderableWidget(
-                    Button.builder(
+            aimAssistButton = Button.builder(
                                     Component.literal("Aim Assist: " + (aimAssistValue ? "ON" : "OFF")),
                                     btn -> {
                                         aimAssistValue = !aimAssistValue;
                                         btn.setMessage(Component.literal(
                                                 "Aim Assist: " + (aimAssistValue ? "ON" : "OFF")));
                                     })
-                            .bounds(width / 2 - 80, height / 4 + 54, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 11, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Helps aim at nearby targets")))
-                            .build());
+                            .build();
+            addRenderableWidget(aimAssistButton);
 
-            // Blood effects button
+            // Throwable projectiles button
             addRenderableWidget(
                     Button.builder(
-                                    Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")),
-                                    btn -> {
-                                        bloodEffectValue = !bloodEffectValue;
-                                        btn.setMessage(Component.literal("Blood Effects: " + (bloodEffectValue ? "ON" : "OFF")));
-                                    })
-                            .bounds(width / 2 - 80, height / 4 + 84, 160, 20)
-                            .tooltip(Tooltip.create(Component.literal("Show blood particles when weapons hit")))
+                                    Component.literal("Throwable Projectiles..."),
+                                    btn -> client.setScreen(new ThrowableItemsScreen(this)))
+                            .bounds(width / 2 - 80, height / 6 + 32, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal("Toggle and manage vanilla and modded items to be thrown immersively")))
+                            .build());
+
+            // Extras button
+            addRenderableWidget(
+                    Button.builder(
+                                    Component.literal("Extras..."),
+                                    btn -> client.setScreen(new ExtrasScreen.ExtrasToggleScreen(this)))
+                            .bounds(width / 2 - 80, height / 6 + 53, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal("More features and settings")))
                             .build());
 
             // Done button
@@ -87,17 +132,13 @@ public final class ConfigScreen {
                                         ConfigHelper.CLIENT.aimAssist = aimAssistValue;
                                         ConfigHelper.write(ConfigHelper.CLIENT);
 
-                                        // Save blood effect setting
-                                        ClientOnlyConfig.ACTIVE.bloodEffect = bloodEffectValue;
-                                        ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
-
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
                                             ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
                                         }
                                         client.setScreen(parent);
                                     })
-                            .bounds(width / 2 - 100, height - 27, 200, 20)
+                            .bounds(width / 2 - 100, height - 30, 200, 20)
                             .build());
         }
 

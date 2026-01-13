@@ -7,12 +7,13 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import win.demistorm.VRThrowingExtensions;
+import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
-import win.demistorm.network.BloodParticleData;
-import win.demistorm.network.BleedingParticleData;
-import win.demistorm.network.ConfigSyncData;
+import win.demistorm.network.data.BloodParticleData;
+import win.demistorm.network.data.BleedingParticleData;
+import win.demistorm.network.data.ConfigSyncData;
 
 // Forge client setup
 @Mod.EventBusSubscriber(modid = "vr_throwing_extensions", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -32,6 +33,10 @@ public class ClientSetup {
         // Register projectile renderer
         event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_ITEM_TYPE,
             win.demistorm.client.ThrownItemRenderer::new);
+
+        // Register thrown primed TNT renderer
+        event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_TNT_TYPE,
+            ThrownTNTRenderer::new);
     }
 
     // Process incoming packets
