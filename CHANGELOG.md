@@ -1,4 +1,4 @@
-- Add option to place blocks when thrown
+- Added option to place blocks when thrown
 - Added throwable projectiles! Works for vanilla and modded items!
 - Throwable TNT! Flint&Steel in the offhand, tnt in the main hand. Throw them like grenades! (it is very fun)
 - Added /addProjectileItemID command to automatically add the held item to the throwable projectile list
@@ -9,3 +9,8 @@
 - Added immersiveMC projectile bypass (kinda). Enables items 
 that immersiveMC compatibility blocks in case users disabled immersiveMC's throwing and would rather use this mod's
 - Added "Throw Conflicting Items" option to give a way to throw things like bows/crossbows/climbing claws
+
+---
+
+- Also made a [wiki](https://github.com/demistorm/VR-Throwing-Extensions/wiki) with more details about 
+everything in VTE!
