@@ -1,6 +1,5 @@
 package win.demistorm.forge;
 
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -22,6 +21,7 @@ import win.demistorm.network.Network;
 import static win.demistorm.VRThrowingExtensions.log;
 
 // Forge mod entry point
+@SuppressWarnings("removal")
 @Mod("vr_throwing_extensions")
 public class VRThrowingExtensionsForge {
 
@@ -98,7 +98,7 @@ public class VRThrowingExtensionsForge {
         ResourceLocation tntEntityLocation = new ResourceLocation("vr_throwing_extensions", "thrown_primed_tnt");
 
         event.register(ResourceKey.createRegistryKey(new ResourceLocation("minecraft", "entity_type")), tntEntityLocation, () -> {
-            VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.<ThrownTNTEntity>of(ThrownTNTEntity::new, MobCategory.MISC)
+            VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.of(ThrownTNTEntity::new, MobCategory.MISC)
                     .sized(0.98f, 0.98f)
                     .clientTrackingRange(64)
                     .updateInterval(5)

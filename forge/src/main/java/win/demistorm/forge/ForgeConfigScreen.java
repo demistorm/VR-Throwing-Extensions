@@ -5,6 +5,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import win.demistorm.client.config.ConfigScreen;
 
 // Forge config screen registration
+@SuppressWarnings("removal")
 public class ForgeConfigScreen {
     public static void register() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
