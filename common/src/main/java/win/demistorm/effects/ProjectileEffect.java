@@ -3,15 +3,11 @@ package win.demistorm.effects;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -20,7 +16,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.resources.ResourceLocation;
 import win.demistorm.ConfigHelper;
 import win.demistorm.ModCompat;
-import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
 
 import java.io.IOException;
@@ -51,12 +46,14 @@ public final class ProjectileEffect {
         loadProjectileItems();
     }
 
-    // Configuration data class
+    // Configuration data (default throwable projectile items)
     private static class ProjectileConfig {
         public List<String> projectile_items = List.of(
             // Tridents not present, their charging function does not work with the throwable projectiles system
             "minecraft:snowball",
             "minecraft:egg",
+            "minecraft:blue_egg",
+            "minecraft:brown_egg",
             "minecraft:ender_pearl",
             "minecraft:experience_bottle",
             "minecraft:splash_potion",
@@ -132,7 +129,7 @@ public final class ProjectileEffect {
                 if (entity instanceof Projectile projectile && isEntityOwnedByPlayer(entity, player)) {
                     UUID entityId = entity.getUUID();
 
-                    // Check if this is a new entity
+                    // Check if new entity
                     if (!tracking.entitiesBeforeUse.contains(entityId)) {
                         VRThrowingExtensions.log.debug("[ProjectileEffect] Found new projectile {} for player {}",
                             entityId, player.getName().getString());
@@ -153,20 +150,19 @@ public final class ProjectileEffect {
 
         private static void redirectProjectile(Projectile projectile, ThrowTracking tracking) {
             // Cast to Entity for chunk tracking access
-            Entity entity = (Entity) projectile;
 
             // Cast to ServerLevel for chunk source access
             ServerLevel serverLevel = (ServerLevel) projectile.level();
 
             // Remove from client tracking (preventing wrong spawn packet from being sent)
-            serverLevel.getChunkSource().removeEntity(entity);
+            serverLevel.getChunkSource().removeEntity(projectile);
 
             // Override position and velocity with throw data
             projectile.setPos(tracking.throwOrigin);
             projectile.setDeltaMovement(tracking.throwVelocity);
 
             // Add back to client tracking (sends spawn packet with updated data)
-            serverLevel.getChunkSource().addEntity(entity);
+            serverLevel.getChunkSource().addEntity(projectile);
 
             VRThrowingExtensions.log.debug("[ProjectileEffect] Redirected projectile {} to pos {} vel {}",
                 projectile.getId(), tracking.throwOrigin, tracking.throwVelocity);
@@ -208,14 +204,14 @@ public final class ProjectileEffect {
             // Determine if crouch modifier is active based on config
             boolean crouchModifierActive = switch (ConfigHelper.ACTIVE.crouchBehaviorProjectiles) {
                 case NORMAL -> playerCrouched;       // Crouch activates the feature
-                case INVERTED -> !playerCrouched;   // Not crouching activates the feature
+                case INVERTED -> !playerCrouched;    // Not crouching activates the feature
             };
 
-            // Default throw (no modifiers) → Vanilla projectile behavior
+            // Default throw (no modifiers) = Vanilla projectile behavior
             if (!useBindHeld && !crouchModifierActive) {
                 return ThrowBehavior.VANILLA_PROJECTILE;
             }
-            // Any modifier held → Force custom projectile
+            // Any modifier held = Force custom projectile
             if (useBindHeld || crouchModifierActive) {
                 return useBindHeld && crouchModifierActive ?
                     ThrowBehavior.CUSTOM_PROJECTILE_WHOLE_STACK :
@@ -286,8 +282,6 @@ public final class ProjectileEffect {
         }
     }
 
-    // Public API methods for config screen integration
-
     // Get current projectile items as a list
     public static List<String> getProjectileItemsList() {
         List<String> items = new ArrayList<>();
@@ -332,11 +326,6 @@ public final class ProjectileEffect {
     public static void loadProjectileItemsFromConfig() {
         projectileItemCache.clear();
         loadProjectileItems();
-    }
-
-    // Reload configuration (for server commands etc.)
-    public static void reloadConfig() {
-        loadProjectileItemsFromConfig();
     }
 
     // Reset projectile items to defaults
