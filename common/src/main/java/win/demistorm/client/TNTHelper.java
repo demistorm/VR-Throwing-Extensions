@@ -5,8 +5,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
-import org.joml.Quaternionfc;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Quaternion;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.VRBodyPartData;
@@ -69,8 +69,9 @@ public class TNTHelper {
                 (float) offHandData.getPos().z
             );
 
-            Vector3f offset = new Vector3f(offHandPos).sub(mainHandPos);
-            float distance = offset.length();
+            Vector3f offset = new Vector3f(offHandPos.x(), offHandPos.y(), offHandPos.z());
+            offset.sub(mainHandPos);
+            float distance = (float) Math.sqrt(offset.x() * offset.x() + offset.y() * offset.y() + offset.z() * offset.z());
 
             if (i == 0) {
                 isOutsideAgain = distance >= proximityDistance;
@@ -161,17 +162,22 @@ public class TNTHelper {
         if (hand == null) return;
 
         Vec3 handPos = hand.getPos();
-        Quaternionfc rotation = hand.getRotation();
+        Quaternion rotation = hand.getRotation();
 
         // Calculate offset position for hand particles
         // Forward 0.15m, Up 0.1m from hand center
-        Vector3f forward = new Vector3f(0, 0, -1).rotate(rotation).normalize();
-        Vector3f up = new Vector3f(0, 1, 0).rotate(rotation).normalize();
+        Vector3f forward = new Vector3f(0, 0, -1);
+        forward.transform(rotation);
+        forward.normalize();
+
+        Vector3f up = new Vector3f(0, 1, 0);
+        up.transform(rotation);
+        up.normalize();
 
         Vec3 particlePos = handPos.add(
-            new Vec3(forward.x * 0.15, forward.y * 0.15, forward.z * 0.15)
+            new Vec3(forward.x() * 0.15, forward.y() * 0.15, forward.z() * 0.15)
         ).add(
-            new Vec3(up.x * 0.1, up.y * 0.1, up.z * 0.1)
+            new Vec3(up.x() * 0.1, up.y() * 0.1, up.z() * 0.1)
         );
 
         // Calculate color based on remaining fuse

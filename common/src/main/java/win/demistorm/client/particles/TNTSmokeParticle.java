@@ -2,7 +2,7 @@ package win.demistorm.client.particles;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.DustParticleOptions;
-import org.joml.Vector3f;
+import com.mojang.math.Vector3f;
 
 // Colored smoke particle for thrown TNT
 public final class TNTSmokeParticle {

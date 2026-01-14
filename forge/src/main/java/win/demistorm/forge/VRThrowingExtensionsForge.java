@@ -97,7 +97,7 @@ public class VRThrowingExtensionsForge {
         // Create thrown primed TNT entity
         ResourceLocation tntEntityLocation = new ResourceLocation("vr_throwing_extensions", "thrown_primed_tnt");
 
-        event.register(Registries.ENTITY_TYPE, tntEntityLocation, () -> {
+        event.register(ResourceKey.createRegistryKey(new ResourceLocation("minecraft", "entity_type")), tntEntityLocation, () -> {
             VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.<ThrownTNTEntity>of(ThrownTNTEntity::new, MobCategory.MISC)
                     .sized(0.98f, 0.98f)
                     .clientTrackingRange(64)

@@ -1,6 +1,5 @@
 package win.demistorm.neoforge;
 
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -88,8 +87,9 @@ public class VRThrowingExtensionsNeoForge {
         // Create thrown projectile entity
         ResourceLocation entityLocation = ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "generic_thrown_item");
 
-        if (event.getRegistryKey() == Registries.ENTITY_TYPE) {
-            event.register(Registries.ENTITY_TYPE, entityLocation, () -> {
+        ResourceKey<Registry<EntityType<?>>> entityTypeKey = ResourceKey.createRegistryKey(new ResourceLocation("minecraft", "entity_type"));
+        if (event.getRegistryKey().equals(entityTypeKey)) {
+            event.register(entityTypeKey, entityLocation, () -> {
                 VRThrowingExtensions.THROWN_ITEM_TYPE = EntityType.Builder.<ThrownProjectileEntity>of(ThrownProjectileEntity::new, MobCategory.MISC)
                         .sized(0.25f, 0.25f)
                         .clientTrackingRange(64)
@@ -103,7 +103,7 @@ public class VRThrowingExtensionsNeoForge {
             // Create thrown primed TNT entity
             ResourceLocation tntEntityLocation = ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "thrown_primed_tnt");
 
-            event.register(Registries.ENTITY_TYPE, tntEntityLocation, () -> {
+            event.register(entityTypeKey, tntEntityLocation, () -> {
                 VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.<ThrownTNTEntity>of(ThrownTNTEntity::new, MobCategory.MISC)
                         .sized(0.98f, 0.98f)
                         .clientTrackingRange(64)

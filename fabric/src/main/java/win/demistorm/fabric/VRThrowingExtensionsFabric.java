@@ -84,7 +84,7 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
                 .updateInterval(5)
                 .build("vr-throwing-extensions:thrown_primed_tnt");
 
-        Registry.register(BuiltInRegistries.ENTITY_TYPE, tntEntityLocation, VRThrowingExtensions.THROWN_TNT_TYPE);
+        Registry.register(Registry.ENTITY_TYPE, tntEntityLocation, VRThrowingExtensions.THROWN_TNT_TYPE);
 
         log.info("Registered entity type: {}", tntEntityLocation);
     }

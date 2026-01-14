@@ -1,6 +1,7 @@
 package win.demistorm.network;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.Items;
 import win.demistorm.Platform;
@@ -42,9 +43,6 @@ public class TNTServer {
 
         tntTimers.put(player, TNT_FUSE_TICKS);
         log.debug("[TNTServer] Started {}-tick fuse timer for {}", TNT_FUSE_TICKS, player.getName().getString());
-
-        // Note: TNT ignition sound would play here but SoundEvents.TNT_PRIMED is a Holder<SoundEvent>
-        // The PrimedTnt entity will play its own sound when spawned/thrown
     }
 
     // Cancel TNT fuse timer for a player
@@ -100,14 +98,14 @@ public class TNTServer {
 
     // Explode TNT at player's position
     private void explodeTNT(ServerPlayer player) {
-        Level level = player.level();
+        Level level = player.level;
 
         log.debug("[TNTServer] TNT exploded at {}'s position", player.getName().getString());
 
         // Create explosion with vanilla TNT force
-        // Note: Using TNT explosion type which doesn't destroy blocks as aggressively
+        // Using TNT explosion type which doesn't destroy blocks as aggressively
         level.explode(player, player.getX(), player.getY(), player.getZ(),
-                EXPLOSION_POWER, Level.ExplosionInteraction.TNT);
+                EXPLOSION_POWER, Explosion.BlockInteraction.BREAK);
 
         // Consume 1 TNT from player's main hand if they still have it
         if (player.getMainHandItem().is(Items.TNT)) {

@@ -102,7 +102,7 @@ public final class NetworkHandlers {
         );
 
         // Call vanilla item use
-        InteractionResult result = heldStack.use(player.level(), player, InteractionHand.MAIN_HAND).getResult();
+        InteractionResult result = heldStack.use(player.level, player, InteractionHand.MAIN_HAND).getResult();
         if (result != InteractionResult.PASS) {
             // Item was consumed or changed, update the hand
             ItemStack newStack = player.getMainHandItem();
@@ -123,10 +123,12 @@ public final class NetworkHandlers {
     private static void handleCustomProjectile(Player player, ItemStack heldStack, Vec3 origin, Vec3 velocity, float rollDeg, boolean wholeStack, boolean useBindHeld, boolean playerCrouched) {
         log.debug("[Network] Handling custom projectile for item: {}", heldStack);
 
-        ThrownProjectileEntity proj = new ThrownProjectileEntity(player.level(), player, heldStack, wholeStack, useBindHeld, playerCrouched);
+        ThrownProjectileEntity proj = new ThrownProjectileEntity(player.level, player, heldStack, wholeStack, useBindHeld, playerCrouched);
 
         // Make sure item syncs properly on first spawn
-        proj.setItem(heldStack.copyWithCount(1));
+        ItemStack single = heldStack.copy();
+        single.setCount(1);
+        proj.setItem(single);
 
         proj.setPos(origin);
         proj.setOriginalThrowPos(origin);
@@ -297,7 +299,7 @@ public final class NetworkHandlers {
         }
 
         // Spawn ThrownTNTEntity with custom properties
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = (ServerLevel) player.level;
         ThrownTNTEntity tnt = new ThrownTNTEntity(VRThrowingExtensions.THROWN_TNT_TYPE, level);
 
         // Set position, velocity, and data

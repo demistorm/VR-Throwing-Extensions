@@ -8,14 +8,14 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.ThrownTNTEntity;
 
@@ -49,15 +49,15 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity> {
         if (velocity.length() > 0.001) {
             // Calculate yaw (horizontal rotation)
             float yaw = (float)(Mth.atan2(velocity.z, velocity.x) * 180.0 / Math.PI);
-            matrices.mulPose(Axis.YP.rotationDegrees(90.0F - yaw));
+            matrices.mulPose(Vector3f.YP.rotationDegrees(90.0F - yaw));
 
             // Calculate pitch (vertical rotation)
             float hor = Mth.sqrt((float)(velocity.x * velocity.x + velocity.z * velocity.z));
             float pitch = (float)(Mth.atan2(velocity.y, hor) * 180.0 / Math.PI);
-            matrices.mulPose(Axis.XP.rotationDegrees(-pitch));
+            matrices.mulPose(Vector3f.XP.rotationDegrees(-pitch));
 
             // Add hand tilt
-            matrices.mulPose(Axis.ZP.rotationDegrees(-handRollDeg));
+            matrices.mulPose(Vector3f.ZP.rotationDegrees(-handRollDeg));
         }
 
         // Velocity-based spin speed - full spin or no spin
@@ -66,10 +66,10 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity> {
         float spinSpeed = (speed > spinThreshold) ? 15.0F : 0.0F;
 
         float spin = (age * spinSpeed) % 360F;
-        matrices.mulPose(Axis.XP.rotationDegrees(spin));
+        matrices.mulPose(Vector3f.XP.rotationDegrees(spin));
 
         // Flip to match item orientation (same as ThrownItemRenderer)
-        matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+        matrices.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 
         // Apply scale
         matrices.scale(scale, scale, scale);
@@ -81,12 +81,11 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity> {
         try {
             itemRenderer.renderStatic(
                     tntItemStack,
-                    ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
+                    ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND,
                     light,
                     OverlayTexture.NO_OVERLAY,
                     matrices,
                     vcp,
-                    Minecraft.getInstance().level,
                     0
             );
         } catch (Exception e) {

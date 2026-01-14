@@ -9,7 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -42,7 +42,7 @@ public final class ItemIdCommand {
         }
 
         // Get the full item ID (namespace:name)
-        ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(heldStack.getItem());
+        ResourceLocation itemKey = Registry.ITEM.getKey(heldStack.getItem());
         String itemId = itemKey.toString();
         String itemName = heldStack.getDisplayName().getString();
         int stackSize = heldStack.getCount();

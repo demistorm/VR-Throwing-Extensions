@@ -3,7 +3,7 @@ package win.demistorm.effects;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -96,7 +96,7 @@ public final class ProjectileEffect {
                 player.getX() + SEARCH_RADIUS, player.getY() + SEARCH_RADIUS, player.getZ() + SEARCH_RADIUS
             );
 
-            player.level().getEntities(player, searchBox, entity -> {
+            player.level.getEntities(player, searchBox, entity -> {
                 if (entity instanceof Projectile && isEntityOwnedByPlayer(entity, player)) {
                     tracking.entitiesBeforeUse.add(entity.getUUID());
                 }
@@ -114,7 +114,7 @@ public final class ProjectileEffect {
 
             if (tracking == null) return;
 
-            Level level = player.level();
+            Level level = player.level;
 
             // Find new projectiles that were spawned
             AABB searchBox = new AABB(
@@ -174,7 +174,7 @@ public final class ProjectileEffect {
         }
 
         // Check by resource location
-        ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
+        ResourceLocation itemKey = Registry.ITEM.getKey(item);
         boolean isProjectile = projectileItems.contains(itemKey);
 
         if (isProjectile) {
@@ -229,9 +229,9 @@ public final class ProjectileEffect {
         for (String itemId : config.projectile_items) {
             try {
                 ResourceLocation key = ResourceLocation.tryParse(itemId);
-                if (BuiltInRegistries.ITEM.containsKey(key)) {
+                if (Registry.ITEM.containsKey(key)) {
                     items.add(key);
-                    BuiltInRegistries.ITEM.getOptional(key).ifPresent(projectileItemCache::add);
+                    Registry.ITEM.getOptional(key).ifPresent(projectileItemCache::add);
                 } else {
                     VRThrowingExtensions.log.warn("[ProjectileEffect] Unknown item in config: {}", itemId);
                 }
@@ -290,9 +290,9 @@ public final class ProjectileEffect {
         for (String itemId : items) {
             try {
                 ResourceLocation key = ResourceLocation.tryParse(itemId);
-                if (BuiltInRegistries.ITEM.containsKey(key)) {
+                if (Registry.ITEM.containsKey(key)) {
                     newItems.add(key);
-                    BuiltInRegistries.ITEM.getOptional(key).ifPresent(newCache::add);
+                    Registry.ITEM.getOptional(key).ifPresent(newCache::add);
                 } else {
                     VRThrowingExtensions.log.warn("[ProjectileEffect] Unknown item ID: {}", itemId);
                 }

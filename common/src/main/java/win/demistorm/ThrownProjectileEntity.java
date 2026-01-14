@@ -300,7 +300,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                 net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
                 Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
 
-                if (PlaceEffect.placeBlock(level(), getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit, impactPos)) {
+                if (PlaceEffect.placeBlock(this.level, getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit, impactPos)) {
                     // Block was successfully placed, consume the item
                     if (stackSize > 1) {
                         stackSize--;
