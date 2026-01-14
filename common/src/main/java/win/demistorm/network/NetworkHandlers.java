@@ -110,8 +110,9 @@ public final class NetworkHandlers {
         }
 
         // Check for spawned projectiles and redirect after one tick
-        if (player.getServer() != null) {
-            player.getServer().getTickCount(); // Access server to check if available
+        ServerLevel serverLevel = (ServerLevel) player.level();
+        if (serverLevel.getServer() != null) {
+            serverLevel.getServer().getTickCount(); // Access server to check if available
             // Schedule the interception for next tick
             ProjectileEffect.ItemProjectileDetector.interceptAndRedirect((ServerPlayer) player);
         }

@@ -1,52 +1,79 @@
 package win.demistorm.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.ThrownTNTEntity;
 
-// Renders thrown primed TNT as an item with velocity-based spinning
+/**
+ * 1.21.10 submit-pipeline ThrownTNTRenderer
+ * - render(...) -> submit(...)
+ * - MultiBufferSource -> SubmitNodeCollector
+ * - Use ItemModelResolver.updateForNonLiving(...) and ItemStackRenderState#submit(...)
+ */
 public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNTRenderer.ThrownTNTRenderState> {
-    private final ItemRenderer itemRenderer;
+    private final ItemModelResolver itemModelResolver;
     private final float scale;
 
     public ThrownTNTRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
-        this.itemRenderer = Minecraft.getInstance().getItemRenderer();
+        this.itemModelResolver = ctx.getItemModelResolver();
         this.scale = 0.7f;
         this.shadowRadius = 0.0f;
     }
 
     @Override
-    public @NotNull ThrownTNTRenderer.ThrownTNTRenderState createRenderState() {
+    public @NotNull ThrownTNTRenderState createRenderState() {
         return new ThrownTNTRenderState();
     }
 
     @Override
     public void extractRenderState(ThrownTNTEntity entity, ThrownTNTRenderState state, float tickDelta) {
+        super.extractRenderState(entity, state, tickDelta);
+
         state.velocity = entity.getDeltaMovement();
         state.age = entity.tickCount + tickDelta;
         state.handRollDeg = entity.getHandRoll();
+
+        // Packed light for submit()
+        BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
+        state.lightCoords = LevelRenderer.getLightColor(entity.level(), pos);
+
+        // Prepare the item's render state (correct 1.21.10 signature)
+        // updateForNonLiving(itemState, stack, displayContext, entity)
+        itemModelResolver.updateForNonLiving(
+                state.item,
+                state.itemStack,
+                ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
+                entity
+        );
     }
 
     @Override
-    public void render(ThrownTNTRenderState state,
+    public void submit(ThrownTNTRenderState state,
                        PoseStack matrices,
-                       MultiBufferSource vcp,
-                       int light) {
+                       SubmitNodeCollector collector,
+                       CameraRenderState cameraState) {
+        super.submit(state, matrices, collector, cameraState);
+
+        if (state.item.isEmpty()) {
+            return;
+        }
 
         matrices.pushPose();
 
@@ -80,33 +107,20 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         // Apply scale
         matrices.scale(scale, scale, scale);
 
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        // Render TNT as an item using item renderer
-        ItemStack tntItemStack = new ItemStack(Items.TNT);
-        try {
-            itemRenderer.renderStatic(
-                    Minecraft.getInstance().player,
-                    tntItemStack,
-                    ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
-                    matrices,
-                    vcp,
-                    Minecraft.getInstance().level,
-                    light,
-                    OverlayTexture.NO_OVERLAY,
-                    0
-            );
-        } catch (Exception e) {
-            System.err.println("VR Throwing Extensions: Could not render thrown TNT: " + e.getMessage());
-        }
+        // Submit prepared TNT item
+        state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 
         matrices.popPose();
-        super.render(state, matrices, vcp, light);
     }
 
     public static class ThrownTNTRenderState extends EntityRenderState {
+        public final ItemStack itemStack = new ItemStack(Items.TNT);
+        public final ItemStackRenderState item = new ItemStackRenderState();
+
         public Vec3 velocity = Vec3.ZERO;
         public float age = 0.0f;
         public float handRollDeg = 0f;
+        public int lightCoords = 0;
+        // outlineColor is inherited from EntityRenderState
     }
 }

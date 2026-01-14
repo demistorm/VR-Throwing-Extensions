@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.ThrownItemRenderer;
 import win.demistorm.client.ThrownTNTRenderer;

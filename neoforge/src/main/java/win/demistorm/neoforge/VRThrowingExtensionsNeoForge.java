@@ -123,7 +123,7 @@ public class VRThrowingExtensionsNeoForge {
             log.info("Registered thrown item renderer for NeoForge");
         }
 
-        if (FMLEnvironment.dist.isClient() && VRThrowingExtensions.THROWN_TNT_TYPE != null) {
+        if (FMLEnvironment.getDist().isClient() && VRThrowingExtensions.THROWN_TNT_TYPE != null) {
             event.registerEntityRenderer(VRThrowingExtensions.THROWN_TNT_TYPE,
                 ThrownTNTRenderer::new);
             log.info("Registered thrown primed TNT renderer for NeoForge");
