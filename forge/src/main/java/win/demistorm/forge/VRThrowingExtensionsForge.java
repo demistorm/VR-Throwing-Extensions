@@ -17,6 +17,7 @@ import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
 import net.minecraftforge.registries.RegisterEvent;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.network.Network;
 
@@ -108,5 +109,19 @@ public class VRThrowingExtensionsForge {
         });
 
         log.info("Registered entity type: {}", entityLocation);
+
+        // Create thrown primed TNT entity
+        Identifier tntEntityLocation = Identifier.fromNamespaceAndPath("vr_throwing_extensions", "thrown_primed_tnt");
+
+        event.register(Registries.ENTITY_TYPE, tntEntityLocation, () -> {
+            VRThrowingExtensions.THROWN_TNT_TYPE = EntityType.Builder.of(ThrownTNTEntity::new, MobCategory.MISC)
+                    .sized(0.98f, 0.98f)
+                    .clientTrackingRange(64)
+                    .updateInterval(5)
+                    .build(ResourceKey.create(Registries.ENTITY_TYPE, tntEntityLocation));
+            return VRThrowingExtensions.THROWN_TNT_TYPE;
+        });
+
+        log.info("Registered entity type: {}", tntEntityLocation);
     }
 }

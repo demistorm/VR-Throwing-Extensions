@@ -9,9 +9,9 @@ import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
-import win.demistorm.network.BloodParticleData;
-import win.demistorm.network.BleedingParticleData;
-import win.demistorm.network.ConfigSyncData;
+import win.demistorm.network.data.BloodParticleData;
+import win.demistorm.network.data.BleedingParticleData;
+import win.demistorm.network.data.ConfigSyncData;
 import win.demistorm.ConfigHelper;
 
 // NeoForge client setup

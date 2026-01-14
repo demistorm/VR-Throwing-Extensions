@@ -5,7 +5,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import win.demistorm.command.ItemInfoCommand;
 import win.demistorm.network.Network;
+import win.demistorm.network.TNTServer;
 
 // Common initialization code
 public class VRThrowingExtensions {
@@ -14,6 +16,7 @@ public class VRThrowingExtensions {
 	public static final Logger log = LoggerFactory.getLogger(MOD_ID);
 
 	public static EntityType<ThrownProjectileEntity> THROWN_ITEM_TYPE;
+	public static EntityType<ThrownTNTEntity> THROWN_TNT_TYPE;
 
 	// Debug mode switch
 	public static final boolean debugMode = false;
@@ -34,8 +37,16 @@ public class VRThrowingExtensions {
 		// Start the networking system
 		Network.initialize();
 
+		// Register commands
+		Platform.registerCommands(dispatcher -> {
+			ItemInfoCommand.register(dispatcher);
+		});
+
 		// Set up server events for config sync
 		registerServerEventHandlers();
+
+		// Set up TNT server (fuse timers)
+		TNTServer.instance().registerTickHandler();
 	}
 
 	// Handle server events for syncing config with players

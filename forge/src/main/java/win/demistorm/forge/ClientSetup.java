@@ -7,19 +7,24 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.ThrownItemRenderer;
+import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
-import win.demistorm.network.BloodParticleData;
-import win.demistorm.network.BleedingParticleData;
-import win.demistorm.network.ConfigSyncData;
+import win.demistorm.network.data.BloodParticleData;
+import win.demistorm.network.data.BleedingParticleData;
+import win.demistorm.network.data.ConfigSyncData;
 
 // Forge client setup
 public class ClientSetup {
     private static final Identifier THROWN_ITEM_ID =
             Identifier.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
+
+    private static final Identifier THROWN_TNT_ID =
+            Identifier.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "thrown_primed_tnt");
 
     public static void doClientSetup() {
         // Start client systems
@@ -31,18 +36,32 @@ public class ClientSetup {
 
     // Register entity renderer using a lookup by id (avoids null field use)
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        final EntityType<?> anyType = ForgeRegistries.ENTITY_TYPES.getValue(THROWN_ITEM_ID);
-        if (anyType == null) {
+        // Register projectile renderer
+        final EntityType<?> anyProjectileType = ForgeRegistries.ENTITY_TYPES.getValue(THROWN_ITEM_ID);
+        if (anyProjectileType == null) {
             VRThrowingExtensions.log.error("Entity type not found during renderer registration: {}", THROWN_ITEM_ID);
             return; // Avoid inserting a null key
         }
 
         // Narrow the type in the smallest possible scope
         @SuppressWarnings("unchecked")
-        final EntityType<ThrownProjectileEntity> type = (EntityType<ThrownProjectileEntity>) anyType;
+        final EntityType<ThrownProjectileEntity> projectileType = (EntityType<ThrownProjectileEntity>) anyProjectileType;
 
-        event.registerEntityRenderer(type, ThrownItemRenderer::new);
+        event.registerEntityRenderer(projectileType, ThrownItemRenderer::new);
+
+        // Register thrown primed TNT renderer
+        final EntityType<?> anyTNTType = ForgeRegistries.ENTITY_TYPES.getValue(THROWN_TNT_ID);
+        if (anyTNTType == null) {
+            VRThrowingExtensions.log.error("Entity type not found during renderer registration: {}", THROWN_TNT_ID);
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        final EntityType<ThrownTNTEntity> tntType = (EntityType<ThrownTNTEntity>) anyTNTType;
+
+        event.registerEntityRenderer(tntType, ThrownTNTRenderer::new);
     }
+
 
     // Process incoming packets
     public static void handleNetworkPacket(FriendlyByteBuf buffer) {
