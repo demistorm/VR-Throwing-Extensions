@@ -146,12 +146,13 @@ public class ThrowableItemsScreen extends Screen {
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         renderBackground(context);
-        super.render(context, mouseX, mouseY, delta);
 
         // Render the item list after background and other widgets
         if (itemList != null) {
             itemList.render(context, mouseX, mouseY, delta);
         }
+
+        super.render(context, mouseX, mouseY, delta);
 
         // Title at top
         context.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF);
