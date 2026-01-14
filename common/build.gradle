@@ -10,8 +10,11 @@ architectury {
 
 // Loom configuration for the common module
 loom {
-    // No access widener needed - we use only public Minecraft APIs and Vivecraft API
-    // This keeps our mod compatible across all loaders without special access
+    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
+    def aw = file("src/main/resources/vr-throwing-extensions.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
 }
 
 repositories {
