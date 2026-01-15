@@ -156,23 +156,18 @@ public class ThrowableItemsScreen extends Screen {
         }
 
         // Title at top
-        context.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF);
+        context.drawCenteredString(font, title, width / 2, 10, 0xFFFFFFFF);
 
         // Label for text input
-        context.drawString(font, "Add Item ID:", 20, 28, 0xFFFFFF);
+        context.drawString(font, "Add Item ID:", 20, 28, 0xFFFFFFFF);
 
         // Label for item list
-        context.drawString(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFF);
+        context.drawString(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFFFF);
 
         // Show count of items
-        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xAAAAAA);
+        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xFFAAAAAA);
     }
 
-    @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
-        // Let the screen handle mouse events normally
-        return super.mouseClicked(mouseButtonEvent, bl);
-    }
 
     @Override
     public boolean keyPressed(KeyEvent keyEvent) {
@@ -235,12 +230,12 @@ public class ThrowableItemsScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics context, int index, int y, boolean hovered, float partialTick) {
-                // Get the list bounds from parent
-                int x = ItemListWidget.this.getX();
-                int width = ItemListWidget.this.getRowWidth();
-                int mouseX = (int) (ItemListWidget.this.minecraft.mouseHandler.xpos() * (double)ItemListWidget.this.minecraft.getWindow().getGuiScaledWidth() / (double)ItemListWidget.this.minecraft.getWindow().getScreenWidth());
-                int mouseY = (int) (ItemListWidget.this.minecraft.mouseHandler.ypos() * (double)ItemListWidget.this.minecraft.getWindow().getGuiScaledHeight() / (double)ItemListWidget.this.minecraft.getWindow().getScreenHeight());
+            public void renderContent(GuiGraphics context, int mouseX, int mouseY, boolean isHovering, float delta) {
+                // Get entry position from instance methods
+                int x = this.getX();
+                int y = this.getY();
+                int width = this.getWidth();
+                int height = this.getHeight();
 
                 int columnWidth = width / 2;
 
@@ -251,11 +246,11 @@ public class ThrowableItemsScreen extends Screen {
                     // Truncate if too long
                     leftDisplay = font.plainSubstrByWidth(leftItem, columnWidth - 30) + "...";
                 }
-                context.drawString(font, leftDisplay, x + 5, y + 4, 0xFFFFFF);
+                context.drawString(font, leftDisplay, x + 5, y + 4, 0xFFFFFFFF);
 
                 // Position and render left remove button
                 leftRemoveButton.setPosition(x + columnWidth - 20, y + 1);
-                leftRemoveButton.render(context, mouseX, mouseY, partialTick);
+                leftRemoveButton.render(context, mouseX, mouseY, delta);
 
                 // Right column (if exists)
                 if (rightItem != null) {
@@ -264,22 +259,19 @@ public class ThrowableItemsScreen extends Screen {
                     if (rightTextWidth > columnWidth - 25) {
                         rightDisplay = font.plainSubstrByWidth(rightItem, columnWidth - 30) + "...";
                     }
-                    context.drawString(font, rightDisplay, x + columnWidth + 5, y + 4, 0xFFFFFF);
+                    context.drawString(font, rightDisplay, x + columnWidth + 5, y + 4, 0xFFFFFFFF);
                     rightRemoveButton.setPosition(x + width - 20, y + 1);
-                    rightRemoveButton.render(context, mouseX, mouseY, partialTick);
+                    rightRemoveButton.render(context, mouseX, mouseY, delta);
                 }
             }
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
-                // Extract coordinates from event
-                double mouseX = mouseButtonEvent.x();
-                double mouseY = mouseButtonEvent.y();
-
-                if (leftRemoveButton.mouseClicked(mouseButtonEvent, bl)) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
+                // Forward click events to buttons
+                if (leftRemoveButton.mouseClicked(event, isDoubleClick)) {
                     return true;
                 }
-                if (rightRemoveButton != null && rightRemoveButton.mouseClicked(mouseButtonEvent, bl)) {
+                if (rightRemoveButton != null && rightRemoveButton.mouseClicked(event, isDoubleClick)) {
                     return true;
                 }
                 return false;
