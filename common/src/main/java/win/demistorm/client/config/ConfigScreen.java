@@ -7,6 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
 import win.demistorm.ConfigHelper;
 import win.demistorm.WeaponEffectType;
+import win.demistorm.effects.ProjectileEffect;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -94,6 +96,9 @@ public final class ConfigScreen {
                                 // Reset ClientOnlyConfig to defaults
                                 ClientOnlyConfig.ACTIVE.bloodEffect = true;
                                 ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
+
+                                // Reset projectile items to defaults
+                                ProjectileEffect.resetProjectileItems();
 
                                 // Update button messages immediately
                                 if (weaponEffectButton != null) {

@@ -203,14 +203,14 @@ public final class ProjectileEffect {
             // Determine if crouch modifier is active based on config
             boolean crouchModifierActive = switch (ConfigHelper.ACTIVE.crouchBehaviorProjectiles) {
                 case NORMAL -> playerCrouched;       // Crouch activates the feature
-                case INVERTED -> !playerCrouched;   // Not crouching activates the feature
+                case INVERTED -> !playerCrouched;    // Not crouching activates the feature
             };
 
-            // Default throw (no modifiers) → Vanilla projectile behavior
+            // Default throw (no modifiers) = Vanilla projectile behavior
             if (!useBindHeld && !crouchModifierActive) {
                 return ThrowBehavior.VANILLA_PROJECTILE;
             }
-            // Any modifier held → Force custom projectile
+            // Any modifier held = Force custom projectile
             if (useBindHeld || crouchModifierActive) {
                 return useBindHeld && crouchModifierActive ?
                     ThrowBehavior.CUSTOM_PROJECTILE_WHOLE_STACK :
@@ -281,8 +281,6 @@ public final class ProjectileEffect {
         }
     }
 
-    // Public API methods for config screen integration
-
     // Get current projectile items as a list
     public static List<String> getProjectileItemsList() {
         List<String> items = new ArrayList<>();
@@ -329,9 +327,12 @@ public final class ProjectileEffect {
         loadProjectileItems();
     }
 
-    // Reload configuration (for server commands etc.)
-    public static void reloadConfig() {
-        loadProjectileItemsFromConfig();
+    // Reset projectile items to defaults
+    public static void resetProjectileItems() {
+        // Get default items from a fresh config instance
+        ProjectileConfig defaultConfig = new ProjectileConfig();
+        setProjectileItemsList(defaultConfig.projectile_items);
+        VRThrowingExtensions.log.info("[ProjectileEffect] Reset projectile items to defaults ({} items)", defaultConfig.projectile_items.size());
     }
 
     private ProjectileEffect() {}
