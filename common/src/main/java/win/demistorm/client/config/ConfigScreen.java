@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import win.demistorm.ConfigHelper;
 import win.demistorm.WeaponEffectType;
+import win.demistorm.effects.ProjectileEffect;
 
 // Settings menu
 public final class ConfigScreen {
@@ -59,6 +60,9 @@ public final class ConfigScreen {
                                         // Reset ClientOnlyConfig to defaults
                                         ClientOnlyConfig.ACTIVE.bloodEffect = true;
                                         ClientOnlyConfig.write(ClientOnlyConfig.ACTIVE);
+
+                                        // Reset projectile items to defaults
+                                        ProjectileEffect.resetProjectileItems();
 
                                         // Update button messages immediately
                                         if (weaponEffectButton != null) {
