@@ -85,7 +85,6 @@ public final class CompatScreen {
 
         @Override
         public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-            renderBackground(context, mouseX, mouseY, delta);
             super.render(context, mouseX, mouseY, delta);
             // Draw title at top
             context.drawCenteredString(font, title, width / 2, 20, 0xFFFFFF);
