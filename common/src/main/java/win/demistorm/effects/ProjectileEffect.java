@@ -334,5 +334,13 @@ public final class ProjectileEffect {
         loadProjectileItemsFromConfig();
     }
 
+    // Reset projectile items to defaults
+    public static void resetProjectileItems() {
+        // Get default items from a fresh config instance
+        ProjectileConfig defaultConfig = new ProjectileConfig();
+        setProjectileItemsList(defaultConfig.projectile_items);
+        VRThrowingExtensions.log.info("[ProjectileEffect] Reset projectile items to defaults ({} items)", defaultConfig.projectile_items.size());
+    }
+
     private ProjectileEffect() {}
 }
