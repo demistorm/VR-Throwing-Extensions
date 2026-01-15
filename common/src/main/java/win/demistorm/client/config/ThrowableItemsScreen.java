@@ -155,16 +155,16 @@ public class ThrowableItemsScreen extends Screen {
         }
 
         // Title at top
-        context.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF);
+        context.drawCenteredString(font, title, width / 2, 10, 0xFFFFFFFF);
 
         // Label for text input
-        context.drawString(font, "Add Item ID:", 20, 28, 0xFFFFFF);
+        context.drawString(font, "Add Item ID:", 20, 28, 0xFFFFFFFF);
 
         // Label for item list
-        context.drawString(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFF);
+        context.drawString(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFFFF);
 
         // Show count of items
-        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xAAAAAA);
+        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xFFAAAAAA);
     }
 
     @Override
@@ -244,7 +244,7 @@ public class ThrowableItemsScreen extends Screen {
                     // Truncate if too long
                     leftDisplay = font.plainSubstrByWidth(leftItem, columnWidth - 30) + "...";
                 }
-                context.drawString(font, leftDisplay, x + 5, y + 4, 0xFFFFFF);
+                context.drawString(font, leftDisplay, x + 5, y + 4, 0xFFFFFFFF);
 
                 // Position and render left remove button
                 leftRemoveButton.setPosition(x + columnWidth - 20, y + 1);
@@ -257,7 +257,7 @@ public class ThrowableItemsScreen extends Screen {
                     if (rightTextWidth > columnWidth - 25) {
                         rightDisplay = font.plainSubstrByWidth(rightItem, columnWidth - 30) + "...";
                     }
-                    context.drawString(font, rightDisplay, x + columnWidth + 5, y + 4, 0xFFFFFF);
+                    context.drawString(font, rightDisplay, x + columnWidth + 5, y + 4, 0xFFFFFFFF);
                     rightRemoveButton.setPosition(x + width - 20, y + 1);
                     rightRemoveButton.render(context, mouseX, mouseY, delta);
                 }
