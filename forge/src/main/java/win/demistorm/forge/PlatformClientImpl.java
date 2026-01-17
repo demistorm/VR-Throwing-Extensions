@@ -1,7 +1,9 @@
 package win.demistorm.forge;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -9,30 +11,38 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = "vr_throwing_extensions", value = Dist.CLIENT)
 public class PlatformClientImpl {
 
-    // Cancel block breaking while throwing
+    // Cancel interactions at the input level (before they become interaction events)
+    // This properly prevents packets from being sent to the server in multiplayer
     @SubscribeEvent
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (win.demistorm.client.ThrowHelper.cancellingBreaks()) {
-            win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Block breaking cancelled due to throwing motion");
+    public static void onInteractionKeyMappingTriggered(InputEvent.InteractionKeyMappingTriggered event) {
+        // Check if this is a left-click (attack/break) or right-click (use/place)
+        boolean isLeftClick = event.getKeyMapping() == Minecraft.getInstance().options.keyAttack;
+        boolean isRightClick = event.getKeyMapping() == Minecraft.getInstance().options.keyUse;
+
+        if (isLeftClick && win.demistorm.client.ThrowHelper.cancellingBreaks()) {
+            win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Block breaking cancelled at input level due to throwing motion");
+            event.setCanceled(true);
+        }
+
+        if (isRightClick && win.demistorm.client.ThrowHelper.cancellingUse()) {
+            win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Block placing/item use cancelled at input level due to throwing motion");
             event.setCanceled(true);
         }
     }
 
-    // Cancel block placing while throwing
+    // Suppress arm swing when place/use is held during throwing
+    // This is needed on NeoForge/Forge because InputEvent fires after the swing already started
     @SubscribeEvent
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (win.demistorm.client.ThrowHelper.cancellingUse()) {
-            win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Block placing cancelled due to throwing motion");
-            event.setCanceled(true);
-        }
-    }
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        // Only run on POST phase to match the EventBus 7 behavior
+        if (event.phase != TickEvent.Phase.END) return;
 
-    // Cancel item use while throwing
-    @SubscribeEvent
-    public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (win.demistorm.client.ThrowHelper.cancellingUse()) {
-            win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Item use cancelled due to throwing motion");
-            event.setCanceled(true);
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        // Only suppress when throwing is active AND place/use key is held
+        if (win.demistorm.client.ThrowHelper.cancellingUse() && mc.options.keyUse.isDown()) {
+            mc.player.swingingArm = null;
         }
     }
 }
