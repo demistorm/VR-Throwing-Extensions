@@ -34,6 +34,7 @@ api_keys.txt
 CLAUDE.md
 .architectury-transformer
 .claude
+devTest/
 
 # Loom specific
 .loom-cache/
