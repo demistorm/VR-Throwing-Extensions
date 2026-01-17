@@ -40,6 +40,8 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
 
     @Override
     public void extractRenderState(ThrownTNTEntity entity, ThrownTNTRenderState state, float tickDelta) {
+        super.extractRenderState(entity, state, tickDelta);
+
         state.velocity = entity.getDeltaMovement();
         state.age = entity.tickCount + tickDelta;
         state.handRollDeg = entity.getHandRoll();
@@ -64,6 +66,11 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
                        PoseStack matrices,
                        SubmitNodeCollector collector,
                        CameraRenderState cameraState) {
+        super.submit(state, matrices, collector, cameraState);
+
+        if (state.item.isEmpty()) {
+            return;
+        }
 
         matrices.pushPose();
 
@@ -101,7 +108,6 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 
         matrices.popPose();
-        super.submit(state, matrices, collector, cameraState);
     }
 
     public static class ThrownTNTRenderState extends EntityRenderState {
