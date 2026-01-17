@@ -55,12 +55,6 @@ public class PlatformImpl {
         return FMLPaths.CONFIGDIR.get();
     }
 
-    // Get Minecraft version (has issues on 1.21.10 NeoForge but I don't need it currently anyway
-//    @SuppressWarnings("unused")
-//    public static String getMinecraftVersion() {
-//        return net.neoforged.fml.loading.FMLLoader.versionInfo().mcVersion();
-//    }
-
     // Check if Forge-like (true for NeoForge)
     @SuppressWarnings("unused")
     public static boolean isForgeLike() {
@@ -143,7 +137,7 @@ public class PlatformImpl {
     // Register input events (handled in client code)
     @SuppressWarnings("unused")
     public static void registerClientInputEventHandlers() {
-        // Implemented in PlatformClientImpl with @SubscribeEvent
+        PlatformClientImpl.register();
     }
 
     // Register packet handlers (handled in main mod class)
