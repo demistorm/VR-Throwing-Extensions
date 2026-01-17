@@ -143,7 +143,7 @@ public class PlatformImpl {
     // Register input events (handled in client code)
     @SuppressWarnings("unused")
     public static void registerClientInputEventHandlers() {
-        // Implemented in PlatformClientImpl with @SubscribeEvent
+        PlatformClientImpl.register();
     }
 
     // Register packet handlers (handled in main mod class)
