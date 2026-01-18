@@ -6,6 +6,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import win.demistorm.command.ItemInfoCommand;
+import win.demistorm.effects.ProjectileEffect;
 import win.demistorm.network.Network;
 import win.demistorm.network.TNTServer;
 
@@ -33,6 +34,9 @@ public class VRThrowingExtensions {
 
 		// Load or create server config file
 		ConfigHelper.loadOrCreateServerConfig();
+
+		// Load or create projectile items config file
+		ProjectileEffect.loadOrCreateConfig();
 
 		// Start the networking system
 		Network.initialize();

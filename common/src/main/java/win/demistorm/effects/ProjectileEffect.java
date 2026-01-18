@@ -48,6 +48,12 @@ public final class ProjectileEffect {
 
     // Load projectile items from config
     static {
+        // Static initializer for in-memory data only
+        // File creation happens during mod initialization via loadOrCreateConfig()
+    }
+
+    // Load or create config file (call during mod initialization)
+    public static void loadOrCreateConfig() {
         loadProjectileItems();
     }
 
