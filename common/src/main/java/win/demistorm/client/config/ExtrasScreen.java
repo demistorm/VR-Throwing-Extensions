@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import win.demistorm.ConfigHelper;
+import win.demistorm.client.VRThrowingExtensionsClient;
 
 // Extras configuration menu
 public final class ExtrasScreen {
@@ -146,6 +147,9 @@ public final class ExtrasScreen {
                                             ConfigHelper.ACTIVE.placeBlocksOnThrow = ConfigHelper.CLIENT.placeBlocksOnThrow;
                                             ConfigHelper.ACTIVE.onlyPlaceLights = ConfigHelper.CLIENT.onlyPlaceLights;
                                             ConfigHelper.ACTIVE.crouchBehaviorPlaceBlocks = ConfigHelper.CLIENT.crouchBehaviorPlaceBlocks;
+                                        } else {
+                                            // Send config to server for non-authoritative mode
+                                            VRThrowingExtensionsClient.sendPlayerConfigToServer();
                                         }
                                         client.setScreen(parent);
                                     })

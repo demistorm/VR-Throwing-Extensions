@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import win.demistorm.ConfigHelper;
+import win.demistorm.client.VRThrowingExtensionsClient;
 
 // Mod compatibility configuration menu
 public final class CompatScreen {
@@ -76,6 +77,9 @@ public final class CompatScreen {
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.immersiveMCThrowables = ConfigHelper.CLIENT.immersiveMCThrowables;
                                             ConfigHelper.ACTIVE.throwConflictingItems = ConfigHelper.CLIENT.throwConflictingItems;
+                                        } else {
+                                            // Send config to server for non-authoritative mode
+                                            VRThrowingExtensionsClient.sendPlayerConfigToServer();
                                         }
                                         client.setScreen(parent);
                                     })

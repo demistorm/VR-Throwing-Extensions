@@ -49,7 +49,7 @@ public class VRThrowingExtensionsClient {
 	}
 
 	// Send player config to server (only if non-authoritative)
-	private static void sendPlayerConfigToServer() {
+	public static void sendPlayerConfigToServer() {
 		if (!ConfigHelper.receivedServerConfig()) {
 			PlayerConfigData data = new PlayerConfigData(
 				ConfigHelper.CLIENT.weaponEffect,
