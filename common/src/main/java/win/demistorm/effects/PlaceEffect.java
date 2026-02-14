@@ -10,7 +10,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import win.demistorm.ConfigHelper;
 import win.demistorm.VRThrowingExtensions;
 
@@ -19,16 +18,7 @@ import java.util.Set;
 // Handles block placement when blocks are thrown
 public final class PlaceEffect {
 
-    public static class BlockThrowResult {
-        public final boolean shouldHandle;
-        public final boolean shouldPlaceBlock;
-        public final boolean throwWholeStack;
-
-        public BlockThrowResult(boolean shouldHandle, boolean shouldPlaceBlock, boolean throwWholeStack) {
-            this.shouldHandle = shouldHandle;
-            this.shouldPlaceBlock = shouldPlaceBlock;
-            this.throwWholeStack = throwWholeStack;
-        }
+    public record BlockThrowResult(boolean shouldHandle, boolean shouldPlaceBlock, boolean throwWholeStack) {
     }
 
     // Light blocks that can be placed when "Only Place Lights" is enabled
@@ -40,9 +30,12 @@ public final class PlaceEffect {
             Items.REDSTONE_TORCH
     );
 
-    public static BlockThrowResult determineBlockThrowLogic(ItemStack stack, boolean useBindHeld, boolean playerCrouched) {
+    public static BlockThrowResult determineBlockThrowLogic(ItemStack stack, net.minecraft.world.entity.player.Player player, boolean useBindHeld, boolean playerCrouched) {
+        // Get active config
+        ConfigHelper.Data config = ConfigHelper.getActiveConfig(player.getUUID());
+
         // Check if feature is enabled
-        if (!ConfigHelper.ACTIVE.placeBlocksOnThrow) {
+        if (!config.placeBlocksOnThrow) {
             return new BlockThrowResult(false, false, false);
         }
 
@@ -52,7 +45,7 @@ public final class PlaceEffect {
         }
 
         // Check crouch behavior based on config
-        boolean shouldFeatureBeActive = switch (ConfigHelper.ACTIVE.crouchBehaviorPlaceBlocks) {
+        boolean shouldFeatureBeActive = switch (config.crouchBehaviorPlaceBlocks) {
             case NORMAL -> !playerCrouched;    // Feature active when NOT crouching
             case INVERTED -> playerCrouched;   // Feature active when crouching
         };
@@ -62,7 +55,7 @@ public final class PlaceEffect {
         }
 
         // Check if only lights mode is enabled and item isn't a light source
-        if (ConfigHelper.ACTIVE.onlyPlaceLights && !LIGHT_BLOCKS.contains(stack.getItem())) {
+        if (config.onlyPlaceLights && !LIGHT_BLOCKS.contains(stack.getItem())) {
             return new BlockThrowResult(false, false, false);
         }
 
@@ -71,7 +64,7 @@ public final class PlaceEffect {
         return new BlockThrowResult(true, shouldPlace, false);
     }
 
-    public static boolean placeBlock(Level level, Player player, ItemStack stack, BlockHitResult hitResult, Vec3 impactPos) {
+    public static boolean placeBlock(Level level, Player player, ItemStack stack, BlockHitResult hitResult) {
         if (isPlaceableBlock(stack)) {
             return false;
         }

@@ -10,6 +10,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -52,12 +54,6 @@ public class PlatformImpl {
     @SuppressWarnings("unused")
     public static Path getConfigFolder() {
         return FMLPaths.CONFIGDIR.get();
-    }
-
-    // Get Minecraft version
-    @SuppressWarnings("unused")
-    public static String getMinecraftVersion() {
-        return net.neoforged.fml.loading.FMLLoader.versionInfo().mcVersion();
     }
 
     // Check if Forge-like (true for NeoForge)
@@ -155,5 +151,11 @@ public class PlatformImpl {
     @SuppressWarnings("unused")
     public static void registerS2CPacketHandler(ResourceLocation packetId, Consumer<win.demistorm.Platform.PacketContext> handler) {
         // Registration happens in main mod class with RegisterPayloadHandlersEvent
+    }
+
+    // Register client tick event
+    @SuppressWarnings("unused")
+    public static void registerClientTickEvent(Runnable runnable) {
+        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> runnable.run());
     }
 }

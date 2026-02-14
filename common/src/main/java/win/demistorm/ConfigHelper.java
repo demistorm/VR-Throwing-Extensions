@@ -9,6 +9,8 @@ import win.demistorm.network.Network;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 // Handles server config file and syncs settings to players
 public final class ConfigHelper {
@@ -21,6 +23,7 @@ public final class ConfigHelper {
 
     // Config settings
     public static final class Data {
+        public boolean serverAuthoritative = true; // Server config overrides all players (true is default)
         public WeaponEffectType weaponEffect = WeaponEffectType.BOOMERANG; // What weapons do when thrown (boomerang is default)
         public boolean aimAssist = true;       // Aim assist is on by default
         public boolean throwableProjectiles = true; // Throwable projectiles system is on by default
@@ -42,6 +45,12 @@ public final class ConfigHelper {
     // Current settings (server config when online, client when offline)
     public static final Data ACTIVE      = new Data();
 
+    // Player-specific config storage (for non-authoritative servers)
+    private static final ConcurrentHashMap<UUID, Data> playerConfigs = new ConcurrentHashMap<>();
+
+    // Flag to track if client received server config
+    private static boolean receivedServerConfig = false;
+
     // Convert config to/from json
     private static String toJson(Data d)      { return GSON.toJson(d); }
     private static Data   fromJson(String js) { return GSON.fromJson(js, Data.class); }
@@ -49,9 +58,7 @@ public final class ConfigHelper {
     // Load or create server config file
     public static void loadOrCreateServerConfig() {
         Data d = read();
-        if (!Files.exists(FILE)) {
-            write(d); // Create file with defaults only if it doesn't exist
-        }
+        write(d); // Always write after load (adds new fields to old configs)
         copyInto(d, ACTIVE);
     }
 
@@ -80,6 +87,7 @@ public final class ConfigHelper {
     }
 
     public static void copyInto(Data from, Data to) {
+        to.serverAuthoritative = from.serverAuthoritative;
         to.weaponEffect = from.weaponEffect;
         to.aimAssist = from.aimAssist;
         to.throwableProjectiles = from.throwableProjectiles;
@@ -101,12 +109,14 @@ public final class ConfigHelper {
     // Got config from server
     public static void clientReceivedRemote(String json) {
         copyInto(fromJson(json), ACTIVE);
+        receivedServerConfig = true;
         VRThrowingExtensions.log.debug("Received remote config: {}", json);
     }
 
     // Player left server
      public static void clientDisconnected() {
         copyInto(CLIENT, ACTIVE);
+        resetServerConfigFlag();
     }
 
     // Set throwable projectiles enabled state (for UI integration)
@@ -161,6 +171,26 @@ public final class ConfigHelper {
         // Also update ACTIVE if not connected to server
         copyInto(CLIENT, ACTIVE);
         VRThrowingExtensions.log.debug("[ConfigHelper] Set crouch behavior place blocks: {}", behavior);
+    }
+
+    // Get active config for a player (server or per-player based on serverAuthoritative)
+    public static Data getActiveConfig(UUID playerUUID) {
+        if (ACTIVE.serverAuthoritative) {
+            return ACTIVE;
+        }
+        return playerConfigs.getOrDefault(playerUUID, ACTIVE);
+    }
+
+    public static void storePlayerConfig(UUID playerUUID, Data config) {
+        playerConfigs.put(playerUUID, config);
+    }
+
+    public static boolean receivedServerConfig() {
+        return receivedServerConfig;
+    }
+
+    public static void resetServerConfigFlag() {
+        receivedServerConfig = false;
     }
 
 }

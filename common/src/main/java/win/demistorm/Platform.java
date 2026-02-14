@@ -132,7 +132,12 @@ public class Platform {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
-        // Simple context for packet handlers
+    // Register client-side tick event
+    @ExpectPlatform
+    public static void registerClientTickEvent(Runnable runnable) {
+        throw new RuntimeException("@ExpectPlatform should have replaced this");
+    }
+
         // Gives the player who sent the packet and the packet data
         public record PacketContext(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
     }
