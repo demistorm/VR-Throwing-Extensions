@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import win.demistorm.ConfigHelper;
 import win.demistorm.WeaponEffectType;
 import win.demistorm.effects.ProjectileEffect;
+import win.demistorm.client.VRThrowingExtensionsClient;
 
 // Settings menu
 public final class ConfigScreen {
@@ -139,6 +140,9 @@ public final class ConfigScreen {
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
                                             ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
+                                        } else {
+                                            // Send config to server for non-authoritative mode
+                                            VRThrowingExtensionsClient.sendPlayerConfigToServer();
                                         }
                                         client.setScreen(parent);
                                     })
