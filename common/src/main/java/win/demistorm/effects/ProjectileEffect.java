@@ -3,15 +3,12 @@ package win.demistorm.effects;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -20,7 +17,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.resources.Identifier;
 import win.demistorm.ConfigHelper;
 import win.demistorm.ModCompat;
-import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
 
 import java.io.IOException;
@@ -181,12 +177,12 @@ public final class ProjectileEffect {
     }
 
     // Check if an item should use projectile interception
-    public static boolean isProjectileItem(ItemStack stack, boolean playerCrouched, boolean placePressed) {
+    public static boolean isProjectileItem(ItemStack stack, Player player, boolean playerCrouched, boolean placePressed) {
         if (!ConfigHelper.ACTIVE.throwableProjectiles) {
             return false;
         }
 
-        if (ModCompat.throwingDisabled(stack, playerCrouched, placePressed)) {
+        if (ModCompat.throwingDisabled(stack, player, playerCrouched, placePressed)) {
             return false;
         }
 
@@ -208,12 +204,13 @@ public final class ProjectileEffect {
     }
 
     // Determine throw behavior based on keybinds and item type
-    public static ThrowBehavior determineThrowBehavior(ItemStack stack, boolean useBindHeld, boolean playerCrouched) {
-        boolean isProjectile = isProjectileItem(stack, playerCrouched, useBindHeld);
+    public static ThrowBehavior determineThrowBehavior(ItemStack stack, Player player, boolean useBindHeld, boolean playerCrouched) {
+        boolean isProjectile = isProjectileItem(stack, player, playerCrouched, useBindHeld);
 
         if (isProjectile) {
             // Determine if crouch modifier is active based on config
-            boolean crouchModifierActive = switch (ConfigHelper.ACTIVE.crouchBehaviorProjectiles) {
+            ConfigHelper.Data config = ConfigHelper.getActiveConfig(player.getUUID());
+            boolean crouchModifierActive = switch (config.crouchBehaviorProjectiles) {
                 case NORMAL -> playerCrouched;       // Crouch activates the feature
                 case INVERTED -> !playerCrouched;    // Not crouching activates the feature
             };

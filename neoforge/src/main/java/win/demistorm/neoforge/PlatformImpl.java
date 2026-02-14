@@ -11,6 +11,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -150,5 +151,11 @@ public class PlatformImpl {
     @SuppressWarnings("unused")
     public static void registerS2CPacketHandler(Identifier packetId, Consumer<win.demistorm.Platform.PacketContext> handler) {
         // Registration happens in main mod class with RegisterPayloadHandlersEvent
+    }
+
+    // Register client tick event
+    @SuppressWarnings("unused")
+    public static void registerClientTickEvent(Runnable runnable) {
+        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> runnable.run());
     }
 }

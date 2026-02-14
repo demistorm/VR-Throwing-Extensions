@@ -160,4 +160,10 @@ public class PlatformImpl {
         // Register client input events using EventBus 7 API
         PlatformClientImpl.register();
     }
+
+    // Register client tick event
+    @SuppressWarnings("unused")
+    public static void registerClientTickEvent(Runnable runnable) {
+        net.minecraftforge.event.TickEvent.ClientTickEvent.Post.BUS.addListener(event -> runnable.run());
+    }
 }

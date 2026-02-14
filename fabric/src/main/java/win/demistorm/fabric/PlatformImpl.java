@@ -3,6 +3,7 @@ package win.demistorm.fabric;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -157,5 +158,11 @@ public class PlatformImpl {
     @SuppressWarnings("unused")
     public static void registerClientInputEventHandlers() {
         // Implemented in PlatformClientImpl
+    }
+
+    // Register client tick event
+    @SuppressWarnings("unused")
+    public static void registerClientTickEvent(Runnable runnable) {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> runnable.run());
     }
 }

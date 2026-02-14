@@ -266,7 +266,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                     return;
                 }
 
-                if (ConfigHelper.ACTIVE.weaponEffect == WeaponEffectType.BOOMERANG) {
+                ConfigHelper.Data config = ConfigHelper.getActiveConfig(getOwner().getUUID());
+                if (config.weaponEffect == WeaponEffectType.BOOMERANG) {
                     boolean shouldBounce = BoomerangEffect.canBounce(getItem().getItem())
                             && !hasBounced && !reachedOriginOnce;
                     if (shouldBounce) {
@@ -276,7 +277,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                         this.entityData.set(BOUNCE_ACTIVE, true);
                         return;
                     }
-                } else if (ConfigHelper.ACTIVE.weaponEffect == WeaponEffectType.EMBED) {
+                } else if (config.weaponEffect == WeaponEffectType.EMBED) {
                     if (damageDealt) {
                         EmbeddingEffect.startEmbedding(this, entityHit, hitPos);
                         return;
@@ -294,7 +295,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                 net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
                 Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
 
-                if (PlaceEffect.placeBlock(level(), getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit, impactPos)) {
+                if (PlaceEffect.placeBlock(level(), getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit)) {
                     // Block was successfully placed, consume the item
                     if (stackSize > 1) {
                         stackSize--;
