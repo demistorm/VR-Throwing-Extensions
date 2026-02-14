@@ -51,10 +51,17 @@ public class PlatformClientImpl implements ClientModInitializer {
         // Register thrown primed TNT renderer
         EntityRendererRegistry.register(VRThrowingExtensions.THROWN_TNT_TYPE, ThrownTNTRenderer::new);
 
+        // Handle join events (start config send timer)
+        ClientPlayConnectionEvents.JOIN.register((handler, client, sender) -> {
+            win.demistorm.client.VRThrowingExtensionsClient.startConfigSendTimer();
+            VRThrowingExtensions.log.debug("Client joined server, starting config send timer");
+        });
+
         // Handle disconnect events (restore local config)
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             ConfigHelper.clientDisconnected();
-            VRThrowingExtensions.log.debug("Client disconnected, restored local config");
+            win.demistorm.client.VRThrowingExtensionsClient.resetConfigSendTimer();
+            VRThrowingExtensions.log.debug("Client disconnected, restored local config and reset timer");
         });
     }
 

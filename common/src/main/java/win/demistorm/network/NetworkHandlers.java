@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
+import win.demistorm.ConfigHelper;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.ThrownTNTEntity;
@@ -28,19 +29,19 @@ public final class NetworkHandlers {
         if (player == null || !player.isAlive()) return;
 
         ItemStack heldStack = player.getMainHandItem();
-        if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack, data.playerCrouched(), data.useBindHeld())) return;
+        if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack, player, data.playerCrouched(), data.useBindHeld())) return;
 
         // PlaceEffect logic
-        PlaceEffect.BlockThrowResult blockResult = PlaceEffect.determineBlockThrowLogic(heldStack, data.useBindHeld(), data.playerCrouched());
+        PlaceEffect.BlockThrowResult blockResult = PlaceEffect.determineBlockThrowLogic(heldStack, player, data.useBindHeld(), data.playerCrouched());
 
-        if (blockResult.shouldHandle) {
+        if (blockResult.shouldHandle()) {
             // PlaceEffect will handle this throw
             Vec3 origin = new Vec3(data.posX(), data.posY(), data.posZ());
             Vec3 velocity = new Vec3(data.velX(), data.velY(), data.velZ());
 
             ThrownProjectileEntity proj = new ThrownProjectileEntity(
-                player.level(), player, heldStack, blockResult.throwWholeStack,
-                data.useBindHeld(), data.playerCrouched(), blockResult.shouldPlaceBlock
+                player.level(), player, heldStack, blockResult.throwWholeStack(),
+                data.useBindHeld(), data.playerCrouched(), blockResult.shouldPlaceBlock()
             );
 
             // Make sure item syncs properly on first spawn
@@ -52,7 +53,7 @@ public final class NetworkHandlers {
             proj.setHandRoll(data.rollDeg());
 
             log.debug("[Server] Spawning block placement proj {} with item {} (placement: {})",
-                proj.getId(), proj.getItem(), blockResult.shouldPlaceBlock);
+                proj.getId(), proj.getItem(), blockResult.shouldPlaceBlock());
 
             player.level().addFreshEntity(proj);
 
@@ -63,7 +64,7 @@ public final class NetworkHandlers {
             }
 
             // Update player inventory
-            if (blockResult.throwWholeStack) {
+            if (blockResult.throwWholeStack()) {
                 player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             } else {
                 if (heldStack.getCount() > 1) heldStack.shrink(1);
@@ -74,11 +75,10 @@ public final class NetworkHandlers {
 
         // If PlaceEffect didn't handle it, use existing projectile logic
         ProjectileEffect.ThrowBehavior behavior = ProjectileEffect.determineThrowBehavior(
-            heldStack, data.useBindHeld(), data.playerCrouched());
+            heldStack, player, data.useBindHeld(), data.playerCrouched());
 
         Vec3 origin = new Vec3(data.posX(), data.posY(), data.posZ());
         Vec3 velocity = new Vec3(data.velX(), data.velY(), data.velZ());
-        boolean throwWholeStack = (behavior == ProjectileEffect.ThrowBehavior.CUSTOM_PROJECTILE_WHOLE_STACK);
 
         switch (behavior) {
             case VANILLA_PROJECTILE -> handleVanillaProjectile(player, heldStack, data);
@@ -255,8 +255,32 @@ public final class NetworkHandlers {
         log.debug("[Network] Received config sync packet for player: {}", player.getName().getString());
     }
 
+    // Got player config from client (non-authoritative mode)
+    public static void handlePlayerConfig(Player player, PlayerConfigData data) {
+        if (!(player instanceof ServerPlayer)) return;
+
+        if (ConfigHelper.ACTIVE.serverAuthoritative) {
+            log.debug("[Network] Ignored player config from {} (server is authoritative)", player.getName().getString());
+            return;
+        }
+
+        // Store player config
+        ConfigHelper.Data playerConfig = new ConfigHelper.Data();
+        playerConfig.weaponEffect = data.weaponEffect();
+        playerConfig.throwableProjectiles = data.throwableProjectiles();
+        playerConfig.crouchBehaviorProjectiles = data.crouchBehaviorProjectiles();
+        playerConfig.placeBlocksOnThrow = data.placeBlocksOnThrow();
+        playerConfig.crouchBehaviorPlaceBlocks = data.crouchBehaviorPlaceBlocks();
+        playerConfig.onlyPlaceLights = data.onlyPlaceLights();
+        playerConfig.immersiveMCThrowables = data.immersiveMCThrowables();
+        playerConfig.throwConflictingItems = data.throwConflictingItems();
+
+        ConfigHelper.storePlayerConfig(player.getUUID(), playerConfig);
+        log.debug("[Network] Stored config for player: {}", player.getName().getString());
+    }
+
     // Client lit TNT with flint & steel swipe
-    public static void handleTNTLit(Player player, TNTLitData data) {
+    public static void handleTNTLit(Player player) {
         if (player == null || !player.isAlive()) return;
 
         log.debug("[Network] {} lit TNT with flint & steel", player.getName().getString());
