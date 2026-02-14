@@ -12,6 +12,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import win.demistorm.ConfigHelper;
 import win.demistorm.effects.ProjectileEffect;
+import win.demistorm.client.VRThrowingExtensionsClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,6 +121,11 @@ public class ThrowableItemsScreen extends Screen {
 
                     // Save any changes to projectile items
                     ProjectileEffect.setProjectileItemsList(projectileItems);
+
+                    if (!client.hasSingleplayerServer()) {
+                        // Send config to server for non-authoritative mode
+                        VRThrowingExtensionsClient.sendPlayerConfigToServer();
+                    }
                     client.setScreen(parent);
                 })
             .bounds(width / 2 - 100, height - 30, 200, 20)
