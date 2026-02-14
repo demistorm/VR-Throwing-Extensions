@@ -99,7 +99,7 @@ public class ThrowHelper {
             // When Attack/Destroy is pressed, start Tracking
             if (!active && attackPressed) {
                 ItemStack held = player.getMainHandItem();
-                if (ModCompat.throwingDisabled(held, player.isCrouching(), placePressed)) return;
+                if (ModCompat.throwingDisabled(held, player, player.isCrouching(), placePressed)) return;
 
                 // Check if holding TNT for special handling (only if feature enabled)
                 boolean holdingTNT = ConfigHelper.ACTIVE.throwableTNT && held.is(Items.TNT);

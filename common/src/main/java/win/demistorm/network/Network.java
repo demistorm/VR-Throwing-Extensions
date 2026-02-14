@@ -1,5 +1,7 @@
 package win.demistorm.network;
 
+import win.demistorm.ConfigHelper;
+import win.demistorm.WeaponEffectType;
 import win.demistorm.network.data.*;
 
 // Handles all networking between client and server
@@ -116,13 +118,38 @@ public class Network {
             (data, player) -> NetworkHandlers.handleConfigSync(player, data)
         );
 
+        // Player config packet (for non-authoritative servers)
+        INSTANCE.register(PlayerConfigData.class,
+            (data, buf) -> {
+                buf.writeEnum(data.weaponEffect());
+                buf.writeBoolean(data.throwableProjectiles());
+                buf.writeEnum(data.crouchBehaviorProjectiles());
+                buf.writeBoolean(data.placeBlocksOnThrow());
+                buf.writeEnum(data.crouchBehaviorPlaceBlocks());
+                buf.writeBoolean(data.onlyPlaceLights());
+                buf.writeBoolean(data.immersiveMCThrowables());
+                buf.writeBoolean(data.throwConflictingItems());
+            },
+            (buf) -> new PlayerConfigData(
+                buf.readEnum(WeaponEffectType.class),
+                buf.readBoolean(),
+                buf.readEnum(ConfigHelper.CrouchBehavior.class),
+                buf.readBoolean(),
+                buf.readEnum(ConfigHelper.CrouchBehavior.class),
+                buf.readBoolean(),
+                buf.readBoolean(),
+                buf.readBoolean()
+            ),
+            (data, player) -> NetworkHandlers.handlePlayerConfig(player, data)
+        );
+
         // TNT lit packet (client lit TNT with flint & steel swipe)
         INSTANCE.register(TNTLitData.class,
             (data, buf) -> {
                 // Empty packet, no data to write
             },
             (buf) -> new TNTLitData(),
-            (data, player) -> NetworkHandlers.handleTNTLit(player, data)
+            (data, player) -> NetworkHandlers.handleTNTLit(player)
         );
 
         // Throw lit TNT packet (client throws lit TNT with flint & steel)

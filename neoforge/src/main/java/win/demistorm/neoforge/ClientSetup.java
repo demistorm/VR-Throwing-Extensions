@@ -71,10 +71,18 @@ public class ClientSetup {
         }
     }
 
+    // Handle join events (start config send timer)
+    @SubscribeEvent
+    public static void onClientLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        win.demistorm.client.VRThrowingExtensionsClient.startConfigSendTimer();
+        VRThrowingExtensions.log.debug("NeoForge client joining server, starting config send timer");
+    }
+
     // Handle disconnect (restore local config)
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ConfigHelper.clientDisconnected();
-        VRThrowingExtensions.log.debug("NeoForge client disconnected, restored local config");
+        win.demistorm.client.VRThrowingExtensionsClient.resetConfigSendTimer();
+        VRThrowingExtensions.log.debug("NeoForge client disconnected, restored local config and reset timer");
     }
 }
