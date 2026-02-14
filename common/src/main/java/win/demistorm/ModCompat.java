@@ -1,11 +1,11 @@
 package win.demistorm;
 
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import win.demistorm.effects.ProjectileEffect;
 
 import java.util.HashSet;
@@ -27,17 +27,20 @@ public class ModCompat {
     }
 
     // Check if an item can't be thrown
-    public static boolean throwingDisabled(ItemStack stack, boolean isCrouching, boolean placePressed) {
+    public static boolean throwingDisabled(ItemStack stack, Player player, boolean isCrouching, boolean placePressed) {
         if (stack.isEmpty()) return true;
 
         Item item = stack.getItem();
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
 
+        // Get active config
+        ConfigHelper.Data config = ConfigHelper.getActiveConfig(player.getUUID());
+
         // If ImmersiveMC is loaded, check compatibility toggle
         if (IMCLoaded && immersiveMCExceptions(id)) {
             // If toggle is ON, let ImmersiveMC handle it (block this mod)
-            // If toggle is OFF and item is in projectile-items config, let this mod handle it
-            if (ConfigHelper.ACTIVE.immersiveMCThrowables) {
+            // If toggle is OFF and item is in projectile-items config, let VTE handle it
+            if (config.immersiveMCThrowables) {
                 return true;
             } else {
                 return !isThrowableProjectileItem(stack);
@@ -48,7 +51,7 @@ public class ModCompat {
         boolean isVivecraftDisabled = isVivecraftItem(stack);
         if (isVivecraftDisabled) {
             // Allow throwing if enabled, crouched and place/use held
-            if (ConfigHelper.ACTIVE.throwConflictingItems && isCrouching && placePressed) {
+            if (config.throwConflictingItems && isCrouching && placePressed) {
                 return false; // Allow throwing
             }
             return true; // Block Vivecraft items
@@ -58,7 +61,7 @@ public class ModCompat {
         boolean isBlocked = blockedItems.contains(id);
         if (isBlocked) {
             // Allow throwing if enabled, crouched and place/use held
-            if (ConfigHelper.ACTIVE.throwConflictingItems && isCrouching && placePressed) {
+            if (config.throwConflictingItems && isCrouching && placePressed) {
                 return false; // Allow throwing
             }
             return true; // Block blacklisted items
@@ -67,10 +70,9 @@ public class ModCompat {
         return false; // Item is not blocked
     }
 
-    // Items that ImmersiveMC already handles
     // Check if an item is in the throwable projectiles config
     private static boolean isThrowableProjectileItem(ItemStack stack) {
-        // Check if the item is in the projectile items list
+        // Check if item is in projectile items list
         Item item = stack.getItem();
         ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
 
@@ -96,7 +98,7 @@ public class ModCompat {
             return false;
         }
 
-        // Check if the hover name has a Vivecraft translation key
+        // Check if hover name has a Vivecraft translation key
         if (stack.getHoverName().getContents() instanceof TranslatableContents translatableContent) {
             String translationKey = translatableContent.getKey();
             return translationKey.equals("vivecraft.item.climbclaws") ||

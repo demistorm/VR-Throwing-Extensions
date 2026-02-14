@@ -11,10 +11,18 @@ import static win.demistorm.VRThrowingExtensions.log;
 @Mod.EventBusSubscriber(modid = "vr_throwing_extensions", value = Dist.CLIENT)
 public class ForgeClientEvents {
 
+    // Handle join events (start config send timer)
+    @SubscribeEvent
+    public static void onClientLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        win.demistorm.client.VRThrowingExtensionsClient.startConfigSendTimer();
+        log.debug("Forge client joining server, starting config send timer");
+    }
+
     // Handle client disconnect events to restore local config
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ConfigHelper.clientDisconnected();
-        log.debug("Forge client disconnected, restored local config");
+        win.demistorm.client.VRThrowingExtensionsClient.resetConfigSendTimer();
+        log.debug("Forge client disconnected, restored local config and reset timer");
     }
 }
