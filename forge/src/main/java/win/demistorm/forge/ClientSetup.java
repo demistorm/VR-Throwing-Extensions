@@ -4,7 +4,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.ThrownTNTEntity;
@@ -12,6 +16,7 @@ import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.ThrownItemRenderer;
 import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.VRThrowingExtensionsClient;
+import win.demistorm.ConfigHelper;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
 import win.demistorm.network.data.BloodParticleData;
@@ -19,12 +24,28 @@ import win.demistorm.network.data.BleedingParticleData;
 import win.demistorm.network.data.ConfigSyncData;
 
 // Forge client setup
+@Mod.EventBusSubscriber(modid = "vr_throwing_extensions", value = Dist.CLIENT)
 public class ClientSetup {
     private static final ResourceLocation THROWN_ITEM_ID =
             ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "generic_thrown_item");
 
     private static final ResourceLocation THROWN_TNT_ID =
             ResourceLocation.fromNamespaceAndPath(VRThrowingExtensions.MOD_ID, "thrown_primed_tnt");
+
+    // Handle join events (start config send timer)
+    @SubscribeEvent
+    public static void onClientLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        win.demistorm.client.VRThrowingExtensionsClient.startConfigSendTimer();
+        VRThrowingExtensions.log.debug("Forge client joining server, starting config send timer");
+    }
+
+    // Handle client disconnect events to restore local config
+    @SubscribeEvent
+    public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        ConfigHelper.clientDisconnected();
+        win.demistorm.client.VRThrowingExtensionsClient.resetConfigSendTimer();
+        VRThrowingExtensions.log.debug("Forge client disconnected, restored local config and reset timer");
+    }
 
     public static void doClientSetup() {
         // Start client systems
