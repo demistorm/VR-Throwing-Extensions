@@ -31,7 +31,7 @@ neoforge/run/
 # Misc
 api_keys.txt
 .api_keys.txt.kate-swp
-CLAUDE.md
+AGENTS.md
 .architectury-transformer
 .claude
 devTest/
