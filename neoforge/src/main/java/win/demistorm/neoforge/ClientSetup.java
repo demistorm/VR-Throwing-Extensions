@@ -3,8 +3,10 @@ package win.demistorm.neoforge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.Platform;
@@ -15,6 +17,7 @@ import win.demistorm.network.data.ConfigSyncData;
 import win.demistorm.ConfigHelper;
 
 // NeoForge client setup
+@EventBusSubscriber(modid = "vr_throwing_extensions", value = Dist.CLIENT)
 public class ClientSetup {
 
     public static void doClientSetup() {
