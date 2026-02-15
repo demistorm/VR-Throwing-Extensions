@@ -1,0 +1,8 @@
+{
+	"match": {
+		"type": "vr_throwing_extensions:generic_thrown_item"
+	},
+	"luminance": {
+		"type": "lambdynlights:projectile/throwable_item"
+	}
+}
