@@ -22,6 +22,10 @@ loom {
     if (aw.exists()) {
         accessWidenerPath.set(aw)
     }
+
+    forge {
+        mixinConfig "vr-throwing-extensions.mixins.json"
+    }
 }
 
 configurations {
@@ -48,12 +52,11 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
 
-    // Vivecraft runtime dependency - Forge version
-    // This provides the actual VR functionality at runtime on Forge
+    // Vivecraft runtime dependency (Forge version)
     modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-forge"
 
-  
-    // MixinExtras for advanced mixin features
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
+    implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixin_extras_version}"))
 }
 
 // Process resources and expand version placeholders
