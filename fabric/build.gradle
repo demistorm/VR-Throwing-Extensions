@@ -47,30 +47,16 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    // Include the common module with all our shared VR logic
+    // Include the common module with all shared VR logic
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    // Vivecraft runtime dependency - Fabric version
-    // This provides the actual VR functionality at runtime
+    // Vivecraft runtime dependency (Fabric version)
     modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
 
 
     // Mod Menu integration for Fabric users
     modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
-
-    // Runtime
-    modRuntimeOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
-    modRuntimeOnly "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
-    modRuntimeOnly "maven.modrinth:sodium:mc1.21.5-0.6.11-fabric"
-
-    include(implementation('com.electronwill.night-config:toml:3.6.6'))
-    include(implementation('com.electronwill.night-config:core:3.6.6'))
-
-//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}")) { transitive = false }
-//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-linux")) { transitive = false }
-//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-macos")) { transitive = false }
-//    include(implementation("org.lwjgl:lwjgl-openvr:${rootProject.lwjgl_version}:natives-windows")) { transitive = false }
 }
 
 // Process resources and expand version placeholders

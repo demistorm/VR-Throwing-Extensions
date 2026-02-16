@@ -37,6 +37,9 @@
 	"suggests": {
 		"modmenu": "*"
 	},
+	"mixins": [
+		"vr-throwing-extensions.mixins.json"
+	],
 	"custom": {
 		"modmenu": {
 			"links": {
