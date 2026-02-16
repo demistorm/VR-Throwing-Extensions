@@ -17,14 +17,14 @@ import static win.demistorm.VRThrowingExtensions.log;
 public final class ClientNetworkHelper {
     private ClientNetworkHelper() {}
 
-    public static void sendToServer(Vec3 pos, Vec3 velocity, boolean useBindHeld, boolean playerCrouched, float rollDeg) {
-        log.debug("ClientNetworkHelper: Sending throw. pos={} vel={} useBindHeld={} playerCrouched={}", pos, velocity, useBindHeld, playerCrouched);
-        Network.INSTANCE.sendToServer(new ThrowData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, useBindHeld, playerCrouched, rollDeg));
+    public static void sendToServer(Vec3 pos, Vec3 velocity, boolean useBindHeld, boolean playerCrouched, float rollDeg, net.minecraft.world.InteractionHand hand) {
+        log.debug("ClientNetworkHelper: Sending throw. pos={} vel={} useBindHeld={} playerCrouched={} hand={}", pos, velocity, useBindHeld, playerCrouched, hand);
+        Network.INSTANCE.sendToServer(new ThrowData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, useBindHeld, playerCrouched, rollDeg, hand));
     }
 
-    public static void sendCatchToServer(ThrownProjectileEntity entity, boolean startCatch) {
-        log.debug("ClientNetworkHelper: Sending catch start/cancel. entity={} start={}", entity.getId(), startCatch);
-        Network.INSTANCE.sendToServer(new CatchData(entity.getId(), startCatch));
+    public static void sendCatchToServer(ThrownProjectileEntity entity, boolean startCatch, net.minecraft.world.InteractionHand hand) {
+        log.debug("ClientNetworkHelper: Sending catch start/cancel. entity={} start={} hand={}", entity.getId(), startCatch, hand);
+        Network.INSTANCE.sendToServer(new CatchData(entity.getId(), startCatch, hand));
     }
 
     public static void sendCatchUpdateToServer(ThrownProjectileEntity entity, Vec3 newVelocity, Quaternionfc handRotation) {
@@ -54,8 +54,8 @@ public final class ClientNetworkHelper {
         Network.INSTANCE.sendToServer(new TNTLitData());
     }
 
-    public static void sendThrowTNTPacket(Vec3 pos, Vec3 velocity, float rollDeg) {
-        log.debug("ClientNetworkHelper: Sending lit TNT throw. pos={} vel={} roll={}", pos, velocity, rollDeg);
-        Network.INSTANCE.sendToServer(new ThrowTNTData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, rollDeg));
+    public static void sendThrowTNTPacket(Vec3 pos, Vec3 velocity, float rollDeg, net.minecraft.world.InteractionHand hand) {
+        log.debug("ClientNetworkHelper: Sending lit TNT throw. pos={} vel={} roll={} hand={}", pos, velocity, rollDeg, hand);
+        Network.INSTANCE.sendToServer(new ThrowTNTData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, rollDeg, hand));
     }
 }

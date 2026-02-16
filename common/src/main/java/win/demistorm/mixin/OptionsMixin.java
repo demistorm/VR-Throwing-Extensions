@@ -25,6 +25,7 @@ public class OptionsMixin {
         // Add custom keybindings to the array
         keyMappings = ArrayUtils.add(keyMappings, RemapBindings.THROW);
         keyMappings = ArrayUtils.add(keyMappings, RemapBindings.THROW_STACK);
+        keyMappings = ArrayUtils.add(keyMappings, RemapBindings.THROW_OFFHAND);
 
         return keyMappings;
     }

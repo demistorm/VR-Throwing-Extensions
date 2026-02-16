@@ -11,7 +11,7 @@ public class RemapBindings {
         Identifier.fromNamespaceAndPath("vr_throwing_extensions", "category")
     );
 
-    // Throw/catch
+    // Throw/catch (main hand)
     public static final KeyMapping THROW = new KeyMapping(
         "key.vr_throwing_extensions.throw",
             InputConstants.Type.MOUSE,
@@ -24,6 +24,13 @@ public class RemapBindings {
         "key.vr_throwing_extensions.throw_stack",
             InputConstants.Type.MOUSE,
             InputConstants.MOUSE_BUTTON_RIGHT,
+            CATEGORY
+    );
+
+    // Offhand throw/catch
+    public static final KeyMapping THROW_OFFHAND = new KeyMapping(
+        "key.vr_throwing_extensions.throw_offhand",
+            -1,
             CATEGORY
     );
 }
