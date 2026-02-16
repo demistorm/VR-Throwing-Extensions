@@ -3,13 +3,11 @@ package win.demistorm.forge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
-import win.demistorm.ConfigHelper;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
 import win.demistorm.network.data.BloodParticleData;
@@ -19,21 +17,6 @@ import win.demistorm.network.data.ConfigSyncData;
 // Forge client setup
 @Mod.EventBusSubscriber(modid = "vr_throwing_extensions", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
-
-    // Handle join events (start config send timer)
-    @SubscribeEvent
-    public static void onClientLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
-        win.demistorm.client.VRThrowingExtensionsClient.startConfigSendTimer();
-        VRThrowingExtensions.log.debug("Forge client joining server, starting config send timer");
-    }
-
-    // Handle client disconnect events to restore local config
-    @SubscribeEvent
-    public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
-        ConfigHelper.clientDisconnected();
-        win.demistorm.client.VRThrowingExtensionsClient.resetConfigSendTimer();
-        VRThrowingExtensions.log.debug("Forge client disconnected, restored local config and reset timer");
-    }
 
     public static void doClientSetup() {
         // Start client systems
