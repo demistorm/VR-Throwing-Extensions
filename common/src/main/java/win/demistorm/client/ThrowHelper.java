@@ -52,6 +52,12 @@ public class ThrowHelper {
 
     private static final TNTHelper tntHelper = new TNTHelper(); // TNT lighting tracker
 
+    // Tracks which hand has priority for catching (null = no priority)
+    private static InteractionHand allowedCatchHand = null;
+
+    // Holds projectile and distance data for catch candidate selection
+    private record ProjectileCatchCandidate(ThrownProjectileEntity projectile, double distance) {}
+
     // Tunables
     private static final double minThrowDistance        = 0.08; // Min arm movement to activate throw
     private static final int    maxPoseHistoryTicks     = 6;    // How many ticks to look back for velocity
@@ -97,9 +103,39 @@ public class ThrowHelper {
             boolean offThrowPressed = RemapBindings.THROW_OFFHAND.isDown();
             boolean throwStackPressed = RemapBindings.THROW_STACK.isDown(); // Throw stack/null modifier keybind
 
-            // Handle catching logic first
-            if (throwCatching(player, mainThrowPressed, InteractionHand.MAIN_HAND) ||
-                throwCatching(player, offThrowPressed, InteractionHand.OFF_HAND)) {
+            // Reset allowed catch hand at start of each tick
+            allowedCatchHand = null;
+
+            // Check if both hands are trying to catch and handle collision
+            if (mainThrowPressed && offThrowPressed) {
+                VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
+                if (pose != null) {
+                    VRBodyPartData mainHandData = pose.getHand(InteractionHand.MAIN_HAND);
+                    VRBodyPartData offHandData = pose.getHand(InteractionHand.OFF_HAND);
+
+                    if (mainHandData != null && offHandData != null) {
+                        ProjectileCatchCandidate mainCandidate = findNearestProjectileWithDistance(player, mainHandData.getPos());
+                        ProjectileCatchCandidate offCandidate = findNearestProjectileWithDistance(player, offHandData.getPos());
+
+                        // If both hands target the same projectile, closer hand wins
+                        if (mainCandidate != null && offCandidate != null &&
+                            mainCandidate.projectile() == offCandidate.projectile()) {
+                            if (mainCandidate.distance() < offCandidate.distance()) {
+                                allowedCatchHand = InteractionHand.MAIN_HAND;
+                            } else {
+                                allowedCatchHand = InteractionHand.OFF_HAND;
+                            }
+                            log.debug("[VR Catch] Both hands targeting projectile {}, closer hand: {}",
+                                mainCandidate.projectile().getId(), allowedCatchHand);
+                        }
+                    }
+                }
+            }
+
+            // Handle catching for both hands
+            boolean mainHandCatching = throwCatching(player, mainThrowPressed, InteractionHand.MAIN_HAND);
+            boolean offHandCatching = throwCatching(player, offThrowPressed, InteractionHand.OFF_HAND);
+            if (mainHandCatching || offHandCatching) {
                 return;
             }
 
@@ -359,6 +395,12 @@ public class ThrowHelper {
 
         // When attack is pressed and not already catching, look for projectiles
         if (!catchActive && attackPressed) {
+            // Check if hand is allowed to catch (when both hands target same projectile)
+            if (allowedCatchHand != null && allowedCatchHand != hand) {
+                log.debug("[VR Catch] Hand {} blocked from catching, {} has priority", hand, allowedCatchHand);
+                return false;
+            }
+
             ThrownProjectileEntity nearestProjectile = findNearestProjectile(player, handPos);
             if (nearestProjectile != null) {
                 if (hand == InteractionHand.MAIN_HAND) {
@@ -416,7 +458,7 @@ public class ThrowHelper {
             return false;
         }
 
-        return catchActive;
+        return false;
     }
 
     // Finds the nearest thrown item within catch range
@@ -431,6 +473,22 @@ public class ThrowHelper {
                     return distance <= catchMaxDistance;
                 }).stream()
                 .min(Comparator.comparingDouble(e -> e.position().distanceTo(handPos)))
+                .orElse(null);
+    }
+
+    // Finds the nearest thrown item within catch range and return with distance
+    private static ProjectileCatchCandidate findNearestProjectileWithDistance(LocalPlayer player, Vec3 handPos) {
+        Vec3 min = handPos.subtract(catchMaxDistance, catchMaxDistance, catchMaxDistance);
+        Vec3 max = handPos.add(catchMaxDistance, catchMaxDistance, catchMaxDistance);
+        AABB searchBox = new AABB(min, max);
+
+        return player.level().getEntitiesOfClass(ThrownProjectileEntity.class, searchBox, entity -> {
+                    if (entity.isRemoved()) return false;
+                    double distance = entity.position().distanceTo(handPos);
+                    return distance <= catchMaxDistance;
+                }).stream()
+                .map(e -> new ProjectileCatchCandidate(e, e.position().distanceTo(handPos)))
+                .min(Comparator.comparingDouble(ProjectileCatchCandidate::distance))
                 .orElse(null);
     }
 
@@ -556,6 +614,7 @@ public class ThrowHelper {
         cancelBreakingMain = false;
         heldItemMain = ItemStack.EMPTY;
         ticksHeldMain = 0;
+        tntHelper.stopTracking();
     }
 
     // Resets throw variables (offhand)
@@ -566,12 +625,6 @@ public class ThrowHelper {
         cancelBreakingOff = false;
         heldItemOff = ItemStack.EMPTY;
         ticksHeldOff = 0;
-    }
-
-    // Resets all throw variables
-    private static void reset() {
-        resetMain();
-        resetOff();
-        tntHelper.stopTracking(); // Reset TNT tracking state
+        tntHelper.stopTracking();
     }
 }
