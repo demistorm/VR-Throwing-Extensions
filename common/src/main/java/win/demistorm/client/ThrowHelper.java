@@ -1,6 +1,5 @@
 package win.demistorm.client;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -80,14 +79,13 @@ public class ThrowHelper {
         // If Tracker becomes active, main throwing mechanic
         @Override
         public void activeProcess(LocalPlayer player) {
-            Minecraft mc = Minecraft.getInstance();
             if (player == null || !VRAPI.instance().isVRPlayer(player)) return;
 
-            boolean attackPressed = mc.options.keyAttack.isDown(); // Attack/Destroy keybind
-            boolean placePressed = mc.options.keyUse.isDown();     // Place/Use keybind
+            boolean throwPressed = RemapBindings.THROW.isDown();            // Throw/catch keybind
+            boolean throwStackPressed = RemapBindings.THROW_STACK.isDown(); // Throw stack/null modifier keybind
 
             // Handle catching logic first
-            if (throwCatching(player, attackPressed)) {
+            if (throwCatching(player, throwPressed)) {
                 return; // Skip throwing logic if catching is active
             }
 
@@ -97,9 +95,9 @@ public class ThrowHelper {
             }
 
             // When Attack/Destroy is pressed, start Tracking
-            if (!active && attackPressed) {
+            if (!active && throwPressed) {
                 ItemStack held = player.getMainHandItem();
-                if (ModCompat.throwingDisabled(held, player, player.isCrouching(), placePressed)) return;
+                if (ModCompat.throwingDisabled(held, player, player.isCrouching(), throwStackPressed)) return;
 
                 // Check if holding TNT for special handling (only if feature enabled)
                 boolean holdingTNT = ConfigHelper.ACTIVE.throwableTNT && held.is(Items.TNT);
@@ -114,16 +112,16 @@ public class ThrowHelper {
                 heldItem = held.copy();
                 ticksHeld = 0;
                 active = true;
-                useBindHeld = placePressed;       // Track if place/use was held
+                useBindHeld = throwStackPressed;       // Track if throw was held
                 playerCrouched = player.isCrouching(); // Track if player is crouching
-                cancelBreaking = false;            // Doesn't cancel breaking until speed is too fast
+                cancelBreaking = false;                // Don't cancel breaking until speed is too fast
                 log.debug("[VR Throw] Hold trace started with item: {}", heldItem);
             }
 
             // Holding Attack/Destroy
-            else if (active && attackPressed) {
+            else if (active && throwPressed) {
                 ticksHeld        = Math.min(ticksHeld + 1, maxPoseHistoryTicks);
-                useBindHeld |= placePressed;           // Track if place/use is held at any point
+                useBindHeld |= throwStackPressed;      // Track if throwStack is held at any point
                 playerCrouched = player.isCrouching(); // Update crouch state
 
                 // Check for swipe motion if tracking TNT
