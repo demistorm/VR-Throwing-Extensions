@@ -46,16 +46,12 @@ dependencies {
     // Core NeoForge dependency
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
-    // Include the common module with all our shared VR logic
+    // Include the common module with all shared VR logic
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive false }
 
-    // Vivecraft runtime dependency - NeoForge version
-    // This provides the actual VR functionality at runtime on NeoForge
+    // Vivecraft runtime dependency (NeoForge version)
     implementation "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-neoforge"
-
-    
-    // MixinExtras for advanced mixin features
 }
 
 // Process resources and expand version placeholders
