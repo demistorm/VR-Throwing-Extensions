@@ -28,16 +28,28 @@ import static win.demistorm.VRThrowingExtensions.log;
 public class ThrowHelper {
 
 
-    // Various literals
-    private static boolean active          = false;          // Throwing logic active
-    private static boolean catchActive     = false;          // Catching logic active
-    private static boolean useBindHeld    = false;          // Place/use keybind was held
-    private static boolean playerCrouched = false;          // Player was crouching when thrown
-    private static boolean cancelBreaking  = false;          // Cancels breaking after a certain speed
-    private static ItemStack heldItem   = ItemStack.EMPTY;   // Checks what item is in hand
-    private static ThrownProjectileEntity targetProjectile = null; // The projectile being caught
-    private static int ticksHeld  = 0;                       // How long trigger is pressed
-    private static int catchTicksHeld = 0;                   // How long trigger is pressed for catching
+    // Various literals (Main hand)
+    private static boolean activeMain      = false;             // Throwing logic active
+    private static boolean catchActiveMain = false;             // Catching logic active
+    private static boolean useBindHeldMain  = false;            // Place/use keybind was held
+    private static boolean playerCrouchedMain = false;          // Player was crouching when thrown
+    private static boolean cancelBreakingMain = false;          // Cancels breaking after a certain speed
+    private static ItemStack heldItemMain = ItemStack.EMPTY;    // Checks what item is in hand
+    private static ThrownProjectileEntity targetProjectileMain = null; // The projectile being caught
+    private static int ticksHeldMain  = 0;                      // How long trigger is pressed
+    private static int catchTicksHeldMain = 0;                  // How long trigger is pressed for catching
+
+    // Various literals (Offhand)
+    private static boolean activeOff      = false;              // Throwing logic active
+    private static boolean catchActiveOff = false;              // Catching logic active
+    private static boolean useBindHeldOff  = false;             // Place/use keybind was held
+    private static boolean playerCrouchedOff = false;           // Player was crouching when thrown
+    private static boolean cancelBreakingOff = false;           // Cancels breaking after a certain speed
+    private static ItemStack heldItemOff = ItemStack.EMPTY;     // Checks what item is in hand
+    private static ThrownProjectileEntity targetProjectileOff = null; // The projectile being caught
+    private static int ticksHeldOff  = 0;                       // How long trigger is pressed
+    private static int catchTicksHeldOff = 0;                   // How long trigger is pressed for catching
+
     private static final TNTHelper tntHelper = new TNTHelper(); // TNT lighting tracker
 
     // Tunables
@@ -61,8 +73,8 @@ public class ThrowHelper {
     // Initialization is done by the tracker in VRThrowingExtensionsClient now
 
     // Interaction callbacks
-    public static boolean cancellingBreaks() { return (active && cancelBreaking) || catchActive; }
-    public static boolean cancellingUse   () { return active; } // Always cancel place/use while throwing is active
+    public static boolean cancellingBreaks() { return (activeMain && cancelBreakingMain) || catchActiveMain; }
+    public static boolean cancellingUse   () { return activeMain; } // Always cancel place/use while main hand throwing is active
 
     // Throwing logic utilizing Vivecraft's Tracker system
     public static class ThrowTracker implements Tracker {
@@ -81,12 +93,14 @@ public class ThrowHelper {
         public void activeProcess(LocalPlayer player) {
             if (player == null || !VRAPI.instance().isVRPlayer(player)) return;
 
-            boolean throwPressed = RemapBindings.THROW.isDown();            // Throw/catch keybind
+            boolean mainThrowPressed = RemapBindings.THROW.isDown();
+            boolean offThrowPressed = RemapBindings.THROW_OFFHAND.isDown();
             boolean throwStackPressed = RemapBindings.THROW_STACK.isDown(); // Throw stack/null modifier keybind
 
             // Handle catching logic first
-            if (throwCatching(player, throwPressed)) {
-                return; // Skip throwing logic if catching is active
+            if (throwCatching(player, mainThrowPressed, InteractionHand.MAIN_HAND) ||
+                throwCatching(player, offThrowPressed, InteractionHand.OFF_HAND)) {
+                return;
             }
 
             // Emit smoke particles from hand if TNT is lit
@@ -94,150 +108,11 @@ public class ThrowHelper {
                 tntHelper.emitSmokeParticles(player);
             }
 
-            // When Attack/Destroy is pressed, start Tracking
-            if (!active && throwPressed) {
-                ItemStack held = player.getMainHandItem();
-                if (ModCompat.throwingDisabled(held, player, player.isCrouching(), throwStackPressed)) return;
+            // Process main hand throwing
+            processThrowHand(player, mainThrowPressed, throwStackPressed, InteractionHand.MAIN_HAND);
 
-                // Check if holding TNT for special handling (only if feature enabled)
-                boolean holdingTNT = ConfigHelper.ACTIVE.throwableTNT && held.is(Items.TNT);
-
-                // Start TNT tracking if holding TNT
-                if (holdingTNT) {
-                    tntHelper.startTracking(player);
-                    log.debug("[VR Throw] Started tracking TNT with flint & steel");
-                }
-
-                // Activates throw states
-                heldItem = held.copy();
-                ticksHeld = 0;
-                active = true;
-                useBindHeld = throwStackPressed;       // Track if throw was held
-                playerCrouched = player.isCrouching(); // Track if player is crouching
-                cancelBreaking = false;                // Don't cancel breaking until speed is too fast
-                log.debug("[VR Throw] Hold trace started with item: {}", heldItem);
-            }
-
-            // Holding Attack/Destroy
-            else if (active && throwPressed) {
-                ticksHeld        = Math.min(ticksHeld + 1, maxPoseHistoryTicks);
-                useBindHeld |= throwStackPressed;      // Track if throwStack is held at any point
-                playerCrouched = player.isCrouching(); // Update crouch state
-
-                // Check for swipe motion if tracking TNT
-                if (tntHelper.isTracking()) {
-                    if (tntHelper.checkSwipeMotion(player)) {
-                        if (VRThrowingExtensions.debugMode) {
-                            player.displayClientMessage(Component.literal("TNT lit!"), true);
-                        }
-                        log.debug("[VR Throw] TNT lit via flint & steel swipe!");
-                    }
-                }
-
-                // Checks arm speed to determine if it should cancel block breaking
-                // Uses player relative speed so player movement doesn't trigger this
-                if (!cancelBreaking) {
-                    VRPoseHistory hist = VRAPI.instance().getHistoricalVRPoses(player);
-                    if (hist != null) {
-                        double speed = hist.averageSpeed(VRBodyPart.MAIN_HAND, 2, true);
-                        if (speed > speedThreshold) {
-                            cancelBreaking = true;
-                            log.debug("[VR Throw] speed threshold crossed, mining blocked");
-                        }
-                    }
-                }
-            }
-
-            // Released Attack/Destroy, sends throw packet
-            else if (active) {
-                if (ticksHeld >= 5) {
-                    VRPoseHistory history = VRAPI.instance().getHistoricalVRPoses(player);
-                    if (history != null) {
-                        int usedTicks = Math.min(ticksHeld, maxPoseHistoryTicks);
-
-                        // Check how far the hand moved relative to the player over the hold duration
-                        Vec3 handMovement = history.netMovement(VRBodyPart.MAIN_HAND, usedTicks, true);
-
-                        if (handMovement != null) {
-                            double relativeMovedDist = handMovement.length();
-
-                            if (relativeMovedDist > minThrowDistance) {
-                                // Get velocity relative to player (independent of player movement)
-                                Vec3 relativeVel = history.averageVelocity(VRBodyPart.MAIN_HAND, usedTicks, true);
-
-                                if (relativeVel != null) {
-                                    double velLength = relativeVel.length();
-
-                                    if (velLength >= throwVelocityThreshold) {
-                                        // Get world space origin for the throw (where projectile spawns)
-                                        Vec3 origin = historicalHandPosition(history);
-                                        double dynamicMultiplier = calculateVelocityMultiplier(velLength);
-                                        Vec3 launchVel = relativeVel.scale(dynamicMultiplier);
-                                        Vec3 assistedVel = AimHelper.applyAimAssist(player, origin, launchVel);
-
-                                        // InteractionHand rotation (world space)
-                                        VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
-                                        assert pose != null;
-                                        VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
-                                        Quaternionfc q = hand.getRotation();
-                                        Vector3f fwd = new Vector3f(0, 0, -1).rotate(q).normalize();
-                                        Vector3f up  = new Vector3f(0, 1,  0).rotate(q).normalize();
-                                        Vector3f projCtrlUp  = up .sub(new Vector3f(fwd).mul(up .dot(fwd))).normalize();
-                                        Vector3f projWorldUp = new Vector3f(0, 1, 0)
-                                                .sub(new Vector3f(fwd).mul(fwd.y)).normalize();
-                                        float rollRad = projCtrlUp.angleSigned(projWorldUp, fwd);
-                                        float rollDeg = (float) Math.toDegrees(rollRad);
-
-                                        // Send throw to server
-                                        try {
-                                            // Check if throwing lit TNT (only if feature enabled)
-                                            if (ConfigHelper.ACTIVE.throwableTNT && tntHelper.isLit()) {
-                                                // Send lit TNT throw packet
-                                                ClientNetworkHelper.sendThrowTNTPacket(origin, assistedVel, rollDeg);
-                                                if (VRThrowingExtensions.debugMode) {
-                                                    player.displayClientMessage(Component.literal("Thrown lit TNT!"), true);
-                                                }
-                                                log.debug("[VR Throw] Thrown lit TNT!");
-                                            } else {
-                                                // Send normal throw packet
-                                                ClientNetworkHelper.sendToServer(origin, assistedVel, useBindHeld, playerCrouched, rollDeg);
-                                            }
-                                        } catch (Exception e) {
-                                            log.error("Error sending throw packet to server: {}", e.getMessage());
-                                            reset(); // Reset throw state on error
-                                            return;
-                                        }
-
-                                        // DEBUG
-                                        if (VRThrowingExtensions.debugMode) {
-                                            boolean aimAssistApplied = !assistedVel.equals(launchVel);
-                                            player.displayClientMessage(Component.literal(
-                                                    "[VR Throw] origin=" + origin +
-                                                            " relativeVel=" + relativeVel +
-                                                            " velLength=" + String.format("%.4f", velLength) +
-                                                            " multiplier=" + String.format("%.2f", dynamicMultiplier) +
-                                                            " relativeMovement=" + String.format("%.3f", relativeMovedDist) +
-                                                            " aimAssist=" + aimAssistApplied +
-                                                            " useBindHeld=" + useBindHeld +
-                                                            " playerCrouched=" + playerCrouched), false);
-                                        }
-
-                                        VRClientAPI.instance().triggerHapticPulse(
-                                                VRBodyPart.fromInteractionHand(InteractionHand.MAIN_HAND), 0.2f);
-                                    } else {
-                                        log.debug("[VR Throw] Relative velocity too slow: {}", velLength);
-                                    }
-                                }
-                            } else {
-                                log.debug("[VR Throw] Insufficient relative movement: {}", relativeMovedDist);
-                            }
-                        }
-                    }
-                } else {
-                    log.debug("[VR Throw] Released too early. Held {} ticks.", ticksHeld);
-                }
-                reset();
-            }
+            // Process offhand throwing
+            processThrowHand(player, offThrowPressed, throwStackPressed, InteractionHand.OFF_HAND);
         }
 
         @Override
@@ -267,15 +142,209 @@ public class ThrowHelper {
         return weakMultiplier + t * (strongMultiplier - weakMultiplier);
     }
 
+    // Process throwing logic for a specific hand
+    private static void processThrowHand(LocalPlayer player, boolean throwPressed, boolean throwStackPressed, InteractionHand hand) {
+        boolean active = (hand == InteractionHand.MAIN_HAND) ? activeMain : activeOff;
+        VRBodyPart bodyPart = (hand == InteractionHand.MAIN_HAND) ? VRBodyPart.MAIN_HAND : VRBodyPart.OFF_HAND;
+
+        // When throw key is pressed, start tracking
+        if (!active && throwPressed) {
+            ItemStack held = player.getItemInHand(hand);
+            if (ModCompat.throwingDisabled(held, player, player.isCrouching(), throwStackPressed)) return;
+
+            // Check if holding TNT for special handling (only if feature enabled)
+            boolean holdingTNT = ConfigHelper.ACTIVE.throwableTNT && held.is(Items.TNT);
+
+            // Start TNT tracking if holding TNT
+            if (holdingTNT) {
+                tntHelper.startTracking(player, hand);
+                log.debug("[VR Throw] Started tracking TNT with flint & steel in {}", hand);
+            }
+
+            // Activates throw states
+            if (hand == InteractionHand.MAIN_HAND) {
+                heldItemMain = held.copy();
+                ticksHeldMain = 0;
+                activeMain = true;
+                useBindHeldMain = throwStackPressed;
+                playerCrouchedMain = player.isCrouching();
+                cancelBreakingMain = false;
+                log.debug("[VR Throw] Hold trace started with item: {} in {}", heldItemMain, hand);
+            } else {
+                heldItemOff = held.copy();
+                ticksHeldOff = 0;
+                activeOff = true;
+                useBindHeldOff = throwStackPressed;
+                playerCrouchedOff = player.isCrouching();
+                cancelBreakingOff = false;
+                log.debug("[VR Throw] Hold trace started with item: {} in {}", heldItemOff, hand);
+            }
+        }
+
+        // Holding throw key
+        else if (active && throwPressed) {
+            int ticksHeld = (hand == InteractionHand.MAIN_HAND) ? ticksHeldMain : ticksHeldOff;
+            ticksHeld = Math.min(ticksHeld + 1, maxPoseHistoryTicks);
+            if (hand == InteractionHand.MAIN_HAND) {
+                ticksHeldMain = ticksHeld;
+                useBindHeldMain |= throwStackPressed;
+                playerCrouchedMain = player.isCrouching();
+            } else {
+                ticksHeldOff = ticksHeld;
+                useBindHeldOff |= throwStackPressed;
+                playerCrouchedOff = player.isCrouching();
+            }
+
+            // Check for swipe motion if tracking TNT
+            if (tntHelper.isTracking()) {
+                if (tntHelper.checkSwipeMotion(player)) {
+                    if (VRThrowingExtensions.debugMode) {
+                        player.displayClientMessage(Component.literal("TNT lit!"), true);
+                    }
+                    log.debug("[VR Throw] TNT lit via flint & steel swipe!");
+                }
+            }
+
+            // Checks arm speed to determine if it should cancel block breaking
+            boolean cancelBreaking = (hand == InteractionHand.MAIN_HAND) ? cancelBreakingMain : cancelBreakingOff;
+            if (!cancelBreaking) {
+                VRPoseHistory hist = VRAPI.instance().getHistoricalVRPoses(player);
+                if (hist != null) {
+                    double speed = hist.averageSpeed(bodyPart, 2, true);
+                    if (speed > speedThreshold) {
+                        if (hand == InteractionHand.MAIN_HAND) {
+                            cancelBreakingMain = true;
+                        } else {
+                            cancelBreakingOff = true;
+                        }
+                        log.debug("[VR Throw] speed threshold crossed, mining blocked in {}", hand);
+                    }
+                }
+            }
+        }
+
+        // Released throw key, sends throw packet
+        else if (active) {
+            int ticksHeld = (hand == InteractionHand.MAIN_HAND) ? ticksHeldMain : ticksHeldOff;
+            if (ticksHeld >= 5) {
+                VRPoseHistory history = VRAPI.instance().getHistoricalVRPoses(player);
+                if (history != null) {
+                    int usedTicks = Math.min(ticksHeld, maxPoseHistoryTicks);
+
+                    // Check how far the hand moved relative to the player over the hold duration
+                    Vec3 handMovement = history.netMovement(bodyPart, usedTicks, true);
+
+                    if (handMovement != null) {
+                        double relativeMovedDist = handMovement.length();
+
+                        if (relativeMovedDist > minThrowDistance) {
+                            // Get velocity relative to player (independent of player movement)
+                            Vec3 relativeVel = history.averageVelocity(bodyPart, usedTicks, true);
+
+                            if (relativeVel != null) {
+                                double velLength = relativeVel.length();
+
+                                if (velLength >= throwVelocityThreshold) {
+                                    // Get world space origin for the throw (where projectile spawns)
+                                    Vec3 origin = historicalHandPosition(history, hand);
+                                    double dynamicMultiplier = calculateVelocityMultiplier(velLength);
+                                    Vec3 launchVel = relativeVel.scale(dynamicMultiplier);
+                                    Vec3 assistedVel = AimHelper.applyAimAssist(player, origin, launchVel);
+
+                                    // InteractionHand rotation (world space)
+                                    VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
+                                    assert pose != null;
+                                    VRBodyPartData handData = pose.getHand(hand);
+                                    Quaternionfc q = handData.getRotation();
+                                    Vector3f fwd = new Vector3f(0, 0, -1).rotate(q).normalize();
+                                    Vector3f up  = new Vector3f(0, 1,  0).rotate(q).normalize();
+                                    Vector3f projCtrlUp  = up .sub(new Vector3f(fwd).mul(up .dot(fwd))).normalize();
+                                    Vector3f projWorldUp = new Vector3f(0, 1, 0)
+                                            .sub(new Vector3f(fwd).mul(fwd.y)).normalize();
+                                    float rollRad = projCtrlUp.angleSigned(projWorldUp, fwd);
+                                    float rollDeg = (float) Math.toDegrees(rollRad);
+
+                                    boolean useBindHeld = (hand == InteractionHand.MAIN_HAND) ? useBindHeldMain : useBindHeldOff;
+                                    boolean playerCrouched = (hand == InteractionHand.MAIN_HAND) ? playerCrouchedMain : playerCrouchedOff;
+
+                                    // Send throw to server
+                                    try {
+                                        // Check if throwing lit TNT (only if feature enabled)
+                                        if (ConfigHelper.ACTIVE.throwableTNT && tntHelper.isLit()) {
+                                            // Send lit TNT throw packet
+                                            ClientNetworkHelper.sendThrowTNTPacket(origin, assistedVel, rollDeg, hand);
+                                            if (VRThrowingExtensions.debugMode) {
+                                                player.displayClientMessage(Component.literal("Thrown lit TNT!"), true);
+                                            }
+                                            log.debug("[VR Throw] Thrown lit TNT from {}", hand);
+                                        } else {
+                                            // Send normal throw packet
+                                            ClientNetworkHelper.sendToServer(origin, assistedVel, useBindHeld, playerCrouched, rollDeg, hand);
+                                        }
+                                    } catch (Exception e) {
+                                        log.error("Error sending throw packet to server: {}", e.getMessage());
+                                        if (hand == InteractionHand.MAIN_HAND) {
+                                            resetMain();
+                                        } else {
+                                            resetOff();
+                                        }
+                                        return;
+                                    }
+
+                                    // DEBUG
+                                    if (VRThrowingExtensions.debugMode) {
+                                        boolean aimAssistApplied = !assistedVel.equals(launchVel);
+                                        player.displayClientMessage(Component.literal(
+                                                "[VR Throw] origin=" + origin +
+                                                        " relativeVel=" + relativeVel +
+                                                        " velLength=" + String.format("%.4f", velLength) +
+                                                        " multiplier=" + String.format("%.2f", dynamicMultiplier) +
+                                                        " relativeMovement=" + String.format("%.3f", relativeMovedDist) +
+                                                        " aimAssist=" + aimAssistApplied +
+                                                        " useBindHeld=" + useBindHeld +
+                                                        " playerCrouched=" + playerCrouched +
+                                                        " hand=" + hand), false);
+                                    }
+
+                                    VRClientAPI.instance().triggerHapticPulse(
+                                            VRBodyPart.fromInteractionHand(hand), 0.2f);
+                                } else {
+                                    log.debug("[VR Throw] Relative velocity too slow: {}", velLength);
+                                }
+                            }
+                        } else {
+                            log.debug("[VR Throw] Insufficient relative movement: {}", relativeMovedDist);
+                        }
+                    }
+                }
+            } else {
+                log.debug("[VR Throw] Released too early. Held {} ticks.", ticksHeld);
+            }
+            if (hand == InteractionHand.MAIN_HAND) {
+                resetMain();
+            } else {
+                resetOff();
+            }
+        }
+    }
+
     // Handles catching logic, returns true if catching is active and blocks throwing logic
-    private static boolean throwCatching(LocalPlayer player, boolean attackPressed) {
-        // Check if player's active slot is empty
-        ItemStack activeStack = player.getMainHandItem();
+    private static boolean throwCatching(LocalPlayer player, boolean attackPressed, InteractionHand hand) {
+        boolean catchActive = (hand == InteractionHand.MAIN_HAND) ? catchActiveMain : catchActiveOff;
+        ThrownProjectileEntity targetProjectile = (hand == InteractionHand.MAIN_HAND) ? targetProjectileMain : targetProjectileOff;
+        int catchTicksHeld = (hand == InteractionHand.MAIN_HAND) ? catchTicksHeldMain : catchTicksHeldOff;
+
+        // Check if player's hand slot is empty
+        ItemStack activeStack = player.getItemInHand(hand);
         if (!activeStack.isEmpty()) {
             // Player switched to occupied slot, cancel any active catch
             if (catchActive) {
-                cancelCatch();
-                log.debug("[VR Catch] Canceled: Player switched to occupied slot");
+                if (hand == InteractionHand.MAIN_HAND) {
+                    cancelCatchMain();
+                } else {
+                    cancelCatchOff();
+                }
+                log.debug("[VR Catch] Canceled: Player switched to occupied slot in {}", hand);
             }
             return false;
         }
@@ -283,18 +352,21 @@ public class ThrowHelper {
         VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
         if (pose == null) return catchActive;
 
-        VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
-        if (hand == null) return catchActive;
+        VRBodyPartData handData = pose.getHand(hand);
+        if (handData == null) return catchActive;
 
-        Vec3 handPos = hand.getPos();
-
+        Vec3 handPos = handData.getPos();
 
         // When attack is pressed and not already catching, look for projectiles
         if (!catchActive && attackPressed) {
             ThrownProjectileEntity nearestProjectile = findNearestProjectile(player, handPos);
             if (nearestProjectile != null) {
-                startCatch(nearestProjectile);
-                log.debug("[VR Catch] Started catching projectile...");
+                if (hand == InteractionHand.MAIN_HAND) {
+                    startCatchMain(nearestProjectile);
+                } else {
+                    startCatchOff(nearestProjectile);
+                }
+                log.debug("[VR Catch] Started catching projectile with {}...", hand);
                 return true;
             }
         }
@@ -302,19 +374,32 @@ public class ThrowHelper {
         // Continue catch if projectile is found
         else if (catchActive && attackPressed) {
             if (targetProjectile == null || targetProjectile.isRemoved()) {
-                cancelCatch();
+                if (hand == InteractionHand.MAIN_HAND) {
+                    cancelCatchMain();
+                } else {
+                    cancelCatchOff();
+                }
                 log.debug("[VR Catch] Canceled: Target projectile no longer exists");
                 return false;
             }
 
             catchTicksHeld++;
-            updateCatchMagnetism(handPos, hand.getRotation());
+            if (hand == InteractionHand.MAIN_HAND) {
+                catchTicksHeldMain = catchTicksHeld;
+            } else {
+                catchTicksHeldOff = catchTicksHeld;
+            }
+            updateCatchMagnetism(handPos, handData.getRotation(), hand);
 
             // Check if projectile is close enough to complete catch
             double distanceToHand = targetProjectile.position().distanceTo(handPos);
             if (distanceToHand <= catchCompletionDistance && catchTicksHeld >= minCatchTicks) {
-                completeCatch();
-                log.debug("[VR Catch] Completed catch!");
+                if (hand == InteractionHand.MAIN_HAND) {
+                    completeCatchMain();
+                } else {
+                    completeCatchOff();
+                }
+                log.debug("[VR Catch] Completed catch with {}!", hand);
                 return false;
             }
             return true;
@@ -322,8 +407,12 @@ public class ThrowHelper {
 
         // Released attack button, cancel catch if active
         else if (catchActive) {
-            cancelCatch();
-            log.debug("[VR Catch] Canceled: Attack button released");
+            if (hand == InteractionHand.MAIN_HAND) {
+                cancelCatchMain();
+            } else {
+                cancelCatchOff();
+            }
+            log.debug("[VR Catch] Canceled: Attack button released for {}", hand);
             return false;
         }
 
@@ -345,18 +434,29 @@ public class ThrowHelper {
                 .orElse(null);
     }
 
-    // Starts catching the target projectile
-    private static void startCatch(ThrownProjectileEntity projectile) {
-        catchActive = true;
-        targetProjectile = projectile;
-        catchTicksHeld = 0;
+    // Starts catching the target projectile (main hand)
+    private static void startCatchMain(ThrownProjectileEntity projectile) {
+        catchActiveMain = true;
+        targetProjectileMain = projectile;
+        catchTicksHeldMain = 0;
 
         // Send catch packet to server to start magnetism
-        ClientNetworkHelper.sendCatchToServer(projectile, true);
+        ClientNetworkHelper.sendCatchToServer(projectile, true, InteractionHand.MAIN_HAND);
+    }
+
+    // Starts catching the target projectile (offhand)
+    private static void startCatchOff(ThrownProjectileEntity projectile) {
+        catchActiveOff = true;
+        targetProjectileOff = projectile;
+        catchTicksHeldOff = 0;
+
+        // Send catch packet to server to start magnetism
+        ClientNetworkHelper.sendCatchToServer(projectile, true, InteractionHand.OFF_HAND);
     }
 
     // Updates magnetism effect during catch
-    private static void updateCatchMagnetism(Vec3 handPos, Quaternionfc handRotation) {
+    private static void updateCatchMagnetism(Vec3 handPos, Quaternionfc handRotation, InteractionHand hand) {
+        ThrownProjectileEntity targetProjectile = (hand == InteractionHand.MAIN_HAND) ? targetProjectileMain : targetProjectileOff;
         if (targetProjectile == null) return;
 
         Vec3 projectilePos = targetProjectile.position();
@@ -374,58 +474,104 @@ public class ThrowHelper {
         }
     }
 
-    // Completes the catch, adding item to player inventory
-    private static void completeCatch() {
-        if (targetProjectile == null) return;
+    // Completes the catch, adding item to player inventory (main hand)
+    private static void completeCatchMain() {
+        if (targetProjectileMain == null) return;
 
         // Send completion packet to server
-        ClientNetworkHelper.sendCatchCompleteToServer(targetProjectile);
+        ClientNetworkHelper.sendCatchCompleteToServer(targetProjectileMain);
 
         // Reset catch state
-        resetCatch();
+        resetCatchMain();
 
         // Haptic feedback for successful catch
         VRClientAPI.instance().triggerHapticPulse(
                 VRBodyPart.fromInteractionHand(InteractionHand.MAIN_HAND), 0.5f);
     }
 
-    // Cancels active catch and releases projectile
-    private static void cancelCatch() {
-        if (targetProjectile != null) {
-            ClientNetworkHelper.sendCatchToServer(targetProjectile, false);
+    // Completes the catch, adding item to player inventory (offhand)
+    private static void completeCatchOff() {
+        if (targetProjectileOff == null) return;
+
+        // Send completion packet to server
+        ClientNetworkHelper.sendCatchCompleteToServer(targetProjectileOff);
+
+        // Reset catch state
+        resetCatchOff();
+
+        // Haptic feedback for successful catch
+        VRClientAPI.instance().triggerHapticPulse(
+                VRBodyPart.fromInteractionHand(InteractionHand.OFF_HAND), 0.5f);
+    }
+
+    // Cancels active catch and releases projectile (main hand)
+    private static void cancelCatchMain() {
+        if (targetProjectileMain != null) {
+            ClientNetworkHelper.sendCatchToServer(targetProjectileMain, false, InteractionHand.MAIN_HAND);
         }
-        resetCatch();
+        resetCatchMain();
+    }
+
+    // Cancels active catch and releases projectile (offhand)
+    private static void cancelCatchOff() {
+        if (targetProjectileOff != null) {
+            ClientNetworkHelper.sendCatchToServer(targetProjectileOff, false, InteractionHand.OFF_HAND);
+        }
+        resetCatchOff();
     }
 
     // Checks historical hand positions (world space for spawn origin)
-    private static Vec3 historicalHandPosition(VRPoseHistory hist) {
+    private static Vec3 historicalHandPosition(VRPoseHistory hist, InteractionHand hand) {
         try {
             VRPose pose2 = hist.getHistoricalData(2); // Gets pose from 2 ticks back
-            VRBodyPartData hand2 = pose2.getHand(InteractionHand.MAIN_HAND);
+            VRBodyPartData hand2 = pose2.getHand(hand);
             if (hand2 != null) return hand2.getPos();
         } catch (IllegalArgumentException ignored) { }
 
         // Fallback to current pose if historical data isn't present (that guy joined and threw really fast!)
         VRPose now = VRClientAPI.instance().getPreTickWorldPose();
         assert now != null;
-        return now.getHand(InteractionHand.MAIN_HAND).getPos();
+        return now.getHand(hand).getPos();
     }
 
-    // Reset catch state
-    private static void resetCatch() {
-        catchActive = false;
-        targetProjectile = null;
-        catchTicksHeld = 0;
+    // Reset catch state (main hand)
+    private static void resetCatchMain() {
+        catchActiveMain = false;
+        targetProjectileMain = null;
+        catchTicksHeldMain = 0;
     }
 
-    // Resets throw variables
+    // Reset catch state (offhand)
+    private static void resetCatchOff() {
+        catchActiveOff = false;
+        targetProjectileOff = null;
+        catchTicksHeldOff = 0;
+    }
+
+    // Resets throw variables (main hand)
+    private static void resetMain() {
+        activeMain = false;
+        useBindHeldMain = false;
+        playerCrouchedMain = false;
+        cancelBreakingMain = false;
+        heldItemMain = ItemStack.EMPTY;
+        ticksHeldMain = 0;
+    }
+
+    // Resets throw variables (offhand)
+    private static void resetOff() {
+        activeOff = false;
+        useBindHeldOff = false;
+        playerCrouchedOff = false;
+        cancelBreakingOff = false;
+        heldItemOff = ItemStack.EMPTY;
+        ticksHeldOff = 0;
+    }
+
+    // Resets all throw variables
     private static void reset() {
-        active = false;
-        useBindHeld = false;
-        playerCrouched = false;
-        cancelBreaking = false;
-        heldItem = ItemStack.EMPTY;
-        ticksHeld = 0;
+        resetMain();
+        resetOff();
         tntHelper.stopTracking(); // Reset TNT tracking state
     }
 }
