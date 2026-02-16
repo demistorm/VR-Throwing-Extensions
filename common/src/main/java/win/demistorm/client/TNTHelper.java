@@ -18,26 +18,34 @@ import win.demistorm.VRThrowingExtensions;
 public class TNTHelper {
     private boolean isLit = false;
     private boolean isTracking = false;
+    private InteractionHand activeTNTHand = InteractionHand.MAIN_HAND;
     private LocalPlayer trackingPlayer = null;
     private int ticksSinceLit = 0; // How many ticks since TNT was lit
     private static final int TNT_FUSE_TICKS = 100; // Server-side fuse duration
 
     private static final float proximityDistance = 0.2f; // Distance in meters
 
-    // Check if offhand swiped through main hand's proximity zone
+    // Check if flint & steel hand swiped through TNT hand's proximity zone
     public boolean checkSwipeMotion(LocalPlayer player) {
         if (!isTracking || trackingPlayer == null) return false;
 
-        // Must be holding flint & steel in offhand
-        if (!isHoldingFlintAndSteel(player)) {
-            return false;
+        // Find which hand has flint & steel
+        InteractionHand flintHand = null;
+        if (isHoldingFlintAndSteel(player, InteractionHand.MAIN_HAND)) {
+            flintHand = InteractionHand.MAIN_HAND;
+        } else if (isHoldingFlintAndSteel(player, InteractionHand.OFF_HAND)) {
+            flintHand = InteractionHand.OFF_HAND;
         }
+
+        if (flintHand == null) return false;
+
+        if (flintHand == activeTNTHand) return false;
 
         VRPoseHistory history = VRAPI.instance().getHistoricalVRPoses(player);
         if (history == null) return false;
 
         // Check last 5 ticks
-        // At each tick, check distance between main hand and offhand at that tick
+        // At each tick, check distance between TNT hand and flint hand at that tick
         boolean wasOutside = false;
         boolean wasInside = false;
         boolean isOutsideAgain = false;
@@ -52,24 +60,24 @@ public class TNTHelper {
 
             if (historicalPose == null) continue;
 
-            VRBodyPartData mainHandData = historicalPose.getHand(InteractionHand.MAIN_HAND);
-            VRBodyPartData offHandData = historicalPose.getHand(InteractionHand.OFF_HAND);
+            VRBodyPartData tntHandData = historicalPose.getHand(activeTNTHand);
+            VRBodyPartData flintHandData = historicalPose.getHand(flintHand);
 
-            if (mainHandData == null || offHandData == null) continue;
+            if (tntHandData == null || flintHandData == null) continue;
 
-            Vector3f mainHandPos = new Vector3f(
-                (float) mainHandData.getPos().x,
-                (float) mainHandData.getPos().y,
-                (float) mainHandData.getPos().z
+            Vector3f tntHandPos = new Vector3f(
+                (float) tntHandData.getPos().x,
+                (float) tntHandData.getPos().y,
+                (float) tntHandData.getPos().z
             );
 
-            Vector3f offHandPos = new Vector3f(
-                (float) offHandData.getPos().x,
-                (float) offHandData.getPos().y,
-                (float) offHandData.getPos().z
+            Vector3f flintHandPos = new Vector3f(
+                (float) flintHandData.getPos().x,
+                (float) flintHandData.getPos().y,
+                (float) flintHandData.getPos().z
             );
 
-            Vector3f offset = new Vector3f(offHandPos).sub(mainHandPos);
+            Vector3f offset = new Vector3f(flintHandPos).sub(tntHandPos);
             float distance = offset.length();
 
             if (i == 0) {
@@ -103,15 +111,11 @@ public class TNTHelper {
         return player.getItemInHand(hand).is(Items.FLINT_AND_STEEL);
     }
 
-    // Check if player is holding flint & steel in offhand
-    public boolean isHoldingFlintAndSteel(LocalPlayer player) {
-        return isHoldingFlintAndSteel(player, InteractionHand.OFF_HAND);
-    }
-
     // Start tracking TNT lighting
-    public void startTracking(LocalPlayer player) {
+    public void startTracking(LocalPlayer player, InteractionHand hand) {
         isTracking = true;
         isLit = false;
+        activeTNTHand = hand;
         trackingPlayer = player;
     }
 
@@ -133,7 +137,7 @@ public class TNTHelper {
         return isTracking;
     }
 
-    // Emit smoke particles from main hand when TNT is lit
+    // Emit smoke particles from hand holding lit TNT
     public void emitSmokeParticles(LocalPlayer player) {
         if (!isLit || trackingPlayer == null) return;
 
@@ -153,11 +157,11 @@ public class TNTHelper {
             return;
         }
 
-        // Get main hand position from VR
+        // Get hand holding TNT from VR
         VRPose pose = VRClientAPI.instance().getPreTickWorldPose();
         if (pose == null) return;
 
-        VRBodyPartData hand = pose.getHand(InteractionHand.MAIN_HAND);
+        VRBodyPartData hand = pose.getHand(activeTNTHand);
         if (hand == null) return;
 
         Vec3 handPos = hand.getPos();

@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,11 +27,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.InteractionHand;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.effects.BoomerangEffect;
 import win.demistorm.effects.EmbeddingEffect;
 import win.demistorm.effects.PlaceEffect;
 import win.demistorm.network.data.BloodParticleData;
+
+import java.util.Objects;
 
 import static win.demistorm.VRThrowingExtensions.log;
 
@@ -72,6 +76,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> IS_CATCHING =
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> CATCHING_HAND =
+            SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BOUNCE_ACTIVE =
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_EMBEDDED =
@@ -90,6 +96,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         super.defineSynchedData();
         this.entityData.define(HAND_ROLL, 0f);
         this.entityData.define(IS_CATCHING, false);
+        this.entityData.define(CATCHING_HAND, 0);
         this.entityData.define(BOUNCE_ACTIVE, false);
         this.entityData.define(IS_EMBEDDED, false);
         this.entityData.define(EMBED_YAW, 0f);
@@ -139,12 +146,17 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     }
 
     public void startCatch() {
+        startCatch(InteractionHand.MAIN_HAND);
+    }
+
+    public void startCatch(InteractionHand hand) {
         EmbeddingEffect.releaseEmbedding(this);
         this.catching = true;
         this.storedVelocity = getDeltaMovement();
         this.entityData.set(IS_CATCHING, true);
+        this.entityData.set(CATCHING_HAND, hand.ordinal());
         this.setNoGravity(true);
-        log.debug("[VR Catch] Started catch for projectile {}", this.getId());
+        log.debug("[VR Catch] Started catch for projectile {} with {}", this.getId(), hand);
     }
 
     public void cancelCatch() {
@@ -158,6 +170,10 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     }
 
     public boolean isCatching() { return this.entityData.get(IS_CATCHING); }
+    public InteractionHand getCatchingHand() {
+        int handOrdinal = this.entityData.get(CATCHING_HAND);
+        return handOrdinal == 1 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+    }
     public boolean isBounceActive() { return this.entityData.get(BOUNCE_ACTIVE); }
     public int getStackSize() { return this.stackSize; }
 
@@ -375,9 +391,9 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         Multimap<Attribute, AttributeModifier> modifiers = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
 
         for (Attribute attribute : modifiers.keySet()) {
-            if (attribute.equals(Attributes.ATTACK_DAMAGE)) {
+            if (Objects.requireNonNull(attribute).equals(Attributes.ATTACK_DAMAGE)) {
                 for (AttributeModifier modifier : modifiers.get(attribute)) {
-                    double amount = modifier.getAmount();
+                    double amount = Objects.requireNonNull(modifier).getAmount();
                     AttributeModifier.Operation operation = modifier.getOperation();
 
                     if (operation == AttributeModifier.Operation.ADDITION) {

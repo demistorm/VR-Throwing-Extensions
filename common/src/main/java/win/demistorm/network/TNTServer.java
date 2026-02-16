@@ -2,7 +2,9 @@ package win.demistorm.network;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import win.demistorm.Platform;
 import win.demistorm.VRThrowingExtensions;
 
@@ -19,6 +21,8 @@ public class TNTServer {
 
     // Track fuse timers for each player (player → remaining ticks)
     private final Map<ServerPlayer, Integer> tntTimers = new HashMap<>();
+    // Track which hand has the lit TNT (player → hand)
+    private final Map<ServerPlayer, InteractionHand> tntHands = new HashMap<>();
 
     // How many ticks before lit TNT explodes (slightly longer than vanilla 80)
     private static final int TNT_FUSE_TICKS = 100;
@@ -37,11 +41,12 @@ public class TNTServer {
     }
 
     // Start TNT fuse timer for a player
-    public void startTNTTimer(ServerPlayer player) {
+    public void startTNTTimer(ServerPlayer player, InteractionHand hand) {
         if (player == null || !player.isAlive()) return;
 
         tntTimers.put(player, TNT_FUSE_TICKS);
-        log.debug("[TNTServer] Started {}-tick fuse timer for {}", TNT_FUSE_TICKS, player.getName().getString());
+        tntHands.put(player, hand);
+        log.debug("[TNTServer] Started {}-tick fuse timer for {} in {}", TNT_FUSE_TICKS, player.getName().getString(), hand);
 
         // Note: TNT ignition sound would play here but SoundEvents.TNT_PRIMED is a Holder<SoundEvent>
         // The PrimedTnt entity will play its own sound when spawned/thrown
@@ -50,6 +55,7 @@ public class TNTServer {
     // Cancel TNT fuse timer for a player
     public void cancelTNTTimer(ServerPlayer player) {
         if (tntTimers.remove(player) != null) {
+            tntHands.remove(player);
             log.debug("[TNTServer] Cancelled fuse timer for {}", player.getName().getString());
         }
     }
@@ -109,11 +115,13 @@ public class TNTServer {
         level.explode(player, player.getX(), player.getY(), player.getZ(),
                 EXPLOSION_POWER, Level.ExplosionInteraction.TNT);
 
-        // Consume 1 TNT from player's main hand if they still have it
-        if (player.getMainHandItem().is(Items.TNT)) {
-            player.getMainHandItem().shrink(1);
-            if (player.getMainHandItem().isEmpty()) {
-                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+        // Consume 1 TNT from hand if they still have it
+        InteractionHand hand = tntHands.getOrDefault(player, InteractionHand.MAIN_HAND);
+        ItemStack heldStack = player.getItemInHand(hand);
+        if (heldStack.is(Items.TNT)) {
+            heldStack.shrink(1);
+            if (heldStack.isEmpty()) {
+                player.setItemInHand(hand, new net.minecraft.world.item.ItemStack(Items.AIR));
             }
         }
 

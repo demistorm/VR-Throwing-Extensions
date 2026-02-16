@@ -28,7 +28,7 @@ public final class NetworkHandlers {
     public static void handleThrow(Player player, ThrowData data) {
         if (player == null || !player.isAlive()) return;
 
-        ItemStack heldStack = player.getMainHandItem();
+        ItemStack heldStack = data.hand() == InteractionHand.MAIN_HAND ? player.getMainHandItem() : player.getOffhandItem();
         if (heldStack.isEmpty() || ModCompat.throwingDisabled(heldStack, player, data.playerCrouched(), data.useBindHeld())) return;
 
         // PlaceEffect logic
@@ -65,10 +65,10 @@ public final class NetworkHandlers {
 
             // Update player inventory
             if (blockResult.throwWholeStack()) {
-                player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                player.setItemInHand(data.hand(), ItemStack.EMPTY);
             } else {
                 if (heldStack.getCount() > 1) heldStack.shrink(1);
-                else player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                else player.setItemInHand(data.hand(), ItemStack.EMPTY);
             }
             return;
         }
@@ -82,8 +82,8 @@ public final class NetworkHandlers {
 
         switch (behavior) {
             case VANILLA_PROJECTILE -> handleVanillaProjectile(player, heldStack, data);
-            case CUSTOM_PROJECTILE_SINGLE -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), false, data.useBindHeld(), data.playerCrouched());
-            case CUSTOM_PROJECTILE_WHOLE_STACK -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), true, data.useBindHeld(), data.playerCrouched());
+            case CUSTOM_PROJECTILE_SINGLE -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), false, data.useBindHeld(), data.playerCrouched(), data.hand());
+            case CUSTOM_PROJECTILE_WHOLE_STACK -> handleCustomProjectile(player, heldStack, origin, velocity, data.rollDeg(), true, data.useBindHeld(), data.playerCrouched(), data.hand());
         }
     }
 
@@ -118,7 +118,7 @@ public final class NetworkHandlers {
     }
 
     // Handle custom projectile (ThrownProjectileEntity)
-    private static void handleCustomProjectile(Player player, ItemStack heldStack, Vec3 origin, Vec3 velocity, float rollDeg, boolean wholeStack, boolean useBindHeld, boolean playerCrouched) {
+    private static void handleCustomProjectile(Player player, ItemStack heldStack, Vec3 origin, Vec3 velocity, float rollDeg, boolean wholeStack, boolean useBindHeld, boolean playerCrouched, InteractionHand hand) {
         log.debug("[Network] Handling custom projectile for item: {}", heldStack);
 
         ThrownProjectileEntity proj = new ThrownProjectileEntity(player.level(), player, heldStack, wholeStack, useBindHeld, playerCrouched);
@@ -150,10 +150,10 @@ public final class NetworkHandlers {
 
         // Update player inventory
         if (wholeStack) {
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(hand, ItemStack.EMPTY);
         } else {
             if (heldStack.getCount() > 1) heldStack.shrink(1);
-            else player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            else player.setItemInHand(hand, ItemStack.EMPTY);
         }
     }
 
@@ -167,7 +167,7 @@ public final class NetworkHandlers {
         }
 
         if (data.startCatch()) {
-            projectile.startCatch();
+            projectile.startCatch(data.hand());
         } else {
             projectile.cancelCatch();
         }
@@ -203,9 +203,12 @@ public final class NetworkHandlers {
 
         if (!projectile.isCatching()) return;
 
+        // Get the hand that was catching (from projectile data)
+        InteractionHand hand = projectile.getCatchingHand();
+
         // Check hand is empty
-        ItemStack mainHand = player.getMainHandItem();
-        if (!mainHand.isEmpty()) return;
+        ItemStack handItem = player.getItemInHand(hand);
+        if (!handItem.isEmpty()) return;
 
         // Get projectile's item
         ItemStack projectileStack = projectile.getItem();
@@ -221,7 +224,7 @@ public final class NetworkHandlers {
         // Return item to player
         ItemStack giveStack = projectileStack.copy();
         giveStack.setCount(stackSize);
-        player.setItemInHand(InteractionHand.MAIN_HAND, giveStack);
+        player.setItemInHand(hand, giveStack);
 
         // Remove projectile
         projectile.discard();
@@ -285,7 +288,7 @@ public final class NetworkHandlers {
         log.debug("[Network] {} lit TNT with flint & steel", player.getName().getString());
 
         // Start the fuse timer
-        TNTServer.instance().startTNTTimer((ServerPlayer) player);
+        TNTServer.instance().startTNTTimer((ServerPlayer) player, InteractionHand.MAIN_HAND);
 
         if (VRThrowingExtensions.debugMode) {
             player.displayClientMessage(Component.literal("TNT lit! Throw it or BOOM!"), true);
@@ -307,8 +310,8 @@ public final class NetworkHandlers {
             return;
         }
 
-        // Check player is still holding TNT
-        ItemStack heldStack = player.getMainHandItem();
+        // Check player is still holding TNT in the correct hand
+        ItemStack heldStack = player.getItemInHand(data.hand());
         if (!heldStack.is(net.minecraft.world.item.Items.TNT)) {
             log.warn("[Network] Player {} tried to throw TNT but not holding TNT",
                     player.getName().getString());
@@ -337,7 +340,7 @@ public final class NetworkHandlers {
         if (heldStack.getCount() > 1) {
             heldStack.shrink(1);
         } else {
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            player.setItemInHand(data.hand(), ItemStack.EMPTY);
         }
 
         // Cancel the fuse timer (TNT is now thrown entity with its own fuse)
