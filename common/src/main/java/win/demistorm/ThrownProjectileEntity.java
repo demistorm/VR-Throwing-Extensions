@@ -23,6 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.InteractionHand;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.effects.BoomerangEffect;
 import win.demistorm.effects.EmbeddingEffect;
@@ -69,6 +70,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> IS_CATCHING =
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> CATCHING_HAND =
+            SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BOUNCE_ACTIVE =
             SynchedEntityData.defineId(ThrownProjectileEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_EMBEDDED =
@@ -87,6 +90,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         super.defineSynchedData(builder);
         builder.define(HAND_ROLL, 0f);
         builder.define(IS_CATCHING, false);
+        builder.define(CATCHING_HAND, 0);
         builder.define(BOUNCE_ACTIVE, false);
         builder.define(IS_EMBEDDED, false);
         builder.define(EMBED_YAW, 0f);
@@ -136,12 +140,17 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     }
 
     public void startCatch() {
+        startCatch(InteractionHand.MAIN_HAND);
+    }
+
+    public void startCatch(InteractionHand hand) {
         EmbeddingEffect.releaseEmbedding(this);
         this.catching = true;
         this.storedVelocity = getDeltaMovement();
         this.entityData.set(IS_CATCHING, true);
+        this.entityData.set(CATCHING_HAND, hand.ordinal());
         this.setNoGravity(true);
-        log.debug("[VR Catch] Started catch for projectile {}", this.getId());
+        log.debug("[VR Catch] Started catch for projectile {} with {}", this.getId(), hand);
     }
 
     public void cancelCatch() {
@@ -155,6 +164,10 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
     }
 
     public boolean isCatching() { return this.entityData.get(IS_CATCHING); }
+    public InteractionHand getCatchingHand() {
+        int handOrdinal = this.entityData.get(CATCHING_HAND);
+        return handOrdinal == 1 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+    }
     public boolean isBounceActive() { return this.entityData.get(BOUNCE_ACTIVE); }
     public int getStackSize() { return this.stackSize; }
 
