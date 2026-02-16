@@ -30,12 +30,14 @@ public class Network {
                 buf.writeBoolean(data.useBindHeld());
                 buf.writeBoolean(data.playerCrouched());
                 buf.writeFloat(data.rollDeg());
+                buf.writeEnum(data.hand());
             },
             // Load throw data from buffer
             (buf) -> new ThrowData(
                 buf.readDouble(), buf.readDouble(), buf.readDouble(),
                 buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                buf.readBoolean(), buf.readBoolean(), buf.readFloat()
+                buf.readBoolean(), buf.readBoolean(), buf.readFloat(),
+                buf.readEnum(net.minecraft.world.InteractionHand.class)
             ),
             // Process throw packet
             (data, player) -> NetworkHandlers.handleThrow(player, data)
@@ -46,8 +48,9 @@ public class Network {
             (data, buf) -> {
                 buf.writeInt(data.entityId());
                 buf.writeBoolean(data.startCatch());
+                buf.writeEnum(data.hand());
             },
-            (buf) -> new CatchData(buf.readInt(), buf.readBoolean()),
+            (buf) -> new CatchData(buf.readInt(), buf.readBoolean(), buf.readEnum(net.minecraft.world.InteractionHand.class)),
             (data, player) -> NetworkHandlers.handleCatch(player, data)
         );
 
@@ -162,11 +165,13 @@ public class Network {
                 buf.writeDouble(data.velY());
                 buf.writeDouble(data.velZ());
                 buf.writeFloat(data.rollDeg());
+                buf.writeEnum(data.hand());
             },
             (buf) -> new ThrowTNTData(
                 buf.readDouble(), buf.readDouble(), buf.readDouble(),
                 buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                buf.readFloat()
+                buf.readFloat(),
+                buf.readEnum(net.minecraft.world.InteractionHand.class)
             ),
             (data, player) -> NetworkHandlers.handleThrowTNT(player, data)
         );
