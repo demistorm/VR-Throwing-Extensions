@@ -1,5 +1,6 @@
 package win.demistorm.client;
 
+import net.minecraft.client.Minecraft;
 import org.vivecraft.api.client.VRClientAPI;
 import win.demistorm.ConfigHelper;
 import win.demistorm.Platform;
@@ -50,6 +51,10 @@ public class VRThrowingExtensionsClient {
 
 	// Send player config to server (only if non-authoritative)
 	public static void sendPlayerConfigToServer() {
+		if (Minecraft.getInstance().player == null) {
+			return;
+		}
+
 		if (!ConfigHelper.receivedServerConfig()) {
 			PlayerConfigData data = new PlayerConfigData(
 				ConfigHelper.CLIENT.weaponEffect,
