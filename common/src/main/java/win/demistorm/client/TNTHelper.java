@@ -127,6 +127,10 @@ public class TNTHelper {
 
     // Stop tracking and reset state
     public void stopTracking() {
+        if (isLit) {
+            ClientNetworkHelper.sendCancelTNTPacket();
+        }
+
         isTracking = false;
         isLit = false;
         trackingPlayer = null;
