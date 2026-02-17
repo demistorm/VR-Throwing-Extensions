@@ -7,6 +7,7 @@ import win.demistorm.network.Network;
 import win.demistorm.network.data.ThrowData;
 import win.demistorm.network.data.ThrowTNTData;
 import win.demistorm.network.data.TNTLitData;
+import win.demistorm.network.data.CancelTNTData;
 import win.demistorm.network.data.CatchData;
 import win.demistorm.network.data.CatchUpdateData;
 import win.demistorm.network.data.CatchCompleteData;
@@ -57,5 +58,10 @@ public final class ClientNetworkHelper {
     public static void sendThrowTNTPacket(Vec3 pos, Vec3 velocity, float rollDeg, net.minecraft.world.InteractionHand hand) {
         log.debug("ClientNetworkHelper: Sending lit TNT throw. pos={} vel={} roll={} hand={}", pos, velocity, rollDeg, hand);
         Network.INSTANCE.sendToServer(new ThrowTNTData(pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z, rollDeg, hand));
+    }
+
+    public static void sendCancelTNTPacket() {
+        log.debug("ClientNetworkHelper: Sending TNT timer cancel");
+        Network.INSTANCE.sendToServer(new CancelTNTData());
     }
 }
