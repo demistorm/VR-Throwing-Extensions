@@ -1,7 +1,7 @@
 package win.demistorm;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import org.apache.logging.log4j.Level;
@@ -57,41 +57,60 @@ public class VRThrowingExtensions {
 	private static void registerServerEventHandlers() {
 		// Send config to new players when they join
 		Platform.registerServerPlayerJoinListener(player -> {
-			if (ConfigHelper.ACTIVE.serverAuthoritative) {
-				// Send server config to player
-				ConfigHelper.sendConfigToPlayer(player);
-				log.debug("Sent config to joining player: {}", player.getName().getString());
+			if (player.level().getServer() instanceof DedicatedServer) {
+				if (ConfigHelper.ACTIVE.serverAuthoritative) {
+					// Send server config to player
+					ConfigHelper.sendConfigToPlayer(player);
+					log.debug("Sent config to joining player: {}", player.getName().getString());
 
-				// Send welcome message showing VTE server's configured features
-				sendWelcomeMessage(player);
-			} else {
-				// Don't send ConfigSync for if non-authoritative
-				log.debug("Non-authoritative server: {} will use local config", player.getName().getString());
+					// Send welcome message showing VTE server's configured features
+					sendWelcomeMessage(player);
+				} else {
+					// Don't send ConfigSync for if non-authoritative
+					log.debug("Non-authoritative server: {} will use local config", player.getName().getString());
 
-				player.sendSystemMessage(Component.literal("§a[VTE]§r This server uses your personal VTE settings!"));
+					player.sendSystemMessage(Component.literal("§a[VTE]§r This server uses your personal VTE settings!"));
+				}
 			}
 		});
 	}
 
 	// Send welcome message showing server settings (authoritative mode)
 	private static void sendWelcomeMessage(ServerPlayer player) {
-		MutableComponent message = Component.literal("§a[VTE]§r Server settings: ");
+		List<String> components = new ArrayList<>();
+
+		// Projectile/TNT throwing
+		if (ConfigHelper.ACTIVE.throwableProjectiles && ConfigHelper.ACTIVE.throwableTNT) {
+			components.add("Projectile and TNT Throwing");
+		} else if (ConfigHelper.ACTIVE.throwableProjectiles) {
+			components.add("Projectile Throwing");
+		} else if (ConfigHelper.ACTIVE.throwableTNT) {
+			components.add("TNT Throwing");
+		}
 
 		// Weapon effect
-		String weaponEffectName = switch (ConfigHelper.ACTIVE.weaponEffect) {
-			case BOOMERANG -> "§eBoomerang";
-			case EMBED -> "§cEmbedding";
-			case OFF -> "§7Off";
+		String weaponEffectText = switch (ConfigHelper.ACTIVE.weaponEffect) {
+			case OFF -> "§7No weapon effects";
+			case BOOMERANG -> "§eWeapons will Boomerang";
+			case EMBED -> "§cWeapons will Embed";
 		};
-		message.append(Component.literal(weaponEffectName + "§r, "));
+		components.add(weaponEffectText + "§r");
 
-		// Key features
-		List<String> features = new ArrayList<>();
-		if (ConfigHelper.ACTIVE.throwableProjectiles) features.add("Projectiles");
-		if (ConfigHelper.ACTIVE.throwableTNT) features.add("TNT Throwing");
-		if (ConfigHelper.ACTIVE.placeBlocksOnThrow) features.add("Block Throwing");
+		// Block placement
+		if (ConfigHelper.ACTIVE.placeBlocksOnThrow) {
+			if (ConfigHelper.ACTIVE.onlyPlaceLights) {
+				components.add("Place lights via throws");
+			} else {
+				components.add("Block placing via throws");
+			}
+		}
 
-		message.append(Component.literal(String.join(", ", features)));
-		player.sendSystemMessage(message);
+		// Crouch tip
+		if (ConfigHelper.ACTIVE.placeBlocksOnThrow && ConfigHelper.ACTIVE.crouchBehaviorPlaceBlocks == ConfigHelper.CrouchBehavior.INVERTED) {
+			components.add("Crouch to enable placement for thrown blocks");
+		}
+
+		String messageText = "§a[VTE]§r Server enabled features: " + String.join(", ", components) + ".";
+		player.sendSystemMessage(Component.literal(messageText));
 	}
 }
