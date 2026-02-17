@@ -50,6 +50,9 @@ public class ThrowHelper {
     private static int ticksHeldOff  = 0;                       // How long trigger is pressed
     private static int catchTicksHeldOff = 0;                   // How long trigger is pressed for catching
 
+    private static boolean swungMain = false;                   // Already swung for this main hand key press
+    private static boolean swungOff = false;                    // Already swung for this offhand key press
+
     private static final TNTHelper tntHelper = new TNTHelper(); // TNT lighting tracker
 
     // Tracks which hand has priority for catching (null = no priority)
@@ -103,6 +106,16 @@ public class ThrowHelper {
             boolean offThrowPressed = RemapBindings.THROW_OFFHAND.isDown();
             boolean throwStackPressed = RemapBindings.THROW_STACK.isDown(); // Throw stack/null modifier keybind
 
+            // Swing when throw key is first pressed
+            if (mainThrowPressed && !swungMain) {
+                player.swing(InteractionHand.MAIN_HAND);
+                swungMain = true;
+            }
+            if (offThrowPressed && !swungOff) {
+                player.swing(InteractionHand.OFF_HAND);
+                swungOff = true;
+            }
+
             // Reset allowed catch hand at start of each tick
             allowedCatchHand = null;
 
@@ -149,6 +162,10 @@ public class ThrowHelper {
 
             // Process offhand throwing
             processThrowHand(player, offThrowPressed, throwStackPressed, InteractionHand.OFF_HAND);
+
+            // Reset swing flags when keys are released
+            if (!mainThrowPressed) swungMain = false;
+            if (!offThrowPressed) swungOff = false;
         }
 
         @Override
