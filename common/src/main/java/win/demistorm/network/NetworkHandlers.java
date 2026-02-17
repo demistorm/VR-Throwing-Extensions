@@ -354,4 +354,17 @@ public final class NetworkHandlers {
                     Component.literal("Thrown lit TNT with " + remainingTicks + " tick fuse!"), true);
         }
     }
+
+    // Client cancelled lit TNT throw
+    public static void handleCancelTNT(Player player) {
+        if (player == null || !player.isAlive()) return;
+
+        log.debug("[Network] {} canceled throw with lit TNT", player.getName().getString());
+
+        TNTServer.instance().cancelTNTTimer((ServerPlayer) player);
+
+        if (VRThrowingExtensions.debugMode) {
+            player.displayClientMessage(Component.literal("TNT timer canceled!"), true);
+        }
+    }
 }
