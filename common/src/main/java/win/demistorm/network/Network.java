@@ -3,6 +3,7 @@ package win.demistorm.network;
 import win.demistorm.ConfigHelper;
 import win.demistorm.WeaponEffectType;
 import win.demistorm.network.data.*;
+import win.demistorm.network.data.CancelTNTData;
 
 // Handles all networking between client and server
 public class Network {
@@ -174,6 +175,15 @@ public class Network {
                 buf.readEnum(net.minecraft.world.InteractionHand.class)
             ),
             (data, player) -> NetworkHandlers.handleThrowTNT(player, data)
+        );
+
+        // Cancel TNT packet (client canceled lit TNT throw)
+        INSTANCE.register(CancelTNTData.class,
+            (data, buf) -> {
+                // Empty packet, no data to write
+            },
+            (buf) -> new CancelTNTData(),
+            (data, player) -> NetworkHandlers.handleCancelTNT(player)
         );
     }
 }
