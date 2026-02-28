@@ -19,12 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.ThrownProjectileEntity;
 
-/**
- * 1.21.10 submit-pipeline ThrownItemRenderer
- * - render(...) -> submit(...)
- * - MultiBufferSource -> SubmitNodeCollector
- * - Use ItemModelResolver.updateForNonLiving(...) and ItemStackRenderState#submit(...)
- */
 public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, ThrownItemRenderer.ThrownItemRenderState> {
     private final ItemModelResolver itemModelResolver;
     private final float scale;
@@ -65,8 +59,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             state.embedTiltDeg = entity.getEmbedTilt();
         }
 
-        // Prepare the item’s render state (correct 1.21.10 signature)
-        // updateForNonLiving(itemState, stack, displayContext, entity)
+        // Prepare the item’s render state
         itemModelResolver.updateForNonLiving(
                 state.item,
                 state.itemStack,
@@ -99,7 +92,6 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             // Attempt a rotation flip instead of a scale hack
             matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
 
-            // Correct 1.21.10 signature: submit(pose, collector, light, overlay, outlineColor)
             state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 
             matrices.popPose();
@@ -140,7 +132,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         matrices.scale(scale, scale, scale);
 
-        // Attempt a rotation flip instead of a scale hack (worked perfectly wow, why didn't I try this before)
+        // Rotation flip instead of a scale hack (worked perfectly wow, why didn't I try this before)
         matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
 
         // Submit prepared item
@@ -165,6 +157,5 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
         public float embedTiltDeg = 0f;
 
         public int lightCoords = 0;
-        // outlineColor is inherited from EntityRenderState
     }
 }

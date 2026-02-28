@@ -20,12 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import win.demistorm.ThrownTNTEntity;
 
-/**
- * 1.21.10 submit-pipeline ThrownTNTRenderer
- * - render(...) -> submit(...)
- * - MultiBufferSource -> SubmitNodeCollector
- * - Use ItemModelResolver.updateForNonLiving(...) and ItemStackRenderState#submit(...)
- */
+// Renders thrown primed TNT as an item with velocity-based spinning
 public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNTRenderer.ThrownTNTRenderState> {
     private final ItemModelResolver itemModelResolver;
     private final float scale;
@@ -38,7 +33,7 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
     }
 
     @Override
-    public @NotNull ThrownTNTRenderState createRenderState() {
+    public @NotNull ThrownTNTRenderer.ThrownTNTRenderState createRenderState() {
         return new ThrownTNTRenderState();
     }
 
@@ -50,15 +45,14 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         state.age = entity.tickCount + tickDelta;
         state.handRollDeg = entity.getHandRoll();
 
-        // Packed light for submit()
         BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
         state.lightCoords = LevelRenderer.getLightColor(entity.level(), pos);
 
-        // Prepare the item's render state (correct 1.21.10 signature)
-        // updateForNonLiving(itemState, stack, displayContext, entity)
+        // Prepare the item's render state
+        ItemStack tntItemStack = new ItemStack(Items.TNT);
         itemModelResolver.updateForNonLiving(
                 state.item,
-                state.itemStack,
+                tntItemStack,
                 ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
                 entity
         );
@@ -93,7 +87,7 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
             matrices.mulPose(Axis.ZP.rotationDegrees(-state.handRollDeg));
         }
 
-        // Velocity-based spin speed - full spin or no spin
+        // Velocity-based spin speed (full spin or no spin)
         float speed = (float) vel.length();
         float spinThreshold = 0.1f; // Above this, spin; below, don't
         float spinSpeed = (speed > spinThreshold) ? 15.0F : 0.0F;
@@ -114,13 +108,10 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
     }
 
     public static class ThrownTNTRenderState extends EntityRenderState {
-        public final ItemStack itemStack = new ItemStack(Items.TNT);
         public final ItemStackRenderState item = new ItemStackRenderState();
-
         public Vec3 velocity = Vec3.ZERO;
         public float age = 0.0f;
         public float handRollDeg = 0f;
         public int lightCoords = 0;
-        // outlineColor is inherited from EntityRenderState
     }
 }

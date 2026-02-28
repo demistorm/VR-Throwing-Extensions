@@ -19,12 +19,12 @@ public class TNTServer {
 
     private static TNTServer instance;
 
-    // Track fuse timers for each player (player → remaining ticks)
+    // Track fuse timers for each player (player to remaining ticks)
     private final Map<ServerPlayer, Integer> tntTimers = new HashMap<>();
-    // Track which hand has the lit TNT (player → hand)
+    // Track which hand has the lit TNT (player to hand)
     private final Map<ServerPlayer, InteractionHand> tntHands = new HashMap<>();
 
-    // How many ticks before lit TNT explodes (slightly longer than vanilla 80)
+    // How many ticks before lit TNT explodes
     private static final int TNT_FUSE_TICKS = 100;
 
     // Explosion power (same as vanilla TNT)
@@ -32,7 +32,6 @@ public class TNTServer {
 
     private TNTServer() {}
 
-    // Get singleton instance
     public static TNTServer instance() {
         if (instance == null) {
             instance = new TNTServer();
@@ -47,9 +46,6 @@ public class TNTServer {
         tntTimers.put(player, TNT_FUSE_TICKS);
         tntHands.put(player, hand);
         log.debug("[TNTServer] Started {}-tick fuse timer for {} in {}", TNT_FUSE_TICKS, player.getName().getString(), hand);
-
-        // Note: TNT ignition sound would play here but SoundEvents.TNT_PRIMED is a Holder<SoundEvent>
-        // The PrimedTnt entity will play its own sound when spawned/thrown
     }
 
     // Cancel TNT fuse timer for a player
@@ -60,17 +56,14 @@ public class TNTServer {
         }
     }
 
-    // Get remaining fuse ticks for a player (returns 0 if no active timer)
     public int getRemainingTicks(ServerPlayer player) {
         return tntTimers.getOrDefault(player, 0);
     }
 
-    // Check if player has an active TNT timer
     public boolean hasActiveTimer(ServerPlayer player) {
         return tntTimers.containsKey(player);
     }
 
-    // Register server tick handler to update timers
     public void registerTickHandler() {
         Platform.registerServerPlayerPostTickListener(this::updatePlayer);
         log.info("[TNTServer] Registered tick handler for fuse timer updates");
@@ -96,7 +89,6 @@ public class TNTServer {
             // Update timer
             tntTimers.put(player, remaining);
 
-            // Debug: show remaining time every 20 ticks (1 second)
             if (VRThrowingExtensions.debugMode && remaining % 20 == 0) {
                 player.displayClientMessage(
                     net.minecraft.network.chat.Component.literal("TNT fuse: " + remaining + " ticks"), true);
@@ -111,7 +103,6 @@ public class TNTServer {
         log.debug("[TNTServer] TNT exploded at {}'s position", player.getName().getString());
 
         // Create explosion with vanilla TNT force
-        // Note: Using TNT explosion type which doesn't destroy blocks as aggressively
         level.explode(player, player.getX(), player.getY(), player.getZ(),
                 EXPLOSION_POWER, Level.ExplosionInteraction.TNT);
 
