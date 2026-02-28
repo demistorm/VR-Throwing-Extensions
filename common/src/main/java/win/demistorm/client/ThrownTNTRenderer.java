@@ -46,12 +46,10 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         state.age = entity.tickCount + tickDelta;
         state.handRollDeg = entity.getHandRoll();
 
-        // Packed light for submit()
         BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
         state.lightCoords = LevelRenderer.getLightColor(entity.level(), pos);
 
-        // Prepare the item's render state (correct 1.21.10+ signature)
-        // updateForNonLiving(itemState, stack, displayContext, entity)
+        // Prepare the item's render state
         ItemStack tntItemStack = new ItemStack(Items.TNT);
         itemModelResolver.updateForNonLiving(
                 state.item,
@@ -90,7 +88,7 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
             matrices.mulPose(Axis.ZP.rotationDegrees(-state.handRollDeg));
         }
 
-        // Velocity-based spin speed - full spin or no spin
+        // Velocity-based spin speed (full spin or no spin)
         float speed = (float) vel.length();
         float spinThreshold = 0.1f; // Above this, spin; below, don't
         float spinSpeed = (speed > spinThreshold) ? 15.0F : 0.0F;
@@ -116,6 +114,5 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         public float age = 0.0f;
         public float handRollDeg = 0f;
         public int lightCoords = 0;
-        // outlineColor is inherited from EntityRenderState
     }
 }

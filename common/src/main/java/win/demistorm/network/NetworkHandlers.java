@@ -340,7 +340,7 @@ public final class NetworkHandlers {
             player.setItemInHand(data.hand(), ItemStack.EMPTY);
         }
 
-        // Cancel the fuse timer (TNT is now thrown entity with its own fuse)
+        // Cancel the fuse timer
         TNTServer.instance().cancelTNTTimer((ServerPlayer) player);
 
         log.debug("[Network] Spawned lit PrimedTnt with {} tick fuse at ({}, {}, {})",
