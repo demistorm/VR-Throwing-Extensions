@@ -1,3 +1,20 @@
+## Version 1.4.0
+#### Additions
+- Added [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights) support for thrown torches/lanterns!
+- Offhand throwing! **Needs to be bound in SteamVR controller settings.** Supports all the same features from the main hand throwing!
+- Rebindable throwing and throw stack binds! Set them in the SteamVR modded binds tab and then change their 
+vanilla keybind to something you don't use and viola!
+- Added Server Authoritative option to the mod's config. Setting it to false will allow players on the server to
+choose their own VTE settings
+- Added a message on server join listing what VTE features are enabled
+
+#### Changes
+- Configs now properly update on update first run
+- Fix held lit TNT from exploding even after throw is canceled
+
+---
+
+## Version 1.3.0
 - Added option to place blocks when thrown
 - Added throwable projectiles! Works for vanilla and modded items!
 - Throwable TNT! Flint&Steel in the offhand, tnt in the main hand. Throw them like grenades! (it is very fun)
