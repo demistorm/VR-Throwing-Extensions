@@ -94,7 +94,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
             return;
         }
 
-        // Non-embedded path (existing logic)
+        // Non-embedded path
         Vec3 vel = state.velocity;
 
         if (vel.length() > 0.001) {

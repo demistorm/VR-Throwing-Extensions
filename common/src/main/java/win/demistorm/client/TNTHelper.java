@@ -14,18 +14,18 @@ import org.vivecraft.api.data.VRPose;
 import org.vivecraft.api.data.VRPoseHistory;
 import win.demistorm.VRThrowingExtensions;
 
-// TNT Lighting with flint & steel swipe detection
+// TNT Lighting plus flint & steel swipe detection
 public class TNTHelper {
     private boolean isLit = false;
     private boolean isTracking = false;
     private InteractionHand activeTNTHand = InteractionHand.MAIN_HAND;
     private LocalPlayer trackingPlayer = null;
-    private int ticksSinceLit = 0; // How many ticks since TNT was lit
+    private int ticksSinceLit = 0;                 // How many ticks since TNT was lit
     private static final int TNT_FUSE_TICKS = 100; // Server-side fuse duration
 
     private static final float proximityDistance = 0.2f; // Distance in meters
 
-    // Check if flint & steel hand swiped through TNT hand's proximity zone
+    // Check if flint & steel hand swiped through TNT hand's zone
     public boolean checkSwipeMotion(LocalPlayer player) {
         if (!isTracking || trackingPlayer == null) return false;
 
@@ -89,7 +89,6 @@ public class TNTHelper {
             }
         }
 
-        // Swipe pattern: outside → inside → outside
         boolean swipeDetected = wasOutside && wasInside && isOutsideAgain;
 
         if (swipeDetected && !isLit) {
@@ -109,12 +108,6 @@ public class TNTHelper {
     public boolean isHoldingFlintAndSteel(LocalPlayer player, InteractionHand hand) {
         if (player == null) return false;
         return player.getItemInHand(hand).is(Items.FLINT_AND_STEEL);
-    }
-
-    // Check if player is holding flint & steel in either hand
-    public boolean isHoldingFlintAndSteel(LocalPlayer player) {
-        return isHoldingFlintAndSteel(player, InteractionHand.MAIN_HAND) ||
-               isHoldingFlintAndSteel(player, InteractionHand.OFF_HAND);
     }
 
     // Start tracking TNT lighting
@@ -137,18 +130,16 @@ public class TNTHelper {
         ticksSinceLit = 0; // Reset tick counter
     }
 
-    // Check if TNT is currently lit
     public boolean isLit() {
         return isLit;
     }
 
-    // Check if currently tracking
     public boolean isTracking() {
         return isTracking;
     }
 
     // Emit smoke particles from hand holding lit TNT
-    public void emitSmokeParticles(LocalPlayer player) {
+    public void emitSmokeParticles() {
         if (!isLit || trackingPlayer == null) return;
 
         Minecraft mc = Minecraft.getInstance();
@@ -177,8 +168,7 @@ public class TNTHelper {
         Vec3 handPos = hand.getPos();
         Quaternionfc rotation = hand.getRotation();
 
-        // Calculate offset position for hand particles
-        // Forward 0.15m, Up 0.1m from hand center
+        // Offset position for hand particles
         Vector3f forward = new Vector3f(0, 0, -1).rotate(rotation).normalize();
         Vector3f up = new Vector3f(0, 1, 0).rotate(rotation).normalize();
 
@@ -191,7 +181,7 @@ public class TNTHelper {
         // Calculate color based on remaining fuse
         float[] color = calculateSmokeColor(remainingTicks);
 
-        // Spawn colored smoke particle at offset position with 50% scale
+        // Spawn colored smoke particle at offset position
         try {
             win.demistorm.client.particles.TNTSmokeParticle.spawnColoredSmoke(
                     color[0], color[1], color[2],
@@ -205,7 +195,7 @@ public class TNTHelper {
         }
     }
 
-    // Calculate smoke color based on remaining fuse ticks (same logic as ThrownTNTEntity)
+    // Calculate smoke color based on remaining fuse ticks (same as ThrownTNTEntity)
     private float[] calculateSmokeColor(int remainingFuse) {
         float r, g, b;
 
