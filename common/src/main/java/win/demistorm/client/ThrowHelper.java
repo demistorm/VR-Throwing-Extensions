@@ -154,7 +154,7 @@ public class ThrowHelper {
 
             // Emit smoke particles from hand if TNT is lit
             if (tntHelper.isLit()) {
-                tntHelper.emitSmokeParticles(player);
+                tntHelper.emitSmokeParticles();
             }
 
             // Process main hand throwing

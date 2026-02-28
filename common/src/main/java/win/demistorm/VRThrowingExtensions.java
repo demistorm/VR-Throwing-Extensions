@@ -34,22 +34,15 @@ public class VRThrowingExtensions {
 	public static void initialize() {
 		log.info("VR Throwing Extensions (SERVER) starting!");
 
-		// Entity registration is handled by each platform (Fabric, Forge, NeoForge)
-		// They handle it in their own ways
+        ConfigHelper.loadOrCreateServerConfig();
 
-		// Load or create server config file
-		ConfigHelper.loadOrCreateServerConfig();
-
-		// Load or create projectile items config file
 		ProjectileEffect.loadOrCreateConfig();
 
-		// Start the networking system
 		Network.initialize();
 
 		// Set up server events for config sync
 		registerServerEventHandlers();
 
-		// Set up TNT server (fuse timers)
 		TNTServer.instance().registerTickHandler();
 	}
 
@@ -63,7 +56,6 @@ public class VRThrowingExtensions {
 					ConfigHelper.sendConfigToPlayer(player);
 					log.debug("Sent config to joining player: {}", player.getName().getString());
 
-					// Send welcome message showing VTE server's configured features
 					sendWelcomeMessage(player);
 				} else {
 					// Don't send ConfigSync for if non-authoritative
