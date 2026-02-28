@@ -60,8 +60,8 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity> {
             matrices.mulPose(Axis.ZP.rotationDegrees(-handRollDeg));
         }
 
-        // Velocity-based spin speed - full spin or no spin
-        float speed = (float) velocity.length();
+        // Velocity-based spin speed (full spin or no spin)
+        float speed = (float) vel.length();
         float spinThreshold = 0.1f; // Above this, spin; below, don't
         float spinSpeed = (speed > spinThreshold) ? 15.0F : 0.0F;
 
