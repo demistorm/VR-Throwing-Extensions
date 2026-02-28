@@ -1,5 +1,5 @@
 {
-  "key.category.vr_throwing_extensions.category": "VR Throwing Extensions",
+  "key.categories.vr_throwing_extensions": "VR Throwing Extensions",
   "key.vr_throwing_extensions.throw": "Throw/Catch",
   "key.vr_throwing_extensions.throw_stack": "Throw Stack/Null Modifier",
   "key.vr_throwing_extensions.throw_offhand": "Offhand Throw/Catch"

@@ -8,9 +8,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import win.demistorm.client.RemapBindings;
 
-import java.util.function.IntFunction;
-import java.util.stream.Stream;
-
 // Injects custom keybinds
 @Mixin(net.minecraft.client.Options.class)
 public class OptionsMixin {
@@ -19,11 +16,11 @@ public class OptionsMixin {
         method = "<init>",
         at = @At(
                 value = "INVOKE",
-                target = "Ljava/util/stream/Stream;toArray(Ljava/util/function/IntFunction;)[Ljava/lang/Object;",
+                target = "Lorg/apache/commons/lang3/ArrayUtils;addAll([Ljava/lang/Object;[Ljava/lang/Object;)[Ljava/lang/Object;",
                 remap = false)
     )
-    private Object[] addKeyMappings(Stream instance, IntFunction<Object[]> intFunction, Operation<Object[]> original) {
-        KeyMapping[] keyMappings = (KeyMapping[]) original.call(instance, intFunction);
+    private Object[] addKeyMappings(Object[] array1, Object[] array2, Operation<Object[]> original) {
+        KeyMapping[] keyMappings = (KeyMapping[]) original.call(array1, array2);
 
         // Add custom keybindings to the array
         keyMappings = ArrayUtils.add(keyMappings, RemapBindings.THROW);
