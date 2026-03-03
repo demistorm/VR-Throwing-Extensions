@@ -2,13 +2,23 @@ package win.demistorm.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import win.demistorm.ThrownProjectileEntity;
+import win.demistorm.ThrownTNTEntity;
 import win.demistorm.VRThrowingExtensions;
+import win.demistorm.client.ThrownItemRenderer;
 import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.VRThrowingExtensionsClient;
+import win.demistorm.client.RemapBindings;
 import win.demistorm.ConfigHelper;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
@@ -54,6 +64,15 @@ public class ClientSetup {
         event.registerEntityRenderer(win.demistorm.VRThrowingExtensions.THROWN_TNT_TYPE,
             ThrownTNTRenderer::new);
     }
+
+    // Register keybindings
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(RemapBindings.THROW);
+        event.register(RemapBindings.THROW_STACK);
+        event.register(RemapBindings.THROW_OFFHAND);
+        VRThrowingExtensions.log.info("Registered keybindings for VR Throwing Extensions");
+    }
+
 
     // Process incoming packets
     public static void handleNetworkPacket(FriendlyByteBuf buffer) {
