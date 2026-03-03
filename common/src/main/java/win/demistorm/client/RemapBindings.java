@@ -2,13 +2,13 @@ package win.demistorm.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 // Custom key mappings
 public class RemapBindings {
 
     public static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
-        Identifier.fromNamespaceAndPath("vr_throwing_extensions", "category")
+        ResourceLocation.fromNamespaceAndPath("vr_throwing_extensions", "category")
     );
 
     // Throw/catch (main hand)
