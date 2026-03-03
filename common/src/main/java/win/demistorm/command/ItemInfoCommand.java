@@ -6,7 +6,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -59,7 +58,7 @@ public class ItemInfoCommand {
 
             // Components (1.21+)
             var components = stack.getComponents();
-            if (components != null && !components.isEmpty()) {
+            if (!components.isEmpty()) {
                 player.sendSystemMessage(Component.literal("§aComponents: §f" + components.size() + " entries"));
 
                 // Show important components
@@ -95,7 +94,7 @@ public class ItemInfoCommand {
                 // Check all component types present
                 player.sendSystemMessage(Component.literal("§eAll component types:"));
                 for (var componentType : components) {
-                    player.sendSystemMessage(Component.literal("  §7- " + componentType.type().toString()));
+                    player.sendSystemMessage(Component.literal("  §7- " + componentType.type()));
                 }
             } else {
                 player.sendSystemMessage(Component.literal("§7Components: §o(None)"));
