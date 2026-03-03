@@ -100,7 +100,7 @@ public final class NetworkHandlers {
         );
 
         // Call vanilla item use
-        InteractionResult result = heldStack.use(player.level(), player, data.hand());
+        InteractionResult result = heldStack.use(player.level(), player, data.hand()).getResult();
         if (result != InteractionResult.PASS) {
             // Item was consumed or changed, update the hand
             ItemStack newStack = player.getItemInHand(data.hand());
