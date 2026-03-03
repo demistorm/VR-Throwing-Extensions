@@ -169,6 +169,10 @@ public class PlatformImpl {
     // Register client tick event
     @SuppressWarnings("unused")
     public static void registerClientTickEvent(Runnable runnable) {
-        net.minecraftforge.event.TickEvent.ClientTickEvent.Post.BUS.addListener(event -> runnable.run());
+        MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent event) -> {
+            if (event.phase == TickEvent.Phase.END) {
+                runnable.run();
+            }
+        });
     }
 }
