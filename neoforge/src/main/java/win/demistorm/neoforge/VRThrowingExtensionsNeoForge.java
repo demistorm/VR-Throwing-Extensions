@@ -10,6 +10,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -54,6 +55,8 @@ public class VRThrowingExtensionsNeoForge {
         // Register renderer (client only)
         if (FMLEnvironment.getDist().isClient()) {
             modEventBus.addListener(this::registerEntityRenderers);
+            // Register keybindings
+            modEventBus.addListener(ClientSetup::registerKeyMappings);
         }
 
         // Make sure Vivecraft is installed
