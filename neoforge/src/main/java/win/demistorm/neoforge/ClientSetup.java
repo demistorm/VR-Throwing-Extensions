@@ -5,10 +5,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
+import win.demistorm.client.RemapBindings;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
 import win.demistorm.network.data.BloodParticleData;
@@ -87,5 +89,14 @@ public class ClientSetup {
         ConfigHelper.clientDisconnected();
         win.demistorm.client.VRThrowingExtensionsClient.resetConfigSendTimer();
         VRThrowingExtensions.log.debug("NeoForge client disconnected, restored local config and reset timer");
+    }
+
+    // Register keybindings
+    @SubscribeEvent
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(RemapBindings.THROW);
+        event.register(RemapBindings.THROW_STACK);
+        event.register(RemapBindings.THROW_OFFHAND);
+        VRThrowingExtensions.log.info("Registered keybindings for VR Throwing Extensions");
     }
 }

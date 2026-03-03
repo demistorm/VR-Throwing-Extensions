@@ -4,10 +4,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
+import win.demistorm.client.RemapBindings;
 import win.demistorm.Platform;
 import win.demistorm.network.NetworkHandlers;
 import win.demistorm.network.data.BloodParticleData;
@@ -49,6 +51,15 @@ public class ClientSetup {
         } else {
             VRThrowingExtensions.log.warn("TNT Entity type not yet initialized, skipping renderer registration");
         }
+    }
+
+    // Register keybindings
+    @SubscribeEvent
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(RemapBindings.THROW);
+        event.register(RemapBindings.THROW_STACK);
+        event.register(RemapBindings.THROW_OFFHAND);
+        VRThrowingExtensions.log.info("Registered keybindings for VR Throwing Extensions");
     }
 
     // Process incoming packets

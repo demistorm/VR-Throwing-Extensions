@@ -1,6 +1,7 @@
 package win.demistorm.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -9,7 +10,6 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import win.demistorm.VRThrowingExtensions;
@@ -17,6 +17,7 @@ import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.client.ThrownItemRenderer;
 import win.demistorm.client.ThrownTNTRenderer;
 import win.demistorm.client.ThrowHelper;
+import win.demistorm.client.RemapBindings;
 import win.demistorm.network.data.BloodParticleData;
 import win.demistorm.network.data.BleedingParticleData;
 import win.demistorm.network.data.ConfigSyncData;
@@ -27,6 +28,11 @@ public class PlatformClientImpl implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Register keybindings
+        KeyBindingHelper.registerKeyBinding(RemapBindings.THROW);
+        KeyBindingHelper.registerKeyBinding(RemapBindings.THROW_STACK);
+        KeyBindingHelper.registerKeyBinding(RemapBindings.THROW_OFFHAND);
+
         // Set up client packet handling
         ClientPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (client, handler, buf, responseSender) -> {
             buf.retain();
