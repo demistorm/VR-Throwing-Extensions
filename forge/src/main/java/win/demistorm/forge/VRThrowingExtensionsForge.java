@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -45,6 +46,8 @@ public class VRThrowingExtensionsForge {
         // Register renderers
         if (FMLEnvironment.dist == Dist.CLIENT) {
             EntityRenderersEvent.RegisterRenderers.BUS.addListener(ClientSetup::registerRenderers);
+            // Register keybindings
+            RegisterKeyMappingsEvent.BUS.addListener(ClientSetup::registerKeyMappings);
         }
 
         // Make sure Vivecraft is installed
