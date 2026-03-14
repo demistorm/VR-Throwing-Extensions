@@ -102,9 +102,9 @@ public class ThrowHelper {
         public void activeProcess(LocalPlayer player) {
             if (player == null || !VRAPI.instance().isVRPlayer(player)) return;
 
-            boolean mainThrowPressed = RemapBindings.THROW.isDown();
+            boolean mainThrowPressed = RemapBindings.isThrowPressed();
             boolean offThrowPressed = RemapBindings.THROW_OFFHAND.isDown();
-            boolean throwStackPressed = RemapBindings.THROW_STACK.isDown(); // Throw stack/null modifier keybind
+            boolean throwStackPressed = RemapBindings.isThrowStackPressed(); // Throw stack/null modifier keybind
 
             // Swing when throw key is first pressed
             if (mainThrowPressed && !swungMain) {
