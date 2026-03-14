@@ -19,7 +19,7 @@ import java.util.List;
 // Common initialization code
 public class VRThrowingExtensions {
 
-	public static final String MOD_ID = "vr-throwing-extensions";
+	public static final String MOD_ID = "vr_throwing_extensions";
 	public static final Logger log = LoggerFactory.getLogger(MOD_ID);
 
 	public static EntityType<ThrownProjectileEntity> THROWN_ITEM_TYPE;
