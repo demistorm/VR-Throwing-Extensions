@@ -11,6 +11,7 @@ choose their own VTE settings
 #### Changes
 - Configs now properly update on update first run
 - Fix held lit TNT from exploding even after throw is canceled
+- Dropped 1.21.8, 1.21.4, and 1.19.2 support (sorry, I just don't have enough time to update all of them forever)
 
 ---
 

@@ -15,14 +15,14 @@ To catch a thrown item, reach towards it with an empty hand and simply hold the 
 
 There are multiple weapon effects, **boomerang**, **embedding**, and **off**. The boomerang effect will have weapons/tools arc back (default). Embedding will embed any weapon or tool into the entity and apply a bleeding effect doing 1 damage every 1.5 seconds. Great against creepers! Off will simply make the weapon drop on impact, similarly to throwing a regular item like dirt. 
 
-There are several other features including throwable TNT, placing blocks, and immersively throwing vanilla and modded projectiles.
+There are several other features including throwable TNT, placing blocks, offhand throwing, and immersively throwing vanilla and modded projectiles.
 
 More info is available on the wiki: [VTE Wiki](https://github.com/demistorm/VR-Throwing-Extensions/wiki)
 
 ---
 
 #### Server Owners:
-The serverside configuration is authoritative. Whatever you set there will be what the mod does for everyone.
+The serverside configuration is authoritative. Whatever you set there will be what the mod does for everyone. There is an option as of 1.4.0 to disable this in the main config.
 
 See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://github.com/demistorm/VR-Throwing-Extensions/wiki/Server-Owners)
 
@@ -32,8 +32,8 @@ See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://
 
 ---
 
-### Versions Supported
-**1.19.2, 1.20.1, 1.21.1, 1.21.4, 1.21.5, 1.21.8, 1.21.10, 1.21.11**
+### Actively Supported Versions
+**1.20.1, 1.21.1, 1.21.5, 1.21.10, 1.21.11**
 
 *Builds available for Fabric, Forge, and NeoForge*
 
