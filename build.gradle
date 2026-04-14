@@ -5,8 +5,8 @@
 plugins {
     // Architectury plugin enables multi-loader builds
     id "architectury-plugin" version "$architectury_plugin_version"
-    // Loom plugin for Minecraft modding (applied to subprojects)
-    id "dev.architectury.loom" version "$loom_version" apply false
+    // Loom-no-remap plugin for Minecraft modding (applied to subprojects)
+    id "dev.architectury.loom-no-remap" version "$loom_version" apply false
 }
 
 // Tell Architectury which Minecraft version we're targeting
@@ -17,12 +17,7 @@ architectury {
 // Configure all subprojects (common/, fabric/, forge/, neoforge/)
 subprojects {
     apply plugin: "java"
-    apply plugin: "dev.architectury.loom"
-
-    loom {
-        // Suppress Mojang mappings license warning
-        silentMojangMappingsLicense()
-    }
+    apply plugin: "dev.architectury.loom-no-remap"
 
     repositories {
         // Local Maven repository for Vivecraft multi-loader build
@@ -59,28 +54,27 @@ subprojects {
         }
     }
 
+    ext.vivecraftMcVersion = rootProject.hasProperty('vivecraft_mc_override') && !rootProject.vivecraft_mc_override.isEmpty()
+        ? rootProject.vivecraft_mc_override
+        : rootProject.minecraft_version
+
     dependencies {
         // Core Minecraft dependency
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 
-        // Mappings for Minecraft obfuscation
-        mappings loom.layered() {
-            officialMojangMappings()
-        }
-
         // Depend on Fabric loader here to use the Fabric @Environment annotations
         // This is needed for client-side code separation across all loaders
         // Do NOT use other classes from fabric loader in common code
-        modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+        implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
         // Vivecraft dependency handled per module to use appropriate JAR for each loader
         // Common module uses compileOnly, loader modules use runtime dependency
     }
 
-    // Ensure all Java compilation uses UTF-8 encoding and Java 21
+    // Ensure all Java compilation uses UTF-8 encoding and Java 25
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = 25
     }
 
     // Generate sources JAR for all subprojects (helpful for debugging)
@@ -96,14 +90,16 @@ allprojects {
     apply plugin: "maven-publish"
 
     // Set consistent project metadata across all loaders
-    archivesBaseName = rootProject.archives_base_name
+    base {
+        archivesName = rootProject.archives_base_name
+    }
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
     // Consistent Java compilation settings
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = 25
     }
 
     // Generate sources for all projects
@@ -114,27 +110,36 @@ allprojects {
 
 // Task to collect all production JARs into a single directory
 tasks.register('collectProductionJars', Copy) {
-    description = "Collect all production JARs from all loaders into dist/ directory"
+    description = "Collect all production JARs from enabled loaders into dist/ directory"
     group = "build"
 
     // Create output directory
     def outputDir = layout.buildDirectory.dir("dist")
     into outputDir
 
-    // Collect production JARs from each loader module
-    from("fabric/build/libs") {
-        include "*-fabric-*.jar"
-        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    // Read enabled platforms from gradle.properties
+    def enabledPlatforms = (project.findProperty('enabled_platforms') ?: 'fabric,neoforge').split(',')
+
+    // Conditionally collect JARs based on enabled platforms
+    if ('fabric' in enabledPlatforms) {
+        from("fabric/build/libs") {
+            include "*-fabric-*.jar"
+            exclude "*-raw.jar", "*-dev-shadow.jar", "*-sources.jar"
+        }
     }
 
-    from("forge/build/libs") {
-        include "*-forge-*.jar"
-        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    if ('forge' in enabledPlatforms) {
+        from("forge/build/libs") {
+            include "*-forge-*.jar"
+            exclude "*-raw.jar", "*-dev-shadow.jar", "*-sources.jar"
+        }
     }
 
-    from("neoforge/build/libs") {
-        include "*-neoforge-*.jar"
-        exclude "*-dev.jar", "*-dev-shadow.jar", "*-sources.jar"
+    if ('neoforge' in enabledPlatforms) {
+        from("neoforge/build/libs") {
+            include "*-neoforge-*.jar"
+            exclude "*-raw.jar", "*-dev-shadow.jar", "*-sources.jar"
+        }
     }
 
     // Only copy files that exist
@@ -156,13 +161,21 @@ tasks.register('collectProductionJars', Copy) {
 
 // Make sure JARs are built before collecting
 collectProductionJars.dependsOn {
-    tasks.matching { task -> task.name == "remapJar" || task.name == "jar" }
+    tasks.matching { task -> task.name == "shadowJar" || task.name == "jar" }
 }
 
 // Make collection happen after every build AND after clean build
 build.finalizedBy(collectProductionJars)
 
-// Also collect after each loader module builds
-project(":fabric").build.finalizedBy(collectProductionJars)
-project(":forge").build.finalizedBy(collectProductionJars)
-project(":neoforge").build.finalizedBy(collectProductionJars)
+// Also collect after each enabled loader module builds
+def enabledPlatforms = (project.findProperty('enabled_platforms') ?: 'fabric,neoforge').split(',')
+
+if ('fabric' in enabledPlatforms) {
+    project(":fabric").build.finalizedBy(collectProductionJars)
+}
+if ('forge' in enabledPlatforms) {
+    project(":forge").build.finalizedBy(collectProductionJars)
+}
+if ('neoforge' in enabledPlatforms) {
+    project(":neoforge").build.finalizedBy(collectProductionJars)
+}

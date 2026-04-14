@@ -4,7 +4,7 @@
 
 plugins {
     // Shadow plugin for bundling common module
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 // Configure Architectury for this NeoForge module
@@ -14,7 +14,9 @@ architectury {
 }
 
 // Set loader-specific archive name for better organization
-archivesBaseName = rootProject.archives_base_name + "-neoforge"
+base {
+    archivesName = rootProject.archives_base_name + "-neoforge"
+}
 
 repositories {
     maven {
@@ -27,7 +29,7 @@ loom {
     // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
     def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
     if (aw.exists()) {
-        accessWidenerPath.set(aw)
+        accessWidenerPath = aw
     }
 }
 
@@ -47,11 +49,11 @@ dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
     // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive false }
 
     // Vivecraft runtime dependency (NeoForge version)
-    implementation "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-neoforge"
+    implementation "maven.modrinth:vivecraft:${vivecraftMcVersion}-${rootProject.vivecraft_version}-neoforge"
 }
 
 // Process resources and expand version placeholders
@@ -71,24 +73,20 @@ processResources {
     }
 }
 
-// Configure shadow JAR for including common module
-shadowJar {
-    exclude "architectury.common.json"
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
-}
-
-// Remap shadow JAR to proper NeoForge format
-remapJar {
-    input.set shadowJar.archiveFile
-    atAccessWideners.add loom.accessWidenerPath.get().asFile.name
-    dependsOn shadowJar
-    archiveClassifier = null
-}
-
-// Configure regular JAR for development
+// Mark the default jar as raw (Loom-processed but not the final artifact)
 jar {
-    archiveClassifier = "dev"
+    archiveClassifier = "raw"
+}
+
+// Configure shadow JAR to build on top of the jar task
+// This preserves Loom modifications
+shadowJar {
+    dependsOn(jar)
+    exclude "architectury.common.json"
+    mainSpec.sourcePaths.clear()
+    from(zipTree(jar.archiveFile))
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = null
 }
 
 // Configure sources JAR to include common module sources
@@ -96,6 +94,18 @@ sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
+}
+
+// Redirect published variants to use shadowJar
+configurations {
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
 }
 
 // Configure Java components for publishing

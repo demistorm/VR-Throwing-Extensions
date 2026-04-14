@@ -22,17 +22,30 @@ pluginManagement {
         }
 
         // Standard Gradle repositories
-        mavenCentral()
         gradlePluginPortal()
     }
 }
 
-// Define all subprojects in our multi-loader setup
-// This creates the module structure: common/, fabric/, forge/, neoforge/
+// Define subprojects in our multi-loader setup
+// This creates the module structure: common/ plus enabled loader modules
 include("common")
-include("fabric")
-include("forge")
-include("neoforge")
+
+// Conditionally include loader subprojects based on enabled_platforms property
+// Read from gradle.properties (defaults to fabric,neoforge if not set)
+def enabledPlatformsString = settings.hasProperty('enabled_platforms')
+    ? settings['enabled_platforms']
+    : 'fabric,neoforge'
+def enabledPlatforms = enabledPlatformsString.split(',')
+
+if ('fabric' in enabledPlatforms) {
+    include 'fabric'
+}
+if ('forge' in enabledPlatforms) {
+    include 'forge'
+}
+if ('neoforge' in enabledPlatforms) {
+    include 'neoforge'
+}
 
 // Set the root project name (used for artifact naming)
 rootProject.name = "vr_throwing_extensions"

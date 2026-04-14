@@ -1,4 +1,4 @@
-accessWidener	v2	named
+accessWidener	v2	official
 # Make StandingAndWallBlockItem.getPlacementState accessible for torch wall placement
 accessible method net/minecraft/world/item/StandingAndWallBlockItem getPlacementState (Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/level/block/state/BlockState;
 

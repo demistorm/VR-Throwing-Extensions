@@ -13,12 +13,7 @@ loom {
     // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
     def aw = file("src/main/resources/vr-throwing-extensions.accesswidener")
     if (aw.exists()) {
-        accessWidenerPath.set(aw)
-    }
-
-    // Custom refmap name for mixin remapping
-    mixin {
-        defaultRefmapName.set("vr-throwing-extensions.refmap.json")
+        accessWidenerPath = aw
     }
 }
 
@@ -34,10 +29,10 @@ dependencies {
     // Fabric loader dependency - needed for @Environment annotations only
     // This allows us to separate client-side code from server-side code across all loaders
     // IMPORTANT: Do NOT use other Fabric classes in common code - only annotations!
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-    // Vivecraft dependency (use Fabric since API is the same amongst loaders))
-    modCompileOnly "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
+    // Vivecraft dependency (use Fabric since API is the same amongst loaders)
+    compileOnly "maven.modrinth:vivecraft:${vivecraftMcVersion}-${rootProject.vivecraft_version}-fabric"
 
 }
 
@@ -60,12 +55,12 @@ publishing {
 // Java configuration for the common module
 java {
     // Ensure consistent Java version across all platforms
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 // Additional Java compile options
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
-    options.release = 21
+    options.release = 25
 }

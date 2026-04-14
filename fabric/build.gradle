@@ -4,7 +4,7 @@
 
 plugins {
     // Shadow plugin for bundling common module
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id("com.gradleup.shadow") version "9.4.1"
 }
 
 // Configure Architectury for this Fabric module
@@ -14,14 +14,16 @@ architectury {
 }
 
 // Set loader-specific archive name for better organization
-archivesBaseName = rootProject.archives_base_name + "-fabric"
+base {
+    archivesName = rootProject.archives_base_name + "-fabric"
+}
 
 // Loom configuration for the Fabric module
 loom {
     // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
     def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
     if (aw.exists()) {
-        accessWidenerPath.set(aw)
+        accessWidenerPath = aw
     }
 }
 
@@ -36,27 +38,20 @@ configurations {
     developmentFabric.extendsFrom common
 }
 
-sourceSets {
-    main {
-        compileClasspath += sourceSets.main.compileClasspath
-    }
-}
-
 dependencies {
     // Core Fabric dependencies
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     // Vivecraft runtime dependency (Fabric version)
-    modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
-
+    implementation "maven.modrinth:vivecraft:${vivecraftMcVersion}-${rootProject.vivecraft_version}-fabric"
 
     // Mod Menu integration for Fabric users
-    modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
+    compileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
 }
 
 // Process resources and expand version placeholders
@@ -72,23 +67,20 @@ processResources {
     }
 }
 
-// Configure shadow JAR for including common module
-shadowJar {
-    exclude "architectury.common.json"
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
-}
-
-// Remap shadow JAR to proper Fabric format
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    archiveClassifier = null
-}
-
-// Configure regular JAR for development
+// Mark the default jar as raw (Loom-processed but not the final artifact)
 jar {
-    archiveClassifier = "dev"
+    archiveClassifier = "raw"
+}
+
+// Configure shadow JAR to build on top of the jar task
+// This preserves Loom modifications (e.g. JiJ metadata in fabric.mod.json)
+shadowJar {
+    dependsOn(jar)
+    exclude "architectury.common.json"
+    mainSpec.sourcePaths.clear()
+    from(zipTree(jar.archiveFile))
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = null
 }
 
 // Configure sources JAR to include common module sources
@@ -96,6 +88,18 @@ sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
+}
+
+// Redirect published variants to use shadowJar
+configurations {
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
 }
 
 // Configure Java components for publishing
