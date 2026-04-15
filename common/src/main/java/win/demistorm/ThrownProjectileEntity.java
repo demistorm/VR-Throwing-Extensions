@@ -322,7 +322,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
 
             dropAndDiscard();
         } else {
-            level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, getItem()),
+            level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, getItem().getItem()),
                     getX(), getY(), getZ(), 0.0, 0.0, 0.0);
         }
     }

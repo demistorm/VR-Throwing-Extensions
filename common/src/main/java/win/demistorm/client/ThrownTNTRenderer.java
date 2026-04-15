@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -47,7 +47,7 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         state.handRollDeg = entity.getHandRoll();
 
         BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
-        state.lightCoords = LevelRenderer.getLightColor(entity.level(), pos);
+        state.lightCoords = LevelRenderer.getLightCoords(entity.level(), pos);
 
         // Prepare the item's render state
         ItemStack tntItemStack = new ItemStack(Items.TNT);

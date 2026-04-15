@@ -1,7 +1,7 @@
 package win.demistorm.client.config;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Button;
@@ -152,25 +152,25 @@ public class ThrowableItemsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(context, mouseX, mouseY, delta);
 
         // Render the item list after background and other widgets
         if (itemList != null) {
-            itemList.render(context, mouseX, mouseY, delta);
+            itemList.extractRenderState(context, mouseX, mouseY, delta);
         }
 
         // Title at top
-        context.drawCenteredString(font, title, width / 2, 10, 0xFFFFFFFF);
+        context.centeredText(font, title, width / 2, 10, 0xFFFFFFFF);
 
         // Label for text input
-        context.drawString(font, "Add Item ID:", 20, 28, 0xFFFFFFFF);
+        context.text(font, "Add Item ID:", 20, 28, 0xFFFFFFFF);
 
         // Label for item list
-        context.drawString(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFFFF);
+        context.text(font, "Custom Projectile Items:", 20, listTopY + 105, 0xFFFFFFFF);
 
         // Show count of items
-        context.drawString(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xFFAAAAAA);
+        context.text(font, "(" + projectileItems.size() + " items)", 180, listTopY + 105, 0xFFAAAAAA);
     }
 
     @Override
@@ -234,7 +234,7 @@ public class ThrowableItemsScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics context, int mouseX, int mouseY, boolean isHovering, float delta) {
+            public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean isHoverings, float delta) {
                 // Get entry position
                 int x = this.getX();
                 int y = this.getY();
@@ -250,11 +250,11 @@ public class ThrowableItemsScreen extends Screen {
                     // Truncate if too long
                     leftDisplay = font.plainSubstrByWidth(leftItem, columnWidth - 30) + "...";
                 }
-                context.drawString(font, leftDisplay, x + 5, y + 4, 0xFFFFFFFF);
+                context.text(font, leftDisplay, x + 5, y + 4, 0xFFFFFFFF);
 
                 // Position and render left remove button
                 leftRemoveButton.setPosition(x + columnWidth - 20, y + 1);
-                leftRemoveButton.render(context, mouseX, mouseY, delta);
+                leftRemoveButton.extractRenderState(context, mouseX, mouseY, delta);
 
                 // Right column (if exists)
                 if (rightItem != null) {
@@ -263,9 +263,9 @@ public class ThrowableItemsScreen extends Screen {
                     if (rightTextWidth > columnWidth - 25) {
                         rightDisplay = font.plainSubstrByWidth(rightItem, columnWidth - 30) + "...";
                     }
-                    context.drawString(font, rightDisplay, x + columnWidth + 5, y + 4, 0xFFFFFFFF);
+                    context.text(font, rightDisplay, x + columnWidth + 5, y + 4, 0xFFFFFFFF);
                     rightRemoveButton.setPosition(x + width - 20, y + 1);
-                    rightRemoveButton.render(context, mouseX, mouseY, delta);
+                    rightRemoveButton.extractRenderState(context, mouseX, mouseY, delta);
                 }
             }
 

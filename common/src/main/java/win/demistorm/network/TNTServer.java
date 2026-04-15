@@ -90,8 +90,8 @@ public class TNTServer {
             tntTimers.put(player, remaining);
 
             if (VRThrowingExtensions.debugMode && remaining % 20 == 0) {
-                player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("TNT fuse: " + remaining + " ticks"), true);
+                player.sendOverlayMessage(
+                    net.minecraft.network.chat.Component.literal("TNT fuse: " + remaining + " ticks"));
             }
         }
     }

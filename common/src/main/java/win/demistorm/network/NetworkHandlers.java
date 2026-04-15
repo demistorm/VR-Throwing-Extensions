@@ -288,7 +288,7 @@ public final class NetworkHandlers {
         TNTServer.instance().startTNTTimer((ServerPlayer) player, InteractionHand.MAIN_HAND);
 
         if (VRThrowingExtensions.debugMode) {
-            player.displayClientMessage(Component.literal("TNT lit! Throw it or BOOM!"), true);
+            player.sendOverlayMessage(Component.literal("TNT lit! Throw it or BOOM!"));
         }
     }
 
@@ -347,8 +347,8 @@ public final class NetworkHandlers {
                 remainingTicks, data.posX(), data.posY(), data.posZ());
 
         if (VRThrowingExtensions.debugMode) {
-            player.displayClientMessage(
-                    Component.literal("Thrown lit TNT with " + remainingTicks + " tick fuse!"), true);
+            player.sendOverlayMessage(
+                    Component.literal("Thrown lit TNT with " + remainingTicks + " tick fuse!"));
         }
     }
 
@@ -361,7 +361,7 @@ public final class NetworkHandlers {
         TNTServer.instance().cancelTNTTimer((ServerPlayer) player);
 
         if (VRThrowingExtensions.debugMode) {
-            player.displayClientMessage(Component.literal("TNT timer canceled!"), true);
+            player.sendOverlayMessage(Component.literal("TNT timer canceled!"));
         }
     }
 }

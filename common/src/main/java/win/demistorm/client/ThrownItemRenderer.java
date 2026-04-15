@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -48,7 +48,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         // Packed light for submit()
         BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
-        state.lightCoords = LevelRenderer.getLightColor(entity.level(), pos);
+        state.lightCoords = LevelRenderer.getLightCoords(entity.level(), pos);
 
         // Embedding render state
         state.isEmbedded = entity.isEmbedded();

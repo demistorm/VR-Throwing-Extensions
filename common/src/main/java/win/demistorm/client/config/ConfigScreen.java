@@ -1,7 +1,7 @@
 package win.demistorm.client.config;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
@@ -151,10 +151,10 @@ public final class ConfigScreen {
         }
 
         @Override
-        public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-            super.render(context, mouseX, mouseY, delta);
+        public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+            super.extractRenderState(context, mouseX, mouseY, delta);
             // Draw title at top
-            context.drawCenteredString(font, title, width / 2, 20, 0xFFFFFFFF);
+            context.centeredText(font, title, width / 2, 20, 0xFFFFFFFF);
         }
     }
 }

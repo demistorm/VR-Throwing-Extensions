@@ -37,7 +37,7 @@ public final class ItemIdCommand {
         ItemStack heldStack = player.getMainHandItem();
 
         if (heldStack.isEmpty()) {
-            player.displayClientMessage(Component.literal("§7Empty hand - no item to identify"), false);
+            player.sendSystemMessage(Component.literal("§7Empty hand - no item to identify"));
             return 1;
         }
 
@@ -48,10 +48,10 @@ public final class ItemIdCommand {
         int stackSize = heldStack.getCount();
 
         // Display item information to player
-        player.displayClientMessage(Component.literal(String.format(
+        player.sendSystemMessage(Component.literal(String.format(
             "§aHeld Item: §f%s§7 (ID: §f%s§7) Count: §f%d§7",
             itemName, itemId, stackSize
-        )), false);
+        )));
 
         return 1;
     }

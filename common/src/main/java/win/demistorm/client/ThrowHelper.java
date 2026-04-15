@@ -252,7 +252,7 @@ public class ThrowHelper {
             if (tntHelper.isTracking()) {
                 if (tntHelper.checkSwipeMotion(player)) {
                     if (VRThrowingExtensions.debugMode) {
-                        player.displayClientMessage(Component.literal("TNT lit!"), true);
+                        player.sendOverlayMessage(Component.literal("TNT lit!"));
                     }
                     log.debug("[VR Throw] TNT lit via flint & steel swipe!");
                 }
@@ -327,7 +327,7 @@ public class ThrowHelper {
                                             // Send lit TNT throw packet
                                             ClientNetworkHelper.sendThrowTNTPacket(origin, assistedVel, rollDeg, hand);
                                             if (VRThrowingExtensions.debugMode) {
-                                                player.displayClientMessage(Component.literal("Thrown lit TNT!"), true);
+                                                player.sendOverlayMessage(Component.literal("Thrown lit TNT!"));
                                             }
                                             log.debug("[VR Throw] Thrown lit TNT from {}", hand);
                                         } else {
@@ -347,7 +347,7 @@ public class ThrowHelper {
                                     // DEBUG
                                     if (VRThrowingExtensions.debugMode) {
                                         boolean aimAssistApplied = !assistedVel.equals(launchVel);
-                                        player.displayClientMessage(Component.literal(
+                                        player.sendSystemMessage(Component.literal(
                                                 "[VR Throw] origin=" + origin +
                                                         " relativeVel=" + relativeVel +
                                                         " velLength=" + String.format("%.4f", velLength) +
@@ -356,7 +356,7 @@ public class ThrowHelper {
                                                         " aimAssist=" + aimAssistApplied +
                                                         " useBindHeld=" + useBindHeld +
                                                         " playerCrouched=" + playerCrouched +
-                                                        " hand=" + hand), false);
+                                                        " hand=" + hand));
                                     }
 
                                     VRClientAPI.instance().triggerHapticPulse(

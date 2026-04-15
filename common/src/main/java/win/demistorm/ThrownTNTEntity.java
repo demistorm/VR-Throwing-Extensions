@@ -80,7 +80,7 @@ public class ThrownTNTEntity extends PrimedTnt {
                 this.explode();
             }
         } else {
-            this.updateInWaterStateAndDoFluidPushing();
+            this.updateFluidInteraction();
             if (this.level().isClientSide()) {
                 spawnColoredSmokeParticle();
             }

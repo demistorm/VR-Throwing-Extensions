@@ -39,7 +39,7 @@ public final class AddProjectileItemCommand {
         ItemStack heldStack = player.getMainHandItem();
 
         if (heldStack.isEmpty()) {
-            player.displayClientMessage(Component.literal("§cEmpty hand - no item to add"), false);
+            player.sendSystemMessage(Component.literal("§cEmpty hand - no item to add"));
             return 0;
         }
 
@@ -53,10 +53,10 @@ public final class AddProjectileItemCommand {
 
         // Check if item is already in the list
         if (projectileItems.contains(itemId)) {
-            player.displayClientMessage(Component.literal(String.format(
+            player.sendSystemMessage(Component.literal(String.format(
                 "§e%s§7 (§f%s§7) is §6already§7 in the projectile items list!",
                 itemName, itemId
-            )), false);
+            )));
             return 0;
         }
 
@@ -67,14 +67,14 @@ public final class AddProjectileItemCommand {
         // Trigger config reload to update the mod
         ProjectileEffect.loadProjectileItemsFromConfig();
 
-        player.displayClientMessage(Component.literal(String.format(
+        player.sendSystemMessage(Component.literal(String.format(
             "§aAdded §f%s§7 (§f%s§7) to projectile items list! §7(%d items total)",
             itemName, itemId, projectileItems.size()
-        )), false);
+        )));
 
-        player.displayClientMessage(Component.literal(String.format(
+        player.sendSystemMessage(Component.literal(String.format(
             "§7Tip: Configure projectile items in the config menu or type §f/itemID§7 to identify items"
-        )), false);
+        )));
 
         return 1;
     }

@@ -99,7 +99,7 @@ public final class BloodParticle {
                 Vec3 vel = sprayForward.scale(speed * dropletSpeedScale).add(jitter);
 
                 client.level.addParticle(
-                        new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.RED_DYE)),
+                        new ItemParticleOption(ParticleTypes.ITEM, Items.RED_DYE),
                         pos.x + ox, pos.y + oy, pos.z + oz,
                         vel.x, vel.y, vel.z
                 );
