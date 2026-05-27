@@ -1,8 +1,11 @@
 package win.demistorm.effects;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.HangingEntityItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import win.demistorm.ConfigHelper;
 import win.demistorm.VRThrowingExtensions;
 
@@ -69,11 +73,16 @@ public final class PlaceEffect {
             return false;
         }
 
+        // Buckets (with placeable liquids) use the dispenser pattern instead of useOn()
+        Item item = stack.getItem();
+        if (item instanceof DispensibleContainerItem && !(item instanceof BlockItem)) {
+            return placeLiquid(level, stack, hitResult);
+        }
+
         try {
             VRThrowingExtensions.log.debug("[PlaceEffect] Attempting to place {} via vanilla useOn()",
                     stack.getItem().getDescriptionId());
 
-            // Use UseOnContext that works like a player right-clicking
             UseOnContext context = new UseOnContext(
                     level,
                     player,
@@ -82,7 +91,6 @@ public final class PlaceEffect {
                     hitResult
             );
 
-            // Use vanilla's UseOnContext to place blocks
             net.minecraft.world.InteractionResult result = stack.getItem().useOn(context);
 
             boolean success = result.consumesAction();
@@ -103,9 +111,44 @@ public final class PlaceEffect {
         }
     }
 
+    // Place liquid from a bucket item using the same pattern dispensers use
+    private static boolean placeLiquid(Level level, ItemStack stack, BlockHitResult hitResult) {
+        DispensibleContainerItem container = (DispensibleContainerItem) stack.getItem();
+        BlockPos targetPos = hitResult.getBlockPos().relative(hitResult.getDirection());
+
+        try {
+            VRThrowingExtensions.log.debug("[PlaceEffect] Attempting to place liquid from {} at {}",
+                    stack.getItem().getDescriptionId(), targetPos);
+
+            boolean success = container.emptyContents(null, level, targetPos, hitResult);
+
+            if (success) {
+                container.checkExtraContent(null, level, stack, targetPos);
+                // Drop empty bucket where the liquid was placed
+                Vec3 dropPos = hitResult.getLocation();
+                ItemEntity emptyBucket = new ItemEntity(level, dropPos.x, dropPos.y, dropPos.z,
+                        new ItemStack(Items.BUCKET));
+                level.addFreshEntity(emptyBucket);
+
+                VRThrowingExtensions.log.debug("[PlaceEffect] Successfully placed liquid from {}",
+                        stack.getItem().getDescriptionId());
+            } else {
+                VRThrowingExtensions.log.debug("[PlaceEffect] Liquid placement failed for {}",
+                        stack.getItem().getDescriptionId());
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            VRThrowingExtensions.log.error("[PlaceEffect] Failed to place liquid from stack {}", stack, e);
+            return false;
+        }
+    }
+
     public static boolean isPlaceableBlock(ItemStack stack) {
         Item item = stack.getItem();
-        return !(item instanceof BlockItem) && !(item instanceof HangingEntityItem);
+        return !(item instanceof BlockItem) && !(item instanceof HangingEntityItem)
+                && !(item instanceof DispensibleContainerItem);
     }
 
     private PlaceEffect() {}
