@@ -1,3 +1,7 @@
+### Version 1.4.1
+- Added throwable liquid buckets to the place block effect! (lava, water, fish-in-buckets, etc)
+- **26.1** support :D
+
 ## Version 1.4.0
 #### Additions
 - Added [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights) support for thrown torches/lanterns!
