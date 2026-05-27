@@ -33,7 +33,7 @@ See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://
 ---
 
 ### Actively Supported Versions
-**1.20.1, 1.21.1, 1.21.5, 1.21.10, 1.21.11**
+**1.20.1, 1.21.1, 1.21.5, 1.21.10, 1.21.11, 26.1+**
 
 *Builds available for Fabric, Forge, and NeoForge*
 
