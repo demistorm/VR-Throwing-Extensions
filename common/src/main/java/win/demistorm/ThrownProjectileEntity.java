@@ -30,6 +30,8 @@ import win.demistorm.effects.EmbeddingEffect;
 import win.demistorm.effects.PlaceEffect;
 import win.demistorm.network.data.BloodParticleData;
 
+import java.util.Objects;
+
 import static win.demistorm.VRThrowingExtensions.log;
 
 // Main projectile entity for thrown items
@@ -279,7 +281,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                     return;
                 }
 
-                ConfigHelper.Data config = ConfigHelper.getActiveConfig(getOwner().getUUID());
+                ConfigHelper.Data config = ConfigHelper.getActiveConfig(Objects.requireNonNull(getOwner()).getUUID());
                 if (config.weaponEffect == WeaponEffectType.BOOMERANG) {
                     boolean shouldBounce = BoomerangEffect.canBounce(getItem().getItem())
                             && !hasBounced && !reachedOriginOnce;
@@ -305,8 +307,13 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
             // Handle block placement for block hits
             if (hitBlock && shouldAttemptPlacement) {
                 // Attempt block placement
-                net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
-                Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
+                net.minecraft.world.phys.BlockHitResult blockHit = null;
+                if (hit instanceof net.minecraft.world.phys.BlockHitResult) {
+                    blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
+                }
+                if (blockHit != null) {
+                    Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
+                }
 
                 if (PlaceEffect.placeBlock(level(), getOwner() instanceof Player ? (Player)getOwner() : null, getItem(), blockHit)) {
                     // Block was successfully placed, consume the item
