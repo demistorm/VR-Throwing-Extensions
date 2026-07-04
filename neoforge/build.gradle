@@ -4,7 +4,7 @@
 
 plugins {
     // Shadow plugin for bundling common module
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '9.4.3'
 }
 
 // Configure Architectury for this NeoForge module
@@ -14,11 +14,13 @@ architectury {
 }
 
 // Set loader-specific archive name for better organization
-archivesBaseName = rootProject.archives_base_name + "-neoforge"
+base {
+    archivesName = rootProject.archives_base_name + "-neoforge"
+}
 
 repositories {
     maven {
-        url "https://maven.neoforged.net/releases/"
+        url = "https://maven.neoforged.net/releases/"
     }
 }
 
@@ -47,8 +49,8 @@ dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
     // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
     // Vivecraft runtime dependency (NeoForge version)
     implementation "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-neoforge"
