@@ -4,7 +4,7 @@
 
 plugins {
     // Shadow plugin for bundling common module
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '9.4.3'
 }
 
 // Configure Architectury for this Forge module
@@ -14,7 +14,9 @@ architectury {
 }
 
 // Set loader-specific archive name for better organization
-archivesBaseName = rootProject.archives_base_name + "-forge"
+base {
+    archivesName = rootProject.archives_base_name + "-forge"
+}
 
 loom {
     // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
@@ -41,7 +43,7 @@ configurations {
 
 repositories {
     // Add repositories to publish here
-    maven { url "https://cursemaven.com" }
+    maven { url = "https://cursemaven.com" }
 }
 
 dependencies {
@@ -52,8 +54,8 @@ dependencies {
     annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.7'
 
     // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     // Vivecraft runtime dependency (Forge version)
     modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-forge"

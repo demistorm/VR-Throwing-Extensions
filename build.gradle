@@ -96,7 +96,9 @@ allprojects {
     apply plugin: "maven-publish"
 
     // Set consistent project metadata across all loaders
-    archivesBaseName = rootProject.archives_base_name
+    base {
+        archivesName = rootProject.archives_base_name
+    }
     version = rootProject.minecraft_version + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
