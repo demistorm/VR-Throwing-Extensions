@@ -4,7 +4,7 @@
 
 plugins {
     // Shadow plugin for bundling common module
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.4.3"
 }
 
 // Configure Architectury for this Fabric module
@@ -44,8 +44,8 @@ dependencies {
     api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     // Include the common module with all shared VR logic
-    common(project(path: ":common")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+    common(project(path: ":common")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
 
     // Vivecraft runtime dependency (Fabric version)
     implementation "maven.modrinth:vivecraft:${vivecraftMcVersion}-${rootProject.vivecraft_version}-fabric"
