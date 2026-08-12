@@ -1,7 +1,7 @@
 package win.demistorm.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -47,7 +47,7 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         state.handRollDeg = entity.getHandRoll();
 
         BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
-        state.lightCoords = LevelRenderer.getLightCoords(entity.level(), pos);
+        state.lightCoords = LightCoordsUtil.getLightCoords(entity.level(), pos);
 
         // Prepare the item's render state
         ItemStack tntItemStack = new ItemStack(Items.TNT);

@@ -67,7 +67,7 @@ public final class BleedingParticle {
             // Occasionally spawn a "droplet" using red dye
             if (rng.nextDouble() < redDyeChance) {
                 mc.level.addParticle(
-                        new ItemParticleOption(ParticleTypes.ITEM, Items.RED_DYE),
+                        new ItemParticleOption(ParticleTypes.ITEM, Items.DYE.red()),
                         pos.x + ox, pos.y + oy, pos.z + oz,
                         vx, vy, vz
                 );

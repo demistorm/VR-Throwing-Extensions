@@ -115,7 +115,7 @@ public final class ConfigScreen {
             addRenderableWidget(
                     Button.builder(
                                     Component.literal("Throwable Projectiles..."),
-                                    btn -> client.setScreen(new ThrowableItemsScreen(this)))
+                                    btn -> client.gui.setScreen(new ThrowableItemsScreen(this)))
                             .bounds(width / 2 - 80, height / 6 + 32, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Toggle and manage vanilla and modded items to be thrown immersively")))
                             .build());
@@ -124,7 +124,7 @@ public final class ConfigScreen {
             addRenderableWidget(
                     Button.builder(
                                     Component.literal("Extras..."),
-                                    btn -> client.setScreen(new ExtrasScreen.ExtrasToggleScreen(this)))
+                                    btn -> client.gui.setScreen(new ExtrasScreen.ExtrasToggleScreen(this)))
                             .bounds(width / 2 - 80, height / 6 + 53, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("More features and settings")))
                             .build());
@@ -144,7 +144,7 @@ public final class ConfigScreen {
                                             // Send config to server for non-authoritative mode
                                             VRThrowingExtensionsClient.sendPlayerConfigToServer();
                                         }
-                                        client.setScreen(parent);
+                                        client.gui.setScreen(parent);
                                     })
                             .bounds(width / 2 - 100, height - 30, 200, 20)
                             .build());

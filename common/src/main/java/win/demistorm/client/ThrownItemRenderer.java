@@ -2,7 +2,7 @@ package win.demistorm.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -48,7 +48,7 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         // Packed light for submit()
         BlockPos pos = BlockPos.containing(entity.getX(), entity.getY(), entity.getZ());
-        state.lightCoords = LevelRenderer.getLightCoords(entity.level(), pos);
+        state.lightCoords = LightCoordsUtil.getLightCoords(entity.level(), pos);
 
         // Embedding render state
         state.isEmbedded = entity.isEmbedded();

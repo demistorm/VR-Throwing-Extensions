@@ -125,7 +125,7 @@ public final class ExtrasScreen {
             addRenderableWidget(
                     Button.builder(
                                     Component.literal("Compat Toggles..."),
-                                    btn -> client.setScreen(new CompatScreen.CompatToggleScreen(this)))
+                                    btn -> client.gui.setScreen(new CompatScreen.CompatToggleScreen(this)))
                             .bounds(width / 2 - 80, height / 6 + 74, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Mod Compatibility Settings")))
                             .build());
@@ -151,7 +151,7 @@ public final class ExtrasScreen {
                                             // Send config to server for non-authoritative mode
                                             VRThrowingExtensionsClient.sendPlayerConfigToServer();
                                         }
-                                        client.setScreen(parent);
+                                        client.gui.setScreen(parent);
                                     })
                             .bounds(width / 2 - 100, height - 30, 200, 20)
                             .build());

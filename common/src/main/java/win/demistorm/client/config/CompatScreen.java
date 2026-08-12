@@ -81,7 +81,7 @@ public final class CompatScreen {
                                             // Send config to server for non-authoritative mode
                                             VRThrowingExtensionsClient.sendPlayerConfigToServer();
                                         }
-                                        client.setScreen(parent);
+                                        client.gui.setScreen(parent);
                                     })
                             .bounds(width / 2 - 100, height - 30, 200, 20)
                             .build());
