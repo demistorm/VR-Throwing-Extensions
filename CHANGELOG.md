@@ -1,6 +1,6 @@
 ### Version 1.4.1
 - Added throwable liquid buckets to the place block effect! (lava, water, fish-in-buckets, etc)
-- **26.1** support :D
+- **26.1 and 26.2** support :D
 
 ## Version 1.4.0
 #### Additions
