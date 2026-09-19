@@ -32,13 +32,6 @@ See the wiki for all settings and more info: [VTE Wiki - Server Owners](https://
 
 ---
 
-### Actively Supported Versions
-**1.20.1, 1.21.1, 1.21.5, 1.21.10, 1.21.11, 26.1+**
-
-*Builds available for Fabric, Forge, and NeoForge*
-
----
-
 <p align="center">
   <img src="https://github.com/user-attachments/assets/5537de37-59bc-44eb-ac96-aab84c3412f1" width="50%" />
 </p>

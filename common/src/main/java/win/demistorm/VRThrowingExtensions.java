@@ -42,6 +42,7 @@ public class VRThrowingExtensions {
 		Network.initialize();
 
 		Platform.registerCommands(ItemInfoCommand::register);
+		Platform.registerCommands(win.demistorm.command.VteThrowCommand::register);
 
 		// Set up server events for config sync
 		registerServerEventHandlers();
@@ -53,19 +54,26 @@ public class VRThrowingExtensions {
 	private static void registerServerEventHandlers() {
 		// Send config to new players when they join
 		Platform.registerServerPlayerJoinListener(player -> {
-			if (player.level().getServer() instanceof DedicatedServer) {
-				if (ConfigHelper.ACTIVE.serverAuthoritative) {
-					// Send server config to player
-					ConfigHelper.sendConfigToPlayer(player);
-					log.debug("Sent config to joining player: {}", player.getName().getString());
+			if (!(player.level().getServer() instanceof DedicatedServer)) {
+				return;
+			}
 
-					sendWelcomeMessage(player);
-				} else {
-					// Don't send ConfigSync for if non-authoritative
-					log.debug("Non-authoritative server: {} will use local config", player.getName().getString());
+			if (!Platform.playerHasVTEClient(player)) {
+				log.debug("Player {} joined without VTE client, skipping VTE sync", player.getName().getString());
+				return;
+			}
 
-					player.sendSystemMessage(Component.literal("§a[VTE]§r This server uses your personal VTE settings!"));
-				}
+			if (ConfigHelper.ACTIVE.serverAuthoritative) {
+				// Send server config to player
+				ConfigHelper.sendConfigToPlayer(player);
+				log.debug("Sent config to joining player: {}", player.getName().getString());
+
+				sendWelcomeMessage(player);
+			} else {
+				// Don't send ConfigSync for if non-authoritative
+				log.debug("Non-authoritative server: {} will use local config", player.getName().getString());
+
+				player.sendSystemMessage(Component.literal("§a[VTE]§r This server uses your personal VTE settings!"));
 			}
 		});
 	}

@@ -31,9 +31,7 @@ neoforge/run/
 # Misc
 api_keys.txt
 .api_keys.txt.kate-swp
-AGENTS.md
 .architectury-transformer
-.claude
 devTest/
 
 # Loom specific

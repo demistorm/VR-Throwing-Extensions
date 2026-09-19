@@ -17,6 +17,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.util.Mth;
@@ -132,6 +133,11 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                 VRThrowingExtensions.log.debug("[Client] Data updated for {}: item now {}", getId(), this.getItem());
             }
         }
+    }
+
+    @Override
+    protected HoverEvent createHoverEvent() {
+        return new HoverEvent.ShowText(this.getItem().getHoverName());
     }
 
     public void setHandRoll(float deg) {

@@ -38,7 +38,8 @@
 		"modmenu": "*"
 	},
 	"mixins": [
-		"vr-throwing-extensions.mixins.json"
+		"vr-throwing-extensions.mixins.json",
+		"vr-throwing-extensions-fabric.mixins.json"
 	],
 	"custom": {
 		"modmenu": {

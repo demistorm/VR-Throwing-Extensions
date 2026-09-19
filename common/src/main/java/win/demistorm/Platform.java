@@ -89,6 +89,11 @@ public class Platform {
         throw new RuntimeException("@ExpectPlatform should have replaced this");
     }
 
+    @ExpectPlatform
+    public static boolean playerHasVTEClient(ServerPlayer player) {
+        throw new RuntimeException("@ExpectPlatform should have replaced this");
+    }
+
     
     // Register a packet handler for client-to-server packets
     @ExpectPlatform

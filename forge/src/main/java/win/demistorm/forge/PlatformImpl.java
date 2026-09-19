@@ -110,6 +110,11 @@ public class PlatformImpl {
         VRThrowingExtensionsForge.NETWORK.send(forgeBuf, PacketDistributor.PLAYER.with(player));
     }
 
+    @SuppressWarnings("unused")
+    public static boolean playerHasVTEClient(ServerPlayer player) {
+        return true;
+    }
+
     
     // Register packet handlers (handled in main mod class)
     @SuppressWarnings("unused")

@@ -32,6 +32,9 @@ public class NetworkChannel {
 
     // Send packet to one player (server to client)
     public <T> void sendToPlayer(ServerPlayer player, T message) {
+        if (!Platform.playerHasVTEClient(player)) {
+            return;
+        }
         Platform.sendToPlayer(player, encode(message, player.registryAccess()));
     }
 
@@ -39,6 +42,10 @@ public class NetworkChannel {
     // Process incoming packet (called by platform code)
     @SuppressWarnings("unchecked")
     public <T> void handlePacket(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
+        if (!Platform.playerHasVTEClient(player)) {
+            return;
+        }
+
         // Get packet type from buffer
         int packetId = buffer.readInt();
 

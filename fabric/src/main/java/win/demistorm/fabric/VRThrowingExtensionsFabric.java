@@ -32,6 +32,8 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
         PayloadTypeRegistry.serverboundPlay().register(BufferPacket.ID, BufferPacket.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(BufferPacket.ID, BufferPacket.CODEC);
 
+        PayloadTypeRegistry.clientboundConfiguration().register(VtePresencePayload.ID, VtePresencePayload.CODEC);
+
         // Handle incoming packets
         ServerPlayNetworking.registerGlobalReceiver(BufferPacket.ID, (payload, context) -> {
             payload.buffer().retain();

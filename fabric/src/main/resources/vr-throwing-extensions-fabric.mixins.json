@@ -1,10 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "win.demistorm.mixin",
+  "package": "win.demistorm.fabric.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ServerEntityMixin"
+    "RegistrySyncManagerMixin"
   ],
   "client": [],
   "server": [],

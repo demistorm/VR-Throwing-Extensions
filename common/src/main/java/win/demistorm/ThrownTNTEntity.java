@@ -10,6 +10,8 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -27,6 +29,11 @@ public class ThrownTNTEntity extends PrimedTnt {
 
     public ThrownTNTEntity(EntityType<? extends PrimedTnt> type, Level level) {
         super(type, level);
+    }
+
+    @Override
+    protected HoverEvent createHoverEvent() {
+        return new HoverEvent.ShowText(Component.translatable("entity.minecraft.tnt"));
     }
 
     @Override

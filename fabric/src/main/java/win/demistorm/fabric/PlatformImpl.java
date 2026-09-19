@@ -111,6 +111,11 @@ public class PlatformImpl {
         }
     }
 
+    @SuppressWarnings("unused")
+    public static boolean playerHasVTEClient(ServerPlayer player) {
+        return ServerPlayNetworking.canSend(player, BufferPacket.ID);
+    }
+
     
     // Register packet handlers (handled in mod initializer now)
     @SuppressWarnings("unused")

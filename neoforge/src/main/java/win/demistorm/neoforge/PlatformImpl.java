@@ -74,6 +74,11 @@ public class PlatformImpl {
         PacketDistributor.sendToPlayer(player, new BufferPacket(buffer));
     }
 
+    @SuppressWarnings("unused")
+    public static boolean playerHasVTEClient(ServerPlayer player) {
+        return player.connection.hasChannel(BufferPacket.TYPE);
+    }
+
 
     // Get client registry access
     @SuppressWarnings("unused")
