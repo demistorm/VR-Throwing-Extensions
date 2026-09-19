@@ -7,6 +7,8 @@ Available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/vr-throwi
 
 ---
 
+# This is a hacked together build with high chances of breaking other mods :O
+
 #### How to Use:
 Simply hold the attack/destroy keybind, make a throwing motion, and release!
 Hold the place/use keybind at the same time to throw the whole stack.
