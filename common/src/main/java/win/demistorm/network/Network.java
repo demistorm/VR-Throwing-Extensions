@@ -1,6 +1,7 @@
 package win.demistorm.network;
 
 import win.demistorm.ConfigHelper;
+import win.demistorm.ThrownItemDamage;
 import win.demistorm.WeaponEffectType;
 import win.demistorm.network.data.*;
 import win.demistorm.network.data.CancelTNTData;
@@ -133,6 +134,7 @@ public class Network {
                 buf.writeBoolean(data.onlyPlaceLights());
                 buf.writeBoolean(data.immersiveMCThrowables());
                 buf.writeBoolean(data.throwConflictingItems());
+                buf.writeEnum(data.thrownItemDamage());
             },
             (buf) -> new PlayerConfigData(
                 buf.readEnum(WeaponEffectType.class),
@@ -142,7 +144,8 @@ public class Network {
                 buf.readEnum(ConfigHelper.CrouchBehavior.class),
                 buf.readBoolean(),
                 buf.readBoolean(),
-                buf.readBoolean()
+                buf.readBoolean(),
+                buf.readEnum(ThrownItemDamage.class)
             ),
             (data, player) -> NetworkHandlers.handlePlayerConfig(player, data)
         );
