@@ -1,6 +1,7 @@
 package win.demistorm.network.data;
 
 import win.demistorm.ConfigHelper;
+import win.demistorm.ThrownItemDamage;
 import win.demistorm.WeaponEffectType;
 
 // Data for player config packets (client to server)
@@ -12,5 +13,6 @@ public record PlayerConfigData(
     ConfigHelper.CrouchBehavior crouchBehaviorPlaceBlocks, // Crouch behavior for place blocks
     boolean onlyPlaceLights,                   // Only place lights enabled
     boolean immersiveMCThrowables,             // ImmersiveMC throwables compat enabled
-    boolean throwConflictingItems              // Throw conflicting items enabled
+    boolean throwConflictingItems,             // Throw conflicting items enabled
+    ThrownItemDamage thrownItemDamage          // Thrown item damage mode
 ) {}

@@ -91,6 +91,16 @@ public class VRThrowingExtensions {
 		};
 		components.add(weaponEffectText + "§r");
 
+		// Thrown item damage mode
+		if (ConfigHelper.ACTIVE.thrownItemDamage != ThrownItemDamage.ON) {
+			String damageText = switch (ConfigHelper.ACTIVE.thrownItemDamage) {
+				case WEAPONS_ONLY -> "§eOnly weapons deal thrown damage";
+				case MOBS_ONLY -> "§eThrown items don't damage players";
+				case ON -> null;
+			};
+			components.add(damageText + "§r");
+		}
+
 		// Block placement
 		if (ConfigHelper.ACTIVE.placeBlocksOnThrow) {
 			if (ConfigHelper.ACTIVE.onlyPlaceLights) {
