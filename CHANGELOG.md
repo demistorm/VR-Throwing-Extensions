@@ -1,3 +1,13 @@
+### Version 1.4.2
+- Added Thrown Item Damage option to Extras screen (cycles through options ON/WEAPONS_ONLY/MOBS_ONLY 
+which do the following:
+    - **ON:** Default behavior (all thrown items deal damage)
+    - **WEAPONS_ONLY:** Only thrown weapons (items that do more than 1 damage) will deal damage, 
+    random items like say dirt blocks or armor won't hurt when tossing at another player or a mob
+    - **MOBS_ONLY:** Tada, all items deal damage but only to mobs! No more tossing some more netherrack while 
+    bridging and sending your buddy into a sea of lava...
+- Added support for **26.3** :D
+
 ### Version 1.4.1
 - Added throwable liquid buckets to the place block effect! (lava, water, fish-in-buckets, etc)
 - **26.1 and 26.2** support :D
