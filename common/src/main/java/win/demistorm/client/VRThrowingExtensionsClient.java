@@ -64,7 +64,8 @@ public class VRThrowingExtensionsClient {
 				ConfigHelper.CLIENT.crouchBehaviorPlaceBlocks,
 				ConfigHelper.CLIENT.onlyPlaceLights,
 				ConfigHelper.CLIENT.immersiveMCThrowables,
-				ConfigHelper.CLIENT.throwConflictingItems
+				ConfigHelper.CLIENT.throwConflictingItems,
+				ConfigHelper.CLIENT.thrownItemDamage
 			);
 			Network.INSTANCE.sendToServer(data);
 			log.debug("[Client] Sent player config to server (non-authoritative mode)");

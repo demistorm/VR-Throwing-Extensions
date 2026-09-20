@@ -276,6 +276,7 @@ public final class NetworkHandlers {
         playerConfig.onlyPlaceLights = data.onlyPlaceLights();
         playerConfig.immersiveMCThrowables = data.immersiveMCThrowables();
         playerConfig.throwConflictingItems = data.throwConflictingItems();
+        playerConfig.thrownItemDamage = data.thrownItemDamage();
 
         ConfigHelper.storePlayerConfig(player.getUUID(), playerConfig);
         log.debug("[Network] Stored config for player: {}", player.getName().getString());

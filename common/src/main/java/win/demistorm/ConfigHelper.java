@@ -34,6 +34,7 @@ public final class ConfigHelper {
         public boolean throwConflictingItems = true; // Throw conflicting items on by default
         public CrouchBehavior crouchBehaviorProjectiles = CrouchBehavior.NORMAL; // Crouch behavior for projectiles (NORMAL by default)
         public CrouchBehavior crouchBehaviorPlaceBlocks = CrouchBehavior.INVERTED; // Crouch behavior for place blocks
+        public ThrownItemDamage thrownItemDamage = ThrownItemDamage.ON; // Thrown item damage behavior (damage with everything against anyone is default)
     }
 
     private static final Gson  GSON      = new GsonBuilder().setPrettyPrinting().create();
@@ -98,6 +99,7 @@ public final class ConfigHelper {
         to.throwConflictingItems = from.throwConflictingItems;
         to.crouchBehaviorProjectiles = from.crouchBehaviorProjectiles;
         to.crouchBehaviorPlaceBlocks = from.crouchBehaviorPlaceBlocks;
+        to.thrownItemDamage = from.thrownItemDamage;
     }
 
     // Send current config to a player
@@ -171,6 +173,15 @@ public final class ConfigHelper {
         // Also update ACTIVE if not connected to server
         copyInto(CLIENT, ACTIVE);
         VRThrowingExtensions.log.debug("[ConfigHelper] Set crouch behavior place blocks: {}", behavior);
+    }
+
+    // Set thrown item damage mode
+    public static void setThrownItemDamage(ThrownItemDamage mode) {
+        CLIENT.thrownItemDamage = mode;
+        write(CLIENT);
+        // Also update ACTIVE if not connected to server
+        copyInto(CLIENT, ACTIVE);
+        VRThrowingExtensions.log.debug("[ConfigHelper] Set thrown item damage: {}", mode);
     }
 
     // Get active config for a player (server or per-player based on serverAuthoritative)
