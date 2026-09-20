@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionfc;
@@ -108,11 +109,11 @@ public class ThrowHelper {
 
             // Swing when throw key is first pressed
             if (mainThrowPressed && !swungMain) {
-                player.swing(InteractionHand.MAIN_HAND);
+                player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                 swungMain = true;
             }
             if (offThrowPressed && !swungOff) {
-                player.swing(InteractionHand.OFF_HAND);
+                player.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
                 swungOff = true;
             }
 

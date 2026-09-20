@@ -1,6 +1,5 @@
 package win.demistorm.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -77,15 +76,15 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         if (vel.length() > 0.001) {
             // Calculate yaw (horizontal rotation)
             float yaw = (float)(Mth.atan2(vel.z, vel.x) * 180.0 / Math.PI);
-            matrices.mulPose(Axis.YP.rotationDegrees(90.0F - yaw));
+            matrices.rotateDegrees(Axis.YP, (90.0F - yaw));
 
             // Calculate pitch (vertical rotation)
             float hor = Mth.sqrt((float)(vel.x * vel.x + vel.z * vel.z));
             float pitch = (float)(Mth.atan2(vel.y, hor) * 180.0 / Math.PI);
-            matrices.mulPose(Axis.XP.rotationDegrees(-pitch));
+            matrices.rotateDegrees(Axis.XP, (-pitch));
 
             // Add hand tilt
-            matrices.mulPose(Axis.ZP.rotationDegrees(-state.handRollDeg));
+            matrices.rotateDegrees(Axis.ZP, (-state.handRollDeg));
         }
 
         // Velocity-based spin speed (full spin or no spin)
@@ -94,10 +93,10 @@ public class ThrownTNTRenderer extends EntityRenderer<ThrownTNTEntity, ThrownTNT
         float spinSpeed = (speed > spinThreshold) ? 15.0F : 0.0F;
 
         float spin = (state.age * spinSpeed) % 360F;
-        matrices.mulPose(Axis.XP.rotationDegrees(spin));
+        matrices.rotateDegrees(Axis.XP, (spin));
 
         // Flip to match item orientation (same as ThrownItemRenderer)
-        matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+        matrices.rotateDegrees(Axis.YP, (180.0F));
 
         // Apply scale
         matrices.scale(scale, scale, scale);

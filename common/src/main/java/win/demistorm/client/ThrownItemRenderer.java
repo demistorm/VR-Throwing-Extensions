@@ -83,14 +83,14 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         // Embedded orientation
         if (state.isEmbedded) {
-            matrices.mulPose(Axis.YP.rotationDegrees(90.0F - state.embedYawDeg));
-            matrices.mulPose(Axis.XP.rotationDegrees(-state.embedPitchDeg));
-            matrices.mulPose(Axis.ZP.rotationDegrees(state.embedTiltDeg));
-            matrices.mulPose(Axis.XP.rotationDegrees(state.embedRollDeg));
+            matrices.rotateDegrees(Axis.YP, (90.0F - state.embedYawDeg));
+            matrices.rotateDegrees(Axis.XP, (-state.embedPitchDeg));
+            matrices.rotateDegrees(Axis.ZP, (state.embedTiltDeg));
+            matrices.rotateDegrees(Axis.XP, (state.embedRollDeg));
             matrices.scale(scale, scale, scale);
 
             // Attempt a rotation flip instead of a scale hack
-            matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+            matrices.rotateDegrees(Axis.YP, (180.0F));
 
             state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 
@@ -103,37 +103,37 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity, T
 
         if (vel.length() > 0.001) {
             float yaw = (float)(Mth.atan2(vel.z, vel.x) * 180.0 / Math.PI);
-            matrices.mulPose(Axis.YP.rotationDegrees(90.0F - yaw));
+            matrices.rotateDegrees(Axis.YP, (90.0F - yaw));
 
             float hor = Mth.sqrt((float)(vel.x * vel.x + vel.z * vel.z));
             float pitch = (float)(Mth.atan2(vel.y, hor) * 180.0 / Math.PI);
-            matrices.mulPose(Axis.XP.rotationDegrees(-pitch));
+            matrices.rotateDegrees(Axis.XP, (-pitch));
 
-            matrices.mulPose(Axis.ZP.rotationDegrees(-state.handRollDeg));
+            matrices.rotateDegrees(Axis.ZP, (-state.handRollDeg));
         }
 
         if (state.isCatching) {
             float smoothSpin = (state.age * 5.0F) % 360F;
-            matrices.mulPose(Axis.XP.rotationDegrees(smoothSpin));
+            matrices.rotateDegrees(Axis.XP, (smoothSpin));
             float bobOffset = Mth.sin(state.age * 0.5F) * 0.05F;
             matrices.translate(0, bobOffset, 0);
         } else if (state.isBounceActive) {
             float returnSpin = (state.age * 8.0F) % 360F;
-            matrices.mulPose(Axis.XP.rotationDegrees(returnSpin));
+            matrices.rotateDegrees(Axis.XP, (returnSpin));
             float wobble = Mth.sin(state.age * 0.35F) * 3.0F;
-            matrices.mulPose(Axis.YP.rotationDegrees(wobble));
+            matrices.rotateDegrees(Axis.YP, (wobble));
             float pulseScale = 1.0F + Mth.sin(state.age * 0.4F) * 0.05F;
             matrices.scale(pulseScale, pulseScale, pulseScale);
         } else {
             float spinSpeed = 15.0F;
             float spin = (state.age * spinSpeed) % 360F;
-            matrices.mulPose(Axis.XP.rotationDegrees(spin));
+            matrices.rotateDegrees(Axis.XP, (spin));
         }
 
         matrices.scale(scale, scale, scale);
 
         // Rotation flip instead of a scale hack (worked perfectly wow, why didn't I try this before)
-        matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+        matrices.rotateDegrees(Axis.YP, (180.0F));
 
         // Submit prepared item
         state.item.submit(matrices, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);

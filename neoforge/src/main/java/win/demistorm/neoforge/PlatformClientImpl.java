@@ -1,6 +1,7 @@
 package win.demistorm.neoforge;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
@@ -36,7 +37,10 @@ public class PlatformClientImpl {
 
             // Only suppress when throwing is active AND place/use key is held
             if (win.demistorm.client.ThrowHelper.cancellingUse() && mc.options.keyUse.isDown()) {
-                mc.player.swingingArm = null;
+                LivingEntity.SwingState swingState = mc.player.swingState;
+                swingState.currentSwing = null;
+                swingState.oldAnimation = 0.0F;
+                swingState.animation = 0.0F;
             }
         });
     }
