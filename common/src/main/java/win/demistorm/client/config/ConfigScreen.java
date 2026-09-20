@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import win.demistorm.ConfigHelper;
+import win.demistorm.ThrownItemDamage;
 import win.demistorm.WeaponEffectType;
 import win.demistorm.effects.ProjectileEffect;
 import win.demistorm.client.VRThrowingExtensionsClient;
@@ -20,8 +21,10 @@ public final class ConfigScreen {
         private final Screen parent;
         private final Minecraft client = Minecraft.getInstance();
         private WeaponEffectType weaponEffectValue = ConfigHelper.CLIENT.weaponEffect;
+        private ThrownItemDamage thrownItemDamageValue = ConfigHelper.CLIENT.thrownItemDamage;
         private boolean aimAssistValue = ConfigHelper.CLIENT.aimAssist;
         private Button weaponEffectButton;
+        private Button thrownItemDamageButton;
         private Button aimAssistButton;
 
         protected SimpleToggleScreen(Screen parent) {
@@ -43,10 +46,12 @@ public final class ConfigScreen {
                                     btn -> {
                                         // Reset all config values to defaults
                                         weaponEffectValue = WeaponEffectType.BOOMERANG;
+                                        thrownItemDamageValue = ThrownItemDamage.ON;
                                         aimAssistValue = true;
 
                                         // Reset ConfigHelper.CLIENT to defaults
                                         ConfigHelper.CLIENT.weaponEffect = WeaponEffectType.BOOMERANG;
+                                        ConfigHelper.CLIENT.thrownItemDamage = ThrownItemDamage.ON;
                                         ConfigHelper.CLIENT.aimAssist = true;
                                         ConfigHelper.CLIENT.throwableProjectiles = true;
                                         ConfigHelper.CLIENT.placeBlocksOnThrow = false;
@@ -68,6 +73,9 @@ public final class ConfigScreen {
                                         // Update button messages immediately
                                         if (weaponEffectButton != null) {
                                             weaponEffectButton.setMessage(Component.literal("Weapon Effect: " + weaponEffectValue.name()));
+                                        }
+                                        if (thrownItemDamageButton != null) {
+                                            thrownItemDamageButton.setMessage(Component.literal("Thrown Item Damage: " + thrownItemDamageValue.name()));
                                         }
                                         if (aimAssistButton != null) {
                                             aimAssistButton.setMessage(Component.literal("Aim Assist: " + (aimAssistValue ? "ON" : "OFF")));
@@ -98,6 +106,27 @@ public final class ConfigScreen {
                             .build();
             addRenderableWidget(weaponEffectButton);
 
+            // Thrown item damage button
+            thrownItemDamageButton = Button.builder(
+                                    Component.literal("Thrown Item Damage: " + thrownItemDamageValue.name()),
+                                    btn -> {
+                                        // Switch between damage modes
+                                        thrownItemDamageValue = switch (thrownItemDamageValue) {
+                                            case ON -> ThrownItemDamage.WEAPONS_ONLY;
+                                            case WEAPONS_ONLY -> ThrownItemDamage.MOBS_ONLY;
+                                            case MOBS_ONLY -> ThrownItemDamage.ON;
+                                        };
+                                        btn.setMessage(Component.literal("Thrown Item Damage: " + thrownItemDamageValue.name()));
+                                    })
+                            .bounds(width / 2 - 80, height / 6 + 11, 160, 20)
+                            .tooltip(Tooltip.create(Component.literal(
+                                    """
+                                            ON: All thrown items deal damage
+                                            WEAPONS_ONLY: Only weapons deal damage
+                                            MOBS_ONLY: Thrown items don't damage players""")))
+                            .build();
+            addRenderableWidget(thrownItemDamageButton);
+
             // Aim assist button
             aimAssistButton = Button.builder(
                                     Component.literal("Aim Assist: " + (aimAssistValue ? "ON" : "OFF")),
@@ -106,7 +135,7 @@ public final class ConfigScreen {
                                         btn.setMessage(Component.literal(
                                                 "Aim Assist: " + (aimAssistValue ? "ON" : "OFF")));
                                     })
-                            .bounds(width / 2 - 80, height / 6 + 11, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 32, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Helps aim at nearby targets")))
                             .build();
             addRenderableWidget(aimAssistButton);
@@ -116,7 +145,7 @@ public final class ConfigScreen {
                     Button.builder(
                                     Component.literal("Throwable Projectiles..."),
                                     btn -> client.gui.setScreen(new ThrowableItemsScreen(this)))
-                            .bounds(width / 2 - 80, height / 6 + 32, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 53, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("Toggle and manage vanilla and modded items to be thrown immersively")))
                             .build());
 
@@ -125,7 +154,7 @@ public final class ConfigScreen {
                     Button.builder(
                                     Component.literal("Extras..."),
                                     btn -> client.gui.setScreen(new ExtrasScreen.ExtrasToggleScreen(this)))
-                            .bounds(width / 2 - 80, height / 6 + 53, 160, 20)
+                            .bounds(width / 2 - 80, height / 6 + 74, 160, 20)
                             .tooltip(Tooltip.create(Component.literal("More features and settings")))
                             .build());
 
@@ -134,11 +163,13 @@ public final class ConfigScreen {
                     Button.builder(Component.literal("Done"),
                                     btn -> {
                                         ConfigHelper.CLIENT.weaponEffect = weaponEffectValue;
+                                        ConfigHelper.CLIENT.thrownItemDamage = thrownItemDamageValue;
                                         ConfigHelper.CLIENT.aimAssist = aimAssistValue;
                                         ConfigHelper.write(ConfigHelper.CLIENT);
 
                                         if (client.hasSingleplayerServer()) {
                                             ConfigHelper.ACTIVE.weaponEffect = ConfigHelper.CLIENT.weaponEffect;
+                                            ConfigHelper.ACTIVE.thrownItemDamage = ConfigHelper.CLIENT.thrownItemDamage;
                                             ConfigHelper.ACTIVE.aimAssist = ConfigHelper.CLIENT.aimAssist;
                                         } else {
                                             // Send config to server for non-authoritative mode

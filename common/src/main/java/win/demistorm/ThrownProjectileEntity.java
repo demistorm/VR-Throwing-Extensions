@@ -336,6 +336,19 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
 
     protected void onHitEntity(EntityHitResult res, Vec3 hitPos) {
         Entity target = res.getEntity();
+
+        // Check thrown item damage config
+        ConfigHelper.Data damageConfig = getOwner() != null
+                ? ConfigHelper.getActiveConfig(getOwner().getUUID())
+                : ConfigHelper.ACTIVE;
+        boolean nonWeapon = stackBaseDamage(getItem()) <= 1.0F;
+        if ((damageConfig.thrownItemDamage == ThrownItemDamage.WEAPONS_ONLY && nonWeapon)
+                || (damageConfig.thrownItemDamage == ThrownItemDamage.MOBS_ONLY && target instanceof Player)) {
+            log.debug("[VR Throw] Damage skipped by config (mode={}, item={}, target={})",
+                    damageConfig.thrownItemDamage, getItem().getItem(), target.getName().getString());
+            return;
+        }
+
         ServerLevel world = (ServerLevel) level();
         DamageSource src = world.damageSources().thrown(this, getOwner() == null ? this : getOwner());
 
