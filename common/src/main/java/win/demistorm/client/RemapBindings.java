@@ -14,21 +14,21 @@ public class RemapBindings {
     // Throw/catch (main hand)
     public static final KeyMapping THROW = new KeyMapping(
             "key.vr_throwing_extensions.throw",
-            -1,  // Uses vanilla left click unless rebound
+            0,  // Uses vanilla left click unless rebound
             CATEGORY
     );
 
     // Throw stack/Null modifier
     public static final KeyMapping THROW_STACK = new KeyMapping(
             "key.vr_throwing_extensions.throw_stack",
-            -1,  // Uses vanilla right click unless rebound
+            0,  // Uses vanilla right click unless rebound
             CATEGORY
     );
 
     // Offhand throw/catch
     public static final KeyMapping THROW_OFFHAND = new KeyMapping(
             "key.vr_throwing_extensions.throw_offhand",
-            -1,
+            0,
             CATEGORY
     );
 
