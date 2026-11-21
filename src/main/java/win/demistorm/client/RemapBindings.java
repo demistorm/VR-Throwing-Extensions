@@ -12,8 +12,8 @@ public class RemapBindings {
         Identifier.fromNamespaceAndPath("vr_throwing_extensions", "category")
     );
     //?} else {
-    /*public static final String CATEGORY = "key.categories.vr_throwing_extensions";*/
-    //?}
+    /*public static final String CATEGORY = "key.category.vr_throwing_extensions.category";
+    *///?}
 
     // Throw/catch (main hand)
     public static final KeyMapping THROW = new KeyMapping(

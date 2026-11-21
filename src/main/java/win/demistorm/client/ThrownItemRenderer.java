@@ -169,7 +169,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Mth;
@@ -313,8 +313,8 @@ public class ThrownItemRenderer extends EntityRenderer<ThrownProjectileEntity> {
     }
 
     @Override
-    public @NotNull ResourceLocation getTextureLocation(ThrownProjectileEntity entity) {
+    public @NotNull Identifier getTextureLocation(ThrownProjectileEntity entity) {
         return TextureAtlas.LOCATION_BLOCKS;
     }
-}*/
-//?}
+}
+*///?}

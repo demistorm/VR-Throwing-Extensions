@@ -304,7 +304,7 @@ public final class ProjectileEffect {
         Set<Identifier> newItems = Sets.newHashSet();
         Set<Item> newCache = Sets.newConcurrentHashSet();
 
-        // Convert string list to ResourceLocation set
+        // Convert string list to Identifier set
         for (String itemId : items) {
             try {
                 Identifier key = Identifier.parse(itemId);

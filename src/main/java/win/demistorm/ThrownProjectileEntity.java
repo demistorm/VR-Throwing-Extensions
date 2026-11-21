@@ -121,8 +121,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         this.entityData.define(EMBED_PITCH, 0f);
         this.entityData.define(EMBED_ROLL, 0f);
         this.entityData.define(EMBED_TILT, 0f);
-    }*/
-    //?}
+    }
+    *///?}
 
     // Constructor used by server when creating the projectile
     public ThrownProjectileEntity(Level level, LivingEntity owner, ItemStack carried, boolean isWholeStack) {
@@ -337,8 +337,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                 }
                 if (blockHit != null) {
                     Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
-                }*/
-                //?} else {
+                }
+                *///?} else {
                 net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
                 Vec3 impactPos = new Vec3(blockHit.getLocation().x, blockHit.getLocation().y, blockHit.getLocation().z);
                 //?}
@@ -386,8 +386,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         float enchBonus = total - base;
         //?} else {
         /*float enchBonus = getEnchantmentDamageBonus(getItem(), target);
-        float total = base + enchBonus;*/
-        //?}
+        float total = base + enchBonus;
+        *///?}
 
         log.debug("[VR Throw] Damage dealt: Item={}, Base={}, EnchBonus={}, Final={}, Target={}, State={}",
                 getItem().getItem(), base, enchBonus, total, target.getName().getString(),
@@ -398,7 +398,7 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
                     "[VR Throw] Damage: Item=%s, Base=%.2f, Ench=%.2f, Final=%.2f, Target=%s, State=%s",
                     getItem().getItem(), base, enchBonus, total, target.getName().getString(),
                     bounceActive ? "RETURNING" : "FORWARD"));
-            sp.sendSystemMessage(msg, false);
+            sp.displayClientMessage(msg, false);
         }
 
         //? if >=1.21.11
@@ -492,8 +492,8 @@ public class ThrownProjectileEntity extends ThrowableItemProjectile {
         }
 
         return Math.max(1.0F, baseDamage);
-    }*/
-    //?}
+    }
+    *///?}
 
 
     //? if <=1.20.1 {

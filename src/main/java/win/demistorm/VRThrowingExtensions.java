@@ -66,7 +66,7 @@ public class VRThrowingExtensions {
 					// Don't send ConfigSync for if non-authoritative
 					log.debug("Non-authoritative server: {} will use local config", player.getName().getString());
 
-					player.sendSystemMessage(Component.literal("§a[VTE]§r This server uses your personal VTE settings!"));
+					player.displayClientMessage(Component.literal("§a[VTE]§r This server uses your personal VTE settings!"), false);
 				}
 			}
 		});
@@ -118,6 +118,6 @@ public class VRThrowingExtensions {
 		}
 
 		String messageText = "§a[VTE]§r Server enabled features: " + String.join(", ", components) + ".";
-		player.sendSystemMessage(Component.literal(messageText));
+		player.displayClientMessage(Component.literal(messageText), false);
 	}
 }

@@ -52,15 +52,15 @@ public class VRThrowingExtensionsNeoForge {
                 (packet, context) -> {
                     if (context.flow().isClientbound()) {
                         // Server to client packets
-                        if (FMLEnvironment.dist.isClient()) {
+                        if (FMLEnvironment.getDist().isClient()) {
                             ClientSetup.handleNetworkPacket(packet.buffer());
                         }
                     } else {
                         // Client to server packets
                         handleServerPacket(packet.buffer(), context);
                     }
-                });*/
-            //?}
+                });
+            *///?}
 
             log.info("Registered NeoForge network handlers in constructor");
         });

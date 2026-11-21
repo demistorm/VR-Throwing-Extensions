@@ -199,15 +199,15 @@ public class ThrowableItemsScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }*/
-    //?}
+    }
+    *///?}
     //? if <=1.21.1 {
     /*@Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // Let the screen handle mouse events normally
         return super.mouseClicked(mouseX, mouseY, button);
-    }*/
-    //?}
+    }
+    *///?}
 
     // Custom list widget for displaying items in two columns
     private class ItemListWidget extends ObjectSelectionList<ItemListWidget.ItemEntry> {

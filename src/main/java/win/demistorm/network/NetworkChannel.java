@@ -68,8 +68,8 @@ public class NetworkChannel {
 
         // Make buffer with registry access
         //? if <=1.20.1 {
-        /*FriendlyByteBuf buffer = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());*/
-        //?} else {
+        /*RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+        *///?} else {
         RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), access);
         //?}
 

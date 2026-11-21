@@ -118,8 +118,8 @@ public final class BloodParticle {
                 DustParticleOptions blood = new DustParticleOptions(packedColor, scale);
                 //?} else {
                 /*Vector3f color = new Vector3f(r, g, b);
-                DustParticleOptions blood = new DustParticleOptions(color, scale);*/
-                //?}
+                DustParticleOptions blood = new DustParticleOptions(color, scale);
+                *///?}
 
                 client.level.addParticle(
                         blood,

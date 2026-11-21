@@ -71,16 +71,22 @@ stonecutter {
     }
 
     // NeoForge client packet distributor merged into PacketDistributor before 1.21.2
-    // (Forward only, the reverse would clobber the PacketDistributor import newer nodes still use)
+    // (sendToPlayer stays fully qualified in PlatformImpl, the reverse needs the word boundary so it
+    // never matches inside the authored ClientPacketDistributor name)
     replacements.regex(current.parsed <= "1.21.1") {
-        replace 'import net\\.neoforged\\.neoforge\\.client\\.network\\.ClientPacketDistributor;', 'import net.neoforged.neoforge.network.PacketDistributor;', '(?!)', ''
-        replace 'ClientPacketDistributor\\.sendToServer\\(', 'PacketDistributor.sendToServer(', '(?!)', ''
+        replace 'import net\\.neoforged\\.neoforge\\.client\\.network\\.ClientPacketDistributor;',
+                'import net.neoforged.neoforge.network.PacketDistributor;',
+                'import net\\.neoforged\\.neoforge\\.network\\.PacketDistributor;',
+                'import net.neoforged.neoforge.client.network.ClientPacketDistributor;'
+        replace 'ClientPacketDistributor\\.sendToServer\\(', 'PacketDistributor.sendToServer(',
+                '\\bPacketDistributor\\.sendToServer\\(', 'ClientPacketDistributor.sendToServer('
     }
 
     // Registry-aware buffers only exist from 1.20.5, 1.20.1 uses plain FriendlyByteBuf
-    // (Forward only, the reverse would rewrite legitimate FriendlyByteBuf uses on newer nodes)
-    replacements.regex(current.parsed <= "1.20.1") {
-        replace 'RegistryFriendlyByteBuf', 'FriendlyByteBuf', '(?!)', ''
+    // (String rules reverse automatically, ClientSetup keeps a legitimate plain buffer so it stays excluded)
+    replacements.string(current.parsed <= "1.20.1") {
+        replace "RegistryFriendlyByteBuf", "FriendlyByteBuf"
+        exclude "**/neoforge/ClientSetup.java"
     }
 
     // Registry access lives on the level before 1.20.5
@@ -89,12 +95,15 @@ stonecutter {
     }
 
     // Client chat and overlay message API rework
+    // (Both forms are authored as displayClientMessage so the reverses stay unambiguous)
     replacements.regex(current.parsed >= "26") {
-        replace 'displayClientMessage\\(([^;]*?), true\\);', 'sendOverlayMessage($1);', '(?!)', ''
+        replace 'displayClientMessage\\(([^;]*?), true\\);', 'sendOverlayMessage($1);',
+                'sendOverlayMessage\\(([^;]*?)\\);', 'displayClientMessage($1, true);'
     }
 
     replacements.regex(current.parsed >= "26") {
-        replace 'displayClientMessage\\(([^;]*?), false\\);', 'sendSystemMessage($1);', '(?!)', ''
+        replace 'displayClientMessage\\(([^;]*?), false\\);', 'sendSystemMessage($1);',
+                'sendSystemMessage\\(([^;]*?)\\);', 'displayClientMessage($1, false);'
     }
 
     // GUI render state extraction rework (full spans, short overlapping patterns get preempted)

@@ -16,7 +16,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -71,7 +70,7 @@ public class PlatformImpl {
     // Send packet to player
     @SuppressWarnings("unused")
     public static void sendToPlayer(ServerPlayer player, RegistryFriendlyByteBuf buffer) {
-        PacketDistributor.sendToPlayer(player, new BufferPacket(buffer));
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new BufferPacket(buffer));
     }
 
 

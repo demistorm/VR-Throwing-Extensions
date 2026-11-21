@@ -117,8 +117,8 @@ public final class NetworkHandlers {
         //? if <=1.21.1 {
         /*if (player.getServer() != null) {
             ProjectileEffect.ItemProjectileDetector.interceptAndRedirect((ServerPlayer) player);
-        }*/
-        //?} else {
+        }
+        *///?} else {
         ProjectileEffect.ItemProjectileDetector.interceptAndRedirect((ServerPlayer) player);
         //?}
     }

@@ -45,8 +45,8 @@ public class ThrownTNTEntity extends PrimedTnt {
     /*protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(HAND_ROLL, 0f);
-    }*/
-    //?}
+    }
+    *///?}
 
     public void setHandRoll(float deg) {
         this.entityData.set(HAND_ROLL, deg);
@@ -90,8 +90,8 @@ public class ThrownTNTEntity extends PrimedTnt {
         //?} else {
         /*if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0F, -0.04, 0.0F));
-        }*/
-        //?}
+        }
+        *///?}
         this.move(MoverType.SELF, this.getDeltaMovement());
         //? if >=1.21.11
         this.applyEffectsFromBlocks();
@@ -175,8 +175,8 @@ public class ThrownTNTEntity extends PrimedTnt {
             }
         }
         //?} else {
-        /*this.level().explode(this, this.getX(), this.getY(0.0625F), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);*/
-        //?}
+        /*this.level().explode(this, this.getX(), this.getY(0.0625F), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);
+        *///?}
     }
 
     //? if >1.20.1 {

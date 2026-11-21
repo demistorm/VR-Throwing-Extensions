@@ -82,8 +82,8 @@ public final class BleedingParticle {
                 //?} else {
                 /*Vector3f color = new Vector3f(0.6f + rng.nextFloat() * 0.35f, rng.nextFloat() * 0.08f, rng.nextFloat() * 0.06f);
                 float scale = dustScaleBase + (rng.nextFloat() - 0.5f) * dustScaleVar;
-                DustParticleOptions bloodDust = new DustParticleOptions(color, scale);*/
-                //?}
+                DustParticleOptions bloodDust = new DustParticleOptions(color, scale);
+                *///?}
 
                 mc.level.addParticle(
                         bloodDust,

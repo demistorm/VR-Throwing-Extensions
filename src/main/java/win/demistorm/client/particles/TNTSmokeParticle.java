@@ -28,8 +28,8 @@ public final class TNTSmokeParticle {
         /*Vector3f color = new Vector3f(r, g, b);
 
         // Create dust particle with color and custom scale
-        DustParticleOptions coloredSmoke = new DustParticleOptions(color, scale);*/
-        //?}
+        DustParticleOptions coloredSmoke = new DustParticleOptions(color, scale);
+        *///?}
 
         // Spawn particle with zero velocity (same as vanilla SMOKE)
         client.level.addParticle(

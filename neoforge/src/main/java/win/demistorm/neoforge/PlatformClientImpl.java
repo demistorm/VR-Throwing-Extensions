@@ -2,8 +2,8 @@ package win.demistorm.neoforge;
 
 import net.minecraft.client.Minecraft;
 //? if >=26.3 {
-import net.minecraft.world.entity.LivingEntity;
-//?}
+/*import net.minecraft.world.entity.LivingEntity;
+*///?}
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
