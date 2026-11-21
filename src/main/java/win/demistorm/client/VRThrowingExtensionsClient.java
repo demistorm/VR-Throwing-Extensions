@@ -23,6 +23,8 @@ public class VRThrowingExtensionsClient {
 		ClientConfigHelper.init();
 		// Set up input cancellation for VR throwing
 		win.demistorm.Platform.registerClientInputEventHandlers();
+		// Start flatscreen input processing
+		Platform.registerClientTickEvent(PancakeHandler::tick);
 		// Register VR tracker with Vivecraft
 		registerTracker();
 		// Register projectile renderer

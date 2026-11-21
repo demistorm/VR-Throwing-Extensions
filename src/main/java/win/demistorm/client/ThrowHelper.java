@@ -76,10 +76,10 @@ public class ThrowHelper {
     private static final double strongMultiplier = 8.0;         // Multiplier for strong throws
 
     // Catching tunables
-    private static final double catchMaxDistance        = 3.0;  // Max distance to start catching (in blocks)
-    private static final double catchMagnetStrength     = 0.10; // Magnetizing effect strength
-    private static final double catchCompletionDistance = 0.2;  // Distance to complete catch
-    private static final int    minCatchTicks           = 3;    // Minimum ticks to hold before catch completes
+    static final double catchMaxDistance        = 3.0;          // Max distance to start catching (in blocks)
+    static final double catchMagnetStrength     = 0.10;         // Magnetizing effect strength
+    static final double catchCompletionDistance = 0.2;          // Distance to complete catch
+    static final int    minCatchTicks           = 3;            // Minimum ticks to hold before catch completes
 
     // Initialization is done by the tracker in VRThrowingExtensionsClient now
 

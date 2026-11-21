@@ -27,7 +27,7 @@ public class VRThrowingExtensions {
 	public static EntityType<ThrownTNTEntity> THROWN_TNT_TYPE;
 
 	// Debug mode switch
-	public static final boolean debugMode = false;
+	public static final boolean debugMode = true;
 
 	static {
 		Configurator.setLevel(MOD_ID, debugMode ? Level.DEBUG : Level.INFO);
