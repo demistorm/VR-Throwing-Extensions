@@ -1,5 +1,5 @@
 // Shared build script for the forge branch (invoked once per versioned node)
-// Forge only builds for 1.20.1, 1.21.1 and 1.21.11 (all remap era versions)
+// Forge only builds for 1.20.1
 
 apply from: rootProject.file("replacements.gradle")
 
@@ -34,10 +34,32 @@ architectury {
     forge()
 }
 
-// Access widener namespace differs per era, process it for this node
-def processedAw = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener"), "build/processed/vr-throwing-extensions.accesswidener")
+// Access widener processed per node with replacements applied (the era rule sets the namespace header)
+def awSource = rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener")
+def processedAw = stonecutter.process(awSource, "build/processed/vr-throwing-extensions.accesswidener")
 // Mixin config ships from common resources, dev runs resolve it from this mod root only
-def processedMixins = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.mixins.json"), "build/processed/vr-throwing-extensions.mixins.json")
+def mixinsSource = rootProject.file("src/main/resources/vr-throwing-extensions.mixins.json")
+def processedMixins = stonecutter.process(mixinsSource, "build/processed/vr-throwing-extensions.mixins.json")
+
+// Stonecutter writes these files during configuration only, back them with tasks so consumers
+// get a real ordering edge and deleted outputs regenerate before anything reads them
+def processAw = tasks.register("processAccessWidener") {
+    inputs.file(awSource)
+    outputs.file(processedAw)
+    doLast { stonecutter.process(awSource, "build/processed/vr-throwing-extensions.accesswidener") }
+}
+def processMixins = tasks.register("processMixinConfig") {
+    inputs.file(mixinsSource)
+    outputs.file(processedMixins)
+    doLast { stonecutter.process(mixinsSource, "build/processed/vr-throwing-extensions.mixins.json") }
+}
+
+tasks.matching { it.name in ["remapJar", "remapSourcesJar", "validateAccessWidener"] }.configureEach {
+    dependsOn processAw
+}
+tasks.matching { it.name == "processResources" }.configureEach {
+    dependsOn processMixins
+}
 
 loom {
     silentMojangMappingsLicense()
@@ -45,13 +67,6 @@ loom {
 
     forge {
         mixinConfig "vr-throwing-extensions.mixins.json"
-    }
-
-    runs {
-        configureEach {
-            // EventBus 7 runtime validation for event listener signatures
-            property "eventbus.api.strictRuntimeChecks", "true"
-        }
     }
 }
 
@@ -84,11 +99,6 @@ dependencies {
 
     forge "net.minecraftforge:forge:${nodeProp('forge_version')}"
 
-    // EventBus 7 annotation processor for compile-time validation (1.21.11 wiring only)
-    if (nodeProp("eventbus_validator").toBoolean()) {
-        annotationProcessor "net.minecraftforge:eventbus-validator:7.0-beta.7"
-    }
-
     modImplementation "net.fabricmc:fabric-loader:${nodeProp('fabric_loader_version')}"
     modApi "maven.modrinth:vivecraft:${nodeProp('vivecraft_mc')}-${nodeProp('vivecraft_version')}-forge"
 
@@ -114,7 +124,7 @@ processResources {
         expand "version": project.version
     }
 
-    from(processedMixins)
+    from(processMixins)
 }
 
 jar {

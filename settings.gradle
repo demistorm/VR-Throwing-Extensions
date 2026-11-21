@@ -49,7 +49,7 @@ stonecutter {
         // Loader branches only get nodes for versions they can build
         branch("fabric")
         branch("forge") {
-            versions("1.20.1", "1.21.1", "1.21.11")
+            versions("1.20.1")
         }
         branch("neoforge") {
             versions("1.21.1", "1.21.11", "26.2", "26.3")

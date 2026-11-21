@@ -29,11 +29,24 @@ def platforms = ["fabric", "forge", "neoforge"].findAll {
 project.extensions.getByName("architectury").common(platforms as String[])
 
 // Access widener processed per node with replacements applied (the era rule sets the namespace header)
-def processedAw = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener"), "build/processed/vr-throwing-extensions.accesswidener")
+def awSource = rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener")
+def processedAw = stonecutter.process(awSource, "build/processed/vr-throwing-extensions.accesswidener")
+
+// Stonecutter writes the file during configuration only, back it with a task so consumers
+// get a real ordering edge and a deleted output regenerates before anything reads it
+def processAw = tasks.register("processAccessWidener") {
+    inputs.file(awSource)
+    outputs.file(processedAw)
+    doLast { stonecutter.process(awSource, "build/processed/vr-throwing-extensions.accesswidener") }
+}
 
 loom {
     silentMojangMappingsLicense()
     accessWidenerPath = processedAw
+}
+
+tasks.matching { it.name in ["validateAccessWidener", "remapSourcesJar"] }.configureEach {
+    dependsOn processAw
 }
 
 repositories {

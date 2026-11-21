@@ -38,13 +38,41 @@ architectury {
 }
 
 // Access widener processed per node with replacements applied (the era rule sets the namespace header)
-def processedAw = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener"), "build/processed/vr-throwing-extensions.accesswidener")
+def awSource = rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener")
+def processedAw = stonecutter.process(awSource, "build/processed/vr-throwing-extensions.accesswidener")
 // Mixin config ships from common resources, dev runs resolve it from this mod root only
-def processedMixins = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.mixins.json"), "build/processed/vr-throwing-extensions.mixins.json")
+def mixinsSource = rootProject.file("src/main/resources/vr-throwing-extensions.mixins.json")
+def processedMixins = stonecutter.process(mixinsSource, "build/processed/vr-throwing-extensions.mixins.json")
+
+// Stonecutter writes these files during configuration only, back them with tasks so consumers
+// get a real ordering edge and deleted outputs regenerate before anything reads them
+def processAw = tasks.register("processAccessWidener") {
+    inputs.file(awSource)
+    outputs.file(processedAw)
+    doLast { stonecutter.process(awSource, "build/processed/vr-throwing-extensions.accesswidener") }
+}
+def processMixins = tasks.register("processMixinConfig") {
+    inputs.file(mixinsSource)
+    outputs.file(processedMixins)
+    doLast { stonecutter.process(mixinsSource, "build/processed/vr-throwing-extensions.mixins.json") }
+}
 
 loom {
     silentMojangMappingsLicense()
     accessWidenerPath = processedAw
+
+    neoForge {
+        // Node-local access transformers are picked up from resources inconsistently, register explicitly
+        def at = file("src/main/resources/META-INF/accesstransformer.cfg")
+        if (at.exists()) accessTransformer(at)
+    }
+}
+
+tasks.matching { it.name in ["remapJar", "remapSourcesJar", "validateAccessWidener"] }.configureEach {
+    dependsOn processAw
+}
+tasks.matching { it.name == "processResources" }.configureEach {
+    dependsOn processMixins
 }
 
 configurations {
@@ -116,7 +144,7 @@ processResources {
         expand "version": project.version
     }
 
-    from(processedMixins)
+    from(processMixins)
 }
 
 if (noRemap) {
