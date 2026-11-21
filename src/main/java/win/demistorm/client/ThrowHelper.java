@@ -83,10 +83,6 @@ public class ThrowHelper {
 
     // Initialization is done by the tracker in VRThrowingExtensionsClient now
 
-    // Interaction callbacks (old call sites keep using these)
-    public static boolean cancellingBreaks() { return ThrowCancels.cancelBreaks(); }
-    public static boolean cancellingUse   () { return ThrowCancels.cancelUse(); }
-
     // Throwing logic utilizing Vivecraft's Tracker system
     public static class ThrowTracker implements Tracker {
         @Override

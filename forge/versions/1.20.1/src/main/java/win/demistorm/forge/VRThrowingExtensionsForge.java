@@ -36,13 +36,11 @@ public class VRThrowingExtensionsForge {
     public VRThrowingExtensionsForge() {
         log.info("VR Throwing Extensions (FORGE) starting!");
 
-        // Make sure Vivecraft is installed
-        try {
-            Class.forName("org.vivecraft.api.VRAPI");
+        // Check for Vivecraft (optional dependency)
+        if (win.demistorm.client.VivecraftGate.isVivecraftPresent()) {
             log.info("Vivecraft detected! VR throwing enabled.");
-        } catch (ClassNotFoundException e) {
-            log.error("Vivecraft not found! VR Throwing Extensions requires Vivecraft to function.");
-            throw new RuntimeException("Vivecraft is required for VR Throwing Extensions");
+        } else {
+            log.info("Vivecraft not found, VR throwing disabled.");
         }
 
         // Initialize common systems FIRST

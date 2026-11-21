@@ -16,7 +16,7 @@ import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.client.ThrownItemRenderer;
 import win.demistorm.client.ThrownTNTRenderer;
-import win.demistorm.client.ThrowHelper;
+import win.demistorm.client.ThrowCancels;
 import win.demistorm.client.RemapBindings;
 import win.demistorm.network.data.BloodParticleData;
 import win.demistorm.network.data.BleedingParticleData;
@@ -119,7 +119,7 @@ public class PlatformClientImpl implements ClientModInitializer {
     private static void registerClientInputEventHandlers() {
         // Cancel block breaking while throwing
         AttackBlockCallback.EVENT.register((player, world, hand, pos, dir) -> {
-            if (ThrowHelper.cancellingBreaks()) {
+            if (ThrowCancels.cancelBreaks()) {
                 VRThrowingExtensions.log.debug("[VR Cancel] Block breaking cancelled due to throwing motion");
                 return InteractionResult.FAIL;
             }
@@ -128,7 +128,7 @@ public class PlatformClientImpl implements ClientModInitializer {
 
         // Cancel block placing while throwing
         UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
-            if (ThrowHelper.cancellingUse()) {
+            if (ThrowCancels.cancelUse()) {
                 VRThrowingExtensions.log.debug("[VR Cancel] Block placing cancelled due to throwing motion");
                 return InteractionResult.FAIL;
             }
@@ -137,7 +137,7 @@ public class PlatformClientImpl implements ClientModInitializer {
 
         // Cancel item use while throwing
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (ThrowHelper.cancellingUse()) {
+            if (ThrowCancels.cancelUse()) {
                 VRThrowingExtensions.log.debug("[VR Cancel] Item use cancelled due to throwing motion");
                 return InteractionResultHolder.fail(player.getItemInHand(hand));
             }
