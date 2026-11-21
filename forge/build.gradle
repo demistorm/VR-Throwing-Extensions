@@ -177,3 +177,20 @@ def buildAndCollect = tasks.register("buildAndCollect", Copy) {
     into(rootProject.layout.buildDirectory.dir("dist"))
     dependsOn("build")
 }
+
+// Hide generated sources and run folders from IDEA search, this only fires during a sync
+// (Stonecutter drives IDE imports through its ideaSyncTask, no Gradle build requests that)
+if (System.getProperty("idea.syncActive") == "true" || gradle.startParameter.taskNames.isEmpty() ||
+        gradle.startParameter.taskNames.any { it.contains("ideaSyncTask") }) {
+    apply plugin: "idea"
+    idea.module.excludeDirs += file("run")
+    afterEvaluate {
+        def keepAuthored = { dirs ->
+            dirs.findAll { !it.absolutePath.replace("\\", "/").contains("build/generated/stonecutter") }
+        }
+        sourceSets.all {
+            java.setSrcDirs(keepAuthored(java.srcDirs))
+            resources.setSrcDirs(keepAuthored(resources.srcDirs))
+        }
+    }
+}

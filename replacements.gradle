@@ -71,8 +71,7 @@ stonecutter {
     }
 
     // NeoForge client packet distributor merged into PacketDistributor before 1.21.2
-    // (sendToPlayer stays fully qualified in PlatformImpl, the reverse needs the word boundary so it
-    // never matches inside the authored ClientPacketDistributor name)
+    // (the word boundary stops the reverse from matching inside the authored Client name)
     replacements.regex(current.parsed <= "1.21.1") {
         replace 'import net\\.neoforged\\.neoforge\\.client\\.network\\.ClientPacketDistributor;',
                 'import net.neoforged.neoforge.network.PacketDistributor;',
@@ -95,7 +94,7 @@ stonecutter {
     }
 
     // Client chat and overlay message API rework
-    // (Both forms are authored as displayClientMessage so the reverses stay unambiguous)
+    // (authored only as displayClientMessage so the reverses stay unambiguous)
     replacements.regex(current.parsed >= "26") {
         replace 'displayClientMessage\\(([^;]*?), true\\);', 'sendOverlayMessage($1);',
                 'sendOverlayMessage\\(([^;]*?)\\);', 'displayClientMessage($1, true);'
