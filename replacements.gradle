@@ -1,0 +1,157 @@
+// Version dependent replacements applied by every branch build script
+// Shared source is written in 1.21.11 style, these adapt it for older and newer nodes
+
+stonecutter {
+    // Mojang renamed ResourceLocation to Identifier in 1.21.11 (shared source uses the new name)
+    replacements.string(current.parsed < "1.21.11") {
+        replace "Identifier", "ResourceLocation"
+    }
+
+    // Keybind category lang key changed with the KeyMapping.Category rework
+    replacements.string(current.parsed < "1.21.11") {
+        replace "key.category.vr_throwing_extensions.category", "key.categories.vr_throwing_extensions"
+    }
+
+    // Fabric mod id was hyphenated on 1.21.1 and older
+    replacements.string(current.parsed <= "1.21.1") {
+        replace '"id": "vr_throwing_extensions"', '"id": "vr-throwing-extensions"'
+    }
+
+    // Access widener namespace header is named on remap era nodes and official on no-remap 26.x
+    replacements.string(current.parsed >= "26.2") {
+        replace "accessWidener\tv2\tnamed", "accessWidener\tv2\tofficial"
+    }
+
+    // Mixin compatibility level for the oldest version
+    replacements.string(current.parsed <= "1.20.1") {
+        replace "\"compatibilityLevel\": \"JAVA_21\"", "\"compatibilityLevel\": \"JAVA_17\""
+    }
+
+    // GuiGraphics color ints lost their alpha channel on 1.21.1 and older
+    replacements.string(current.parsed <= "1.21.1") {
+        replace "0xFFFFFFFF", "0xFFFFFF"
+        replace "0xFFAAAAAA", "0xAAAAAA"
+    }
+
+    // Config files used hyphenated names on 1.21.1 and older
+    replacements.string(current.parsed <= "1.21.1") {
+        replace "vr_throwing_extensions.json", "vr-throwing-extensions.json"
+        replace "vr_throwing_extensions-client.json", "vr-throwing-extensions-client.json"
+    }
+
+    // Level.isClientSide became a method call in 1.21.11
+    replacements.string(current.parsed <= "1.21.1") {
+        replace ".isClientSide()", ".isClientSide"
+    }
+
+    // ResourceLocation static factories arrived with 1.21.2, 1.20.1 needs constructors
+    // (Patterns use the Identifier form of the shared source, longer spans preempt the generic Identifier swap)
+    replacements.string(current.parsed <= "1.20.1") {
+        replace "Identifier.fromNamespaceAndPath(", "new ResourceLocation("
+        replace "Identifier.withDefaultNamespace(\"air\")", "new ResourceLocation(\"minecraft\", \"air\")"
+        replace "Identifier.parse(", "ResourceLocation.tryParse("
+    }
+
+    // Same factory calls map straight to ResourceLocation on 1.21.1 (the 1.20.1 reverse targets would otherwise absorb these spans)
+    replacements.string(current.parsed > "1.20.1" && current.parsed < "1.21.11") {
+        replace "Identifier.fromNamespaceAndPath(", "ResourceLocation.fromNamespaceAndPath("
+        replace "Identifier.withDefaultNamespace(\"air\")", "ResourceLocation.withDefaultNamespace(\"air\")"
+        replace "Identifier.parse(", "ResourceLocation.parse("
+    }
+
+    // SoundEvents holders became direct SoundEvent references before 1.21
+    replacements.string(current.parsed <= "1.20.1") {
+        replace "SoundEvents.TRIDENT_THROW.value()", "SoundEvents.TRIDENT_THROW"
+    }
+
+    // NeoForge FML accessors were methods before 1.21.2
+    replacements.string(current.parsed <= "1.21.1") {
+        replace "FMLEnvironment.getDist()", "FMLEnvironment.dist"
+        replace "FMLEnvironment.isProduction()", "FMLEnvironment.production"
+    }
+
+    // NeoForge client packet distributor merged into PacketDistributor before 1.21.2
+    // (Forward only, the reverse would clobber the PacketDistributor import newer nodes still use)
+    replacements.regex(current.parsed <= "1.21.1") {
+        replace 'import net\\.neoforged\\.neoforge\\.client\\.network\\.ClientPacketDistributor;', 'import net.neoforged.neoforge.network.PacketDistributor;', '(?!)', ''
+        replace 'ClientPacketDistributor\\.sendToServer\\(', 'PacketDistributor.sendToServer(', '(?!)', ''
+    }
+
+    // Registry-aware buffers only exist from 1.20.5, 1.20.1 uses plain FriendlyByteBuf
+    // (Forward only, the reverse would rewrite legitimate FriendlyByteBuf uses on newer nodes)
+    replacements.regex(current.parsed <= "1.20.1") {
+        replace 'RegistryFriendlyByteBuf', 'FriendlyByteBuf', '(?!)', ''
+    }
+
+    // Registry access lives on the level before 1.20.5
+    replacements.string(current.parsed <= "1.20.1") {
+        replace "player.registryAccess()", "player.level().registryAccess()"
+    }
+
+    // Client chat and overlay message API rework
+    replacements.regex(current.parsed >= "26") {
+        replace 'displayClientMessage\\(([^;]*?), true\\);', 'sendOverlayMessage($1);', '(?!)', ''
+    }
+
+    replacements.regex(current.parsed >= "26") {
+        replace 'displayClientMessage\\(([^;]*?), false\\);', 'sendSystemMessage($1);', '(?!)', ''
+    }
+
+    // GUI render state extraction rework (full spans, short overlapping patterns get preempted)
+    replacements.string(current.parsed >= "26") {
+        replace "public void render(GuiGraphics context", "public void extractRenderState(GuiGraphicsExtractor context"
+        replace "public void renderContent(GuiGraphics context", "public void extractContent(GuiGraphicsExtractor context"
+        replace ".render(context", ".extractRenderState(context"
+    }
+
+    replacements.string(current.parsed >= "26") {
+        replace "import net.minecraft.client.gui.GuiGraphics;", "import net.minecraft.client.gui.GuiGraphicsExtractor;"
+        replace "client.setScreen(", "client.gui.setScreen("
+        replace ".drawCenteredString(", ".centeredText("
+        replace ".drawString(", ".text("
+    }
+
+    // Light coordinate helper moved classes
+    replacements.string(current.parsed >= "26") {
+        replace "import net.minecraft.client.renderer.LevelRenderer;", "import net.minecraft.util.LightCoordsUtil;"
+        replace "import net.minecraft.client.renderer.state.CameraRenderState;", "import net.minecraft.client.renderer.state.level.CameraRenderState;"
+        replace "LevelRenderer.getLightColor(", "LightCoordsUtil.getLightCoords("
+    }
+
+    // ItemParticleOption now takes an Item instead of an ItemStack
+    replacements.string(current.parsed >= "26") {
+        replace "new ItemParticleOption(ParticleTypes.ITEM, getItem())", "new ItemParticleOption(ParticleTypes.ITEM, getItem().getItem())"
+        replace "new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.RED_DYE))", "new ItemParticleOption(ParticleTypes.ITEM, Items.DYE.red())"
+    }
+
+    // Fluid push helper renamed
+    replacements.string(current.parsed >= "26") {
+        replace "this.updateInWaterStateAndDoFluidPushing();", "this.updateFluidInteraction();"
+    }
+
+    // Null guarding rework in ThrownProjectileEntity
+    replacements.string(current.parsed >= "26") {
+        replace "ConfigHelper.getActiveConfig(getOwner().getUUID())", "ConfigHelper.getActiveConfig(Objects.requireNonNull(getOwner()).getUUID())"
+    }
+
+    // PoseStack rotation helper introduced in 26.3
+    replacements.string(current.parsed >= "26.3") {
+        replace "mulPose(Axis.YP.rotationDegrees(", "rotateDegrees(Axis.YP, ("
+        replace "mulPose(Axis.XP.rotationDegrees(", "rotateDegrees(Axis.XP, ("
+        replace "mulPose(Axis.ZP.rotationDegrees(", "rotateDegrees(Axis.ZP, ("
+    }
+
+    // Swing animation parameter added in 26.3
+    replacements.string(current.parsed >= "26.3") {
+        replace "player.swing(InteractionHand.MAIN_HAND);", "player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);"
+        replace "player.swing(InteractionHand.OFF_HAND);", "player.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);"
+    }
+
+    // Fabric API renames in 26.x (keybinding helper and payload registry)
+    replacements.string(current.parsed >= "26") {
+        replace "import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;", "import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;"
+        replace "KeyBindingHelper.registerKeyBinding(", "KeyMappingHelper.registerKeyMapping("
+        replace "PayloadTypeRegistry.playC2S()", "PayloadTypeRegistry.serverboundPlay()"
+        replace "PayloadTypeRegistry.playS2C()", "PayloadTypeRegistry.clientboundPlay()"
+    }
+}

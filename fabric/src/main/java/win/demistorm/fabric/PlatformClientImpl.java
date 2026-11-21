@@ -11,6 +11,8 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
+//? if <=1.21.1
+//import net.minecraft.world.InteractionResultHolder;
 import win.demistorm.VRThrowingExtensions;
 import win.demistorm.client.VRThrowingExtensionsClient;
 import win.demistorm.client.ThrownItemRenderer;
@@ -140,9 +142,15 @@ public class PlatformClientImpl implements ClientModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> {
             if (ThrowHelper.cancellingUse()) {
                 VRThrowingExtensions.log.debug("[VR Cancel] Item use cancelled due to throwing motion");
+                //? if >=1.21.11
                 return InteractionResult.FAIL;
+                //? else
+                //return InteractionResultHolder.fail(player.getItemInHand(hand));
             }
+            //? if >=1.21.11
             return InteractionResult.PASS;
+            //? else
+            //return InteractionResultHolder.pass(player.getItemInHand(hand));
         });
     }
 }

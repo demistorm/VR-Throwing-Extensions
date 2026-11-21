@@ -74,7 +74,10 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
                 .sized(0.25f, 0.25f)
                 .clientTrackingRange(64)
                 .updateInterval(5) // Update 4 times per second
+                //? if >=1.21.11
                 .build(ResourceKey.create(Registries.ENTITY_TYPE, entityLocation));
+                //? else
+                //.build("vr-throwing-extensions:generic_thrown_item");
 
         Registry.register(BuiltInRegistries.ENTITY_TYPE, entityLocation, VRThrowingExtensions.THROWN_ITEM_TYPE);
 
@@ -87,7 +90,10 @@ public class VRThrowingExtensionsFabric implements ModInitializer {
                 .sized(0.98f, 0.98f)
                 .clientTrackingRange(64)
                 .updateInterval(5)
+                //? if >=1.21.11
                 .build(ResourceKey.create(Registries.ENTITY_TYPE, tntEntityLocation));
+                //? else
+                //.build("vr-throwing-extensions:thrown_primed_tnt");
 
         Registry.register(BuiltInRegistries.ENTITY_TYPE, tntEntityLocation, VRThrowingExtensions.THROWN_TNT_TYPE);
 

@@ -35,6 +35,7 @@ public class VRThrowingExtensionsNeoForge {
         modEventBus.addListener((RegisterPayloadHandlersEvent event) -> {
             final PayloadRegistrar registrar = event.registrar("vr_throwing_extensions").optional();
 
+            //? if >=1.21.11 {
             // Register bidirectional packet with separate handlers for each direction
             registrar.playBidirectional(
                     BufferPacket.TYPE,
@@ -45,6 +46,21 @@ public class VRThrowingExtensionsNeoForge {
                     (packet, context) -> context.enqueueWork(() ->
                             ClientSetup.handleNetworkPacket(packet.buffer()))
             );
+            //?} else {
+            /*// Register packet handlers
+            registrar.playBidirectional(BufferPacket.TYPE, BufferPacket.STREAM_CODEC,
+                (packet, context) -> {
+                    if (context.flow().isClientbound()) {
+                        // Server to client packets
+                        if (FMLEnvironment.dist.isClient()) {
+                            ClientSetup.handleNetworkPacket(packet.buffer());
+                        }
+                    } else {
+                        // Client to server packets
+                        handleServerPacket(packet.buffer(), context);
+                    }
+                });*/
+            //?}
 
             log.info("Registered NeoForge network handlers in constructor");
         });
@@ -95,7 +111,10 @@ public class VRThrowingExtensionsNeoForge {
                         .sized(0.25f, 0.25f)
                         .clientTrackingRange(64)
                         .updateInterval(5) // Update 4 times per second
+                        //? if >=1.21.11
                         .build(ResourceKey.create(Registries.ENTITY_TYPE, entityLocation));
+                        //? else
+                        //.build("vr_throwing_extensions:generic_thrown_item");
                 return VRThrowingExtensions.THROWN_ITEM_TYPE;
             });
 
@@ -109,7 +128,10 @@ public class VRThrowingExtensionsNeoForge {
                         .sized(0.98f, 0.98f)
                         .clientTrackingRange(64)
                         .updateInterval(5)
+                        //? if >=1.21.11
                         .build(ResourceKey.create(Registries.ENTITY_TYPE, tntEntityLocation));
+                        //? else
+                        //.build("vr_throwing_extensions:thrown_primed_tnt");
                 return VRThrowingExtensions.THROWN_TNT_TYPE;
             });
 

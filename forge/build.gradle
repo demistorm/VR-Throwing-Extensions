@@ -1,136 +1,169 @@
-// Forge module build configuration for VR Throwing Extensions
-// This module contains Forge-specific implementations and runtime dependencies
-// All common VR logic is in the common module - this just handles Forge integration
+// Shared build script for the forge branch (invoked once per versioned node)
+// Forge only builds for 1.20.1, 1.21.1 and 1.21.11 (all remap era versions)
 
-plugins {
-    // Shadow plugin for bundling common module
-    id 'com.gradleup.shadow' version '9.4.3'
+apply from: rootProject.file("replacements.gradle")
+
+// Per-version values live in versions/<version>/gradle.properties, fall back to them
+def commonNodeProps = new Properties()
+def commonNodeFile = rootProject.file("versions/${project.name}/gradle.properties")
+if (commonNodeFile.exists()) commonNodeFile.withInputStream { commonNodeProps.load(it) }
+def nodeProp = { String key ->
+    (project.findProperty(key) ?: commonNodeProps.getProperty(key) ?: "").toString()
+}
+def javaVersion = Integer.parseInt(nodeProp("java_version"))
+def commonProject = rootProject.findProject(":${project.name}")
+
+apply plugin: "dev.architectury.loom"
+apply plugin: "architectury-plugin"
+apply plugin: "com.gradleup.shadow"
+
+// Create the sourcesJar task early so it can be configured below
+java {
+    withSourcesJar()
 }
 
-// Configure Architectury for this Forge module
+version = "${project.name}-${rootProject.mod_version}"
+group = rootProject.maven_group + ".forge"
+base {
+    archivesName = rootProject.archives_base_name + "-forge"
+}
+
+
 architectury {
     platformSetupLoomIde()
     forge()
 }
 
-// Set loader-specific archive name for better organization
-base {
-    archivesName = rootProject.archives_base_name + "-forge"
-}
+// Access widener namespace differs per era, process it for this node
+def processedAw = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener"), "build/processed/vr-throwing-extensions.accesswidener")
+// Mixin config ships from common resources, dev runs resolve it from this mod root only
+def processedMixins = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.mixins.json"), "build/processed/vr-throwing-extensions.mixins.json")
 
 loom {
-    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
-    def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
-    if (aw.exists()) {
-        accessWidenerPath.set(aw)
-    }
+    silentMojangMappingsLicense()
+    accessWidenerPath = processedAw
 
     forge {
         mixinConfig "vr-throwing-extensions.mixins.json"
     }
+
+    runs {
+        configureEach {
+            // EventBus 7 runtime validation for event listener signatures
+            property "eventbus.api.strictRuntimeChecks", "true"
+        }
+    }
 }
 
 configurations {
-    // Common module configuration
     common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this
+    shadowCommon
 
-    // Build configuration inheritance
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
 }
 
 repositories {
-    // Add repositories to publish here
-    maven { url = "https://cursemaven.com" }
+    mavenLocal()
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+    maven {
+        name = "CurseMaven"
+        url = "https://cursemaven.com"
+    }
 }
 
 dependencies {
-    // Core Forge dependency
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    minecraft "com.mojang:minecraft:${project.name}"
+    mappings loom.layered() {
+        officialMojangMappings()
+    }
 
-    // EventBus 7 annotation processor for compile-time validation
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.7'
+    forge "net.minecraftforge:forge:${nodeProp('forge_version')}"
 
-    // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    // EventBus 7 annotation processor for compile-time validation (1.21.11 wiring only)
+    if (nodeProp("eventbus_validator").toBoolean()) {
+        annotationProcessor "net.minecraftforge:eventbus-validator:7.0-beta.7"
+    }
 
-    // Vivecraft runtime dependency (Forge version)
-    modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-forge"
+    modImplementation "net.fabricmc:fabric-loader:${nodeProp('fabric_loader_version')}"
+    modApi "maven.modrinth:vivecraft:${nodeProp('vivecraft_mc')}-${nodeProp('vivecraft_version')}-forge"
+
+    common(project(path: commonProject.path, configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: commonProject.path, configuration: "transformProductionForge")) { transitive = false }
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
     implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixin_extras_version}"))
 }
 
-// Add run configurations with EventBus 7 runtime validation
-loom {
-    runs {
-        // applies to all the run configs below
-        configureEach {
-            property 'eventbus.api.strictRuntimeChecks', 'true'
-        }
-    }
-}
-
-// Process resources and expand version placeholders
 processResources {
     inputs.property "version", project.version
-    inputs.property "minecraft_version", rootProject.minecraft_version
-    inputs.property "forge_version", rootProject.forge_version
+    inputs.property "minecraft_version", project.name
+    inputs.property "forge_version", nodeProp("forge_version")
 
     filesMatching("META-INF/mods.toml") {
-        expand "version": inputs.properties.version,
-                "minecraft_version": inputs.properties.minecraft_version,
-                "forge_version": inputs.properties.forge_version
+        expand "version": project.version,
+                "minecraft_version": project.name,
+                "forge_version": nodeProp("forge_version")
     }
 
     filesMatching("pack.mcmeta") {
-        expand "version": inputs.properties.version
+        expand "version": project.version
     }
+
+    from(processedMixins)
 }
 
-// Configure shadow JAR for including common module
+jar {
+    archiveClassifier = "dev"
+}
+
 shadowJar {
     exclude "architectury.common.json"
     configurations = [project.configurations.shadowCommon]
     archiveClassifier = "dev-shadow"
 }
 
-// Remap shadow JAR to proper Forge format
 remapJar {
-    input.set shadowJar.archiveFile
+    input = shadowJar.archiveFile
     atAccessWideners.add loom.accessWidenerPath.get().asFile.name
     dependsOn shadowJar
     archiveClassifier = null
 }
 
-// Configure regular JAR for development
-jar {
-    archiveClassifier = "dev"
-}
-
-// Configure sources JAR to include common module sources
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    def commonSources = commonProject.tasks.named("sourcesJar")
     dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
+    from(commonSources.flatMap { it.archiveFile }.map { zipTree(it) })
 }
 
-// Configure Java components for publishing
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
     }
 }
 
-// Publishing configuration for Forge builds
-publishing {
-    publications {
-        mavenForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
-            from components.java
-        }
+java {
+    def toolchainVersion = nodeProp("toolchain_version") ?: nodeProp("java_version")
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(Integer.parseInt(toolchainVersion))
     }
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = javaVersion
+}
+
+def buildAndCollect = tasks.register("buildAndCollect", Copy) {
+    group = "build version"
+    description = "Must run through 'build-<version>' or 'buildAll'"
+    from(remapJar.archiveFile)
+    into(rootProject.layout.buildDirectory.dir("dist"))
+    dependsOn("build")
 }

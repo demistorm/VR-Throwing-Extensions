@@ -1,122 +1,198 @@
-// NeoForge module build configuration for VR Throwing Extensions
-// This module contains NeoForge-specific implementations and runtime dependencies
-// All common VR logic is in the common module - this just handles NeoForge integration
+// Shared build script for the neoforge branch (invoked once per versioned node)
+// 1.21.1 and 1.21.11 are remap era, 26.2 and 26.3 use the no-remap plugin variant
 
-plugins {
-    // Shadow plugin for bundling common module
-    id 'com.gradleup.shadow' version '9.4.3'
+apply from: rootProject.file("replacements.gradle")
+
+// Per-version values live in versions/<version>/gradle.properties, fall back to them
+def commonNodeProps = new Properties()
+def commonNodeFile = rootProject.file("versions/${project.name}/gradle.properties")
+if (commonNodeFile.exists()) commonNodeFile.withInputStream { commonNodeProps.load(it) }
+def nodeProp = { String key ->
+    (project.findProperty(key) ?: commonNodeProps.getProperty(key) ?: "").toString()
+}
+def noRemap = nodeProp("no_remap").toBoolean()
+def javaVersion = Integer.parseInt(nodeProp("java_version"))
+// Minecraft dependency range for neoforge.mods.toml, remap era pins the exact version
+def minecraftDep = noRemap ? "[${project.name},)" : "[${project.name}]"
+def commonProject = rootProject.findProject(":${project.name}")
+
+apply plugin: noRemap ? "dev.architectury.loom-no-remap" : "dev.architectury.loom"
+apply plugin: "architectury-plugin"
+apply plugin: "com.gradleup.shadow"
+
+// Create the sourcesJar task early so it can be configured below
+java {
+    withSourcesJar()
 }
 
-// Configure Architectury for this NeoForge module
-architectury {
-    platformSetupLoomIde()
-    forge()
-}
-
-// Set loader-specific archive name for better organization
+version = "${project.name}-${rootProject.mod_version}"
+group = rootProject.maven_group + ".neoforge"
 base {
     archivesName = rootProject.archives_base_name + "-neoforge"
 }
 
-repositories {
-    maven {
-        url = "https://maven.neoforged.net/releases/"
-    }
+
+architectury {
+    platformSetupLoomIde()
+    neoForge()
 }
 
-// Loom configuration for the NeoForge module
+// Access widener processed per node with replacements applied (the era rule sets the namespace header)
+def processedAw = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener"), "build/processed/vr-throwing-extensions.accesswidener")
+// Mixin config ships from common resources, dev runs resolve it from this mod root only
+def processedMixins = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.mixins.json"), "build/processed/vr-throwing-extensions.mixins.json")
+
 loom {
-    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
-    def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
-    if (aw.exists()) {
-        accessWidenerPath.set(aw)
-    }
+    silentMojangMappingsLicense()
+    accessWidenerPath = processedAw
 }
 
 configurations {
-    // Common module configuration
     common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this
+    shadowCommon
 
-    // Build configuration inheritance
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentNeoForge.extendsFrom common
 }
 
-dependencies {
-    // Core NeoForge dependency
-    neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
-
-    // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
-
-    // Vivecraft runtime dependency (NeoForge version)
-    implementation "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-neoforge"
+repositories {
+    mavenLocal()
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+    maven {
+        name = "NeoForge"
+        url = "https://maven.neoforged.net/releases/"
+    }
 }
 
-// Process resources and expand version placeholders
+dependencies {
+    minecraft "com.mojang:minecraft:${project.name}"
+
+    if (!noRemap) {
+        mappings loom.layered() {
+            officialMojangMappings()
+        }
+    }
+
+    neoForge "net.neoforged:neoforge:${nodeProp('neoforge_version')}"
+
+    def fabricLoader = "net.fabricmc:fabric-loader:${nodeProp('fabric_loader_version')}"
+    def vivecraft = "maven.modrinth:vivecraft:${nodeProp('vivecraft_mc')}-${nodeProp('vivecraft_version')}-neoforge"
+
+    if (noRemap) {
+        implementation fabricLoader
+        implementation vivecraft
+    } else {
+        modImplementation fabricLoader
+        implementation vivecraft
+    }
+
+    // Include the common module with all shared VR logic
+    if (noRemap) {
+        common(commonProject) { transitive = false }
+    } else {
+        common(project(path: commonProject.path, configuration: "namedElements")) { transitive = false }
+    }
+    shadowCommon(project(path: commonProject.path, configuration: "transformProductionNeoForge")) { transitive = false }
+}
+
 processResources {
     inputs.property "version", project.version
-    inputs.property "minecraft_version", rootProject.minecraft_version
-    inputs.property "neoforge_version", rootProject.neoforge_version
+    inputs.property "minecraft_version", project.name
+    inputs.property "neoforge_version", nodeProp("neoforge_version")
+    inputs.property "minecraft_dep", minecraftDep
 
     filesMatching("META-INF/neoforge.mods.toml") {
-        expand "version": inputs.properties.version,
-                "minecraft_version": inputs.properties.minecraft_version,
-                "neoforge_version": inputs.properties.neoforge_version
+        expand "version": project.version,
+                "minecraft_version": project.name,
+                "neoforge_version": nodeProp("neoforge_version"),
+                "minecraft_dep": minecraftDep
     }
 
     filesMatching("pack.mcmeta") {
-        expand "version": inputs.properties.version
+        expand "version": project.version
+    }
+
+    from(processedMixins)
+}
+
+if (noRemap) {
+    jar {
+        archiveClassifier = "raw"
+    }
+
+    shadowJar {
+        dependsOn jar
+        exclude "architectury.common.json"
+        mainSpec.sourcePaths.clear()
+        from(zipTree(jar.archiveFile))
+        configurations = [project.configurations.shadowCommon]
+        archiveClassifier = null
+    }
+
+    configurations {
+        apiElements {
+            outgoing.artifacts.clear()
+            outgoing.artifact(shadowJar)
+        }
+        runtimeElements {
+            outgoing.artifacts.clear()
+            outgoing.artifact(shadowJar)
+        }
+    }
+} else {
+    jar {
+        archiveClassifier = "dev"
+    }
+
+    shadowJar {
+        exclude "architectury.common.json"
+        configurations = [project.configurations.shadowCommon]
+        archiveClassifier = "dev-shadow"
+    }
+
+    remapJar {
+        input = shadowJar.archiveFile
+        atAccessWideners.add loom.accessWidenerPath.get().asFile.name
+        dependsOn shadowJar
+        archiveClassifier = null
     }
 }
 
-// Configure shadow JAR for including common module
-shadowJar {
-    exclude "architectury.common.json"
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
-}
-
-// Remap shadow JAR to proper NeoForge format
-remapJar {
-    input.set shadowJar.archiveFile
-    atAccessWideners.add loom.accessWidenerPath.get().asFile.name
-    dependsOn shadowJar
-    archiveClassifier = null
-}
-
-// Configure regular JAR for development
-jar {
-    archiveClassifier = "dev"
-}
-
-// Configure sources JAR to include common module sources
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    def commonSources = commonProject.tasks.named("sourcesJar")
     dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
+    from(commonSources.flatMap { it.archiveFile }.map { zipTree(it) })
 }
 
-// Configure Java components for publishing
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
     }
 }
 
-// Publishing configuration for NeoForge builds
-publishing {
-    publications {
-        mavenNeoForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
-            from components.java
-        }
+java {
+    def toolchainVersion = nodeProp("toolchain_version") ?: nodeProp("java_version")
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(Integer.parseInt(toolchainVersion))
     }
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
 
-    repositories {
-        // Add repositories to publish to here
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = javaVersion
+}
+
+def buildAndCollect = tasks.register("buildAndCollect", Copy) {
+    group = "build version"
+    description = "Must run through 'build-<version>' or 'buildAll'"
+    def finalJar = noRemap ? shadowJar.archiveFile : remapJar.archiveFile
+    from(finalJar)
+    into(rootProject.layout.buildDirectory.dir("dist"))
+    dependsOn("build")
 }

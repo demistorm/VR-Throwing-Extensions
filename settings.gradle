@@ -1,38 +1,63 @@
-// Plugin management for multi-loader VR Throwing Extensions project
-// This tells Gradle where to find the Architectury and Loom plugins needed for cross-loader builds
+// Stonecutter project setup for multi-version, multi-loader VR Throwing Extensions
+// The root branch hosts the common source, loader branches live in fabric/, forge/ and neoforge/
 
 pluginManagement {
     repositories {
-        // Fabric Maven for Loom plugin
         maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
-
-        // Architectury Maven for Architectury plugin
         maven {
             name = 'Architectury'
             url = 'https://maven.architectury.dev/'
         }
-
-        // Forge Maven for Forge/NeoForge plugins
         maven {
             name = 'Forge'
             url = 'https://maven.minecraftforge.net/'
         }
-
-        // Standard Gradle repositories
+        maven {
+            name = 'NeoForge'
+            url = 'https://maven.neoforged.net/releases/'
+        }
+        maven {
+            name = 'Stonecutter'
+            url = 'https://maven.kikugie.dev/releases'
+        }
+        maven {
+            name = 'StonecutterSnapshots'
+            url = 'https://maven.kikugie.dev/snapshots'
+        }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
-// Define all subprojects in our multi-loader setup
-// This creates the module structure: common/, fabric/, forge/, neoforge/
-include("common")
-include("fabric")
-include("forge")
-include("neoforge")
+plugins {
+    id "dev.kikugie.stonecutter" version "0.10"
+    id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
+}
 
-// Set the root project name (used for artifact naming)
+stonecutter {
+    // This project uses Groovy build scripts
+    kotlinController = false
+    centralScript = "build.gradle"
+
+    create(rootProject) {
+        // Root branch (common source) supports every version
+        versions("1.20.1", "1.21.1", "1.21.11", "26.2", "26.3")
+
+        // Loader branches only get nodes for versions they can build
+        branch("fabric")
+        branch("forge") {
+            versions("1.20.1", "1.21.1", "1.21.11")
+        }
+        branch("neoforge") {
+            versions("1.21.1", "1.21.11", "26.2", "26.3")
+        }
+
+        // Version the shared source should be reset to before committing
+        vcsVersion = "1.21.11"
+    }
+}
+
 rootProject.name = "vr_throwing_extensions"

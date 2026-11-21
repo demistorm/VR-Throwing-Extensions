@@ -1,122 +1,217 @@
-// Fabric module build configuration for VR Throwing Extensions
-// This module contains Fabric-specific implementations and runtime dependencies
-// All common VR logic is in the common module - this just handles Fabric integration
+// Shared build script for the fabric branch (invoked once per versioned node)
 
-plugins {
-    // Shadow plugin for bundling common module
-    id 'com.gradleup.shadow' version '9.4.3'
+apply from: rootProject.file("replacements.gradle")
+
+// Per-version values live in versions/<version>/gradle.properties, fall back to them
+def commonNodeProps = new Properties()
+def commonNodeFile = rootProject.file("versions/${project.name}/gradle.properties")
+if (commonNodeFile.exists()) commonNodeFile.withInputStream { commonNodeProps.load(it) }
+def nodeProp = { String key ->
+    (project.findProperty(key) ?: commonNodeProps.getProperty(key) ?: "").toString()
+}
+def noRemap = nodeProp("no_remap").toBoolean()
+def javaVersion = Integer.parseInt(nodeProp("java_version"))
+// Minecraft dependency for fabric.mod.json, remap era pins the exact version
+def minecraftDep = noRemap ? ">=${project.name}" : project.name
+// The common node for this Minecraft version lives directly under the root
+def commonProject = rootProject.findProject(":${project.name}")
+
+apply plugin: noRemap ? "dev.architectury.loom-no-remap" : "dev.architectury.loom"
+apply plugin: "architectury-plugin"
+apply plugin: "com.gradleup.shadow"
+
+// Create the sourcesJar task early so it can be configured below
+java {
+    withSourcesJar()
 }
 
-// Configure Architectury for this Fabric module
+version = "${project.name}-${rootProject.mod_version}"
+group = rootProject.maven_group + ".fabric"
+base {
+    archivesName = rootProject.archives_base_name + "-fabric"
+}
+
+
 architectury {
     platformSetupLoomIde()
     fabric()
 }
 
-// Set loader-specific archive name for better organization
-base {
-    archivesName = rootProject.archives_base_name + "-fabric"
-}
+// Access widener processed per node with replacements applied (the era rule sets the namespace header)
+def processedAw = stonecutter.process(rootProject.file("src/main/resources/vr-throwing-extensions.accesswidener"), "build/processed/vr-throwing-extensions.accesswidener")
 
-// Loom configuration for the Fabric module
 loom {
-    // Access widener for StandingAndWallBlockItem.getPlacementState (torch wall placement)
-    def aw = project(":common").file("src/main/resources/vr-throwing-extensions.accesswidener")
-    if (aw.exists()) {
-        accessWidenerPath.set(aw)
-    }
+    silentMojangMappingsLicense()
+    accessWidenerPath = processedAw
 }
 
 configurations {
-    // Common module configuration
     common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this
+    shadowCommon // Kept separate from the shadow plugin configuration so IDEA does not index it
 
-    // Build configuration inheritance
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
 }
 
-sourceSets {
-    main {
-        compileClasspath += sourceSets.main.compileClasspath
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name = "Terraformers"
+        url = "https://maven.terraformersmc.com/"
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
     }
 }
 
 dependencies {
-    // Core Fabric dependencies
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    minecraft "com.mojang:minecraft:${project.name}"
+
+    if (!noRemap) {
+        mappings loom.layered() {
+            officialMojangMappings()
+        }
+    }
+
+    def fabricLoader = "net.fabricmc:fabric-loader:${nodeProp('fabric_loader_version')}"
+    def fabricApi = "net.fabricmc.fabric-api:fabric-api:${nodeProp('fabric_api_version')}"
+    def vivecraft = "maven.modrinth:vivecraft:${nodeProp('vivecraft_mc')}-${nodeProp('vivecraft_version')}-fabric"
+    def modmenu = "com.terraformersmc:modmenu:${nodeProp('modmenu_version')}"
+
+    if (noRemap) {
+        implementation fabricLoader
+        api fabricApi
+        implementation vivecraft
+        compileOnly modmenu
+    } else {
+        modImplementation fabricLoader
+        modApi fabricApi
+        modApi vivecraft
+        modCompileOnly modmenu
+    }
+
+    // Mod Menu in dev runs only, the published jar merely suggests it
+    if (noRemap) {
+        implementation modmenu
+    } else {
+        modLocalRuntime modmenu
+    }
+
+    // Vivecraft bundles these inside its jar, loom dev runs do not expand jar-in-jar entries
+    implementation "com.electronwill.night-config:core:3.6.6"
+    implementation "com.electronwill.night-config:toml:3.6.6"
+    implementation "org.lwjgl:lwjgl-openvr:3.3.3"
+    implementation "org.lwjgl:lwjgl-openvr:3.3.3:natives-linux"
+    implementation "org.lwjgl:lwjgl-openvr:3.3.3:natives-windows"
+    implementation "org.lwjgl:lwjgl-openvr:3.3.3:natives-macos"
 
     // Include the common module with all shared VR logic
-    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
-
-    // Vivecraft runtime dependency (Fabric version)
-    modApi "maven.modrinth:vivecraft:${rootProject.minecraft_version}-${rootProject.vivecraft_version}-fabric"
-
-
-    // Mod Menu integration for Fabric users
-    modCompileOnly "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
+    if (noRemap) {
+        common(commonProject) { transitive = false }
+    } else {
+        common(project(path: commonProject.path, configuration: "namedElements")) { transitive = false }
+    }
+    shadowCommon(project(path: commonProject.path, configuration: "transformProductionFabric")) { transitive = false }
 }
 
-// Process resources and expand version placeholders
+
 processResources {
     inputs.property "version", project.version
-    inputs.property "minecraft_version", rootProject.minecraft_version
-    inputs.property "fabric_loader_version", rootProject.fabric_loader_version
+    inputs.property "minecraft_dep", minecraftDep
+    inputs.property "java_dep", nodeProp("java_dep")
+    inputs.property "fabric_loader_version", nodeProp("fabric_loader_version")
 
     filesMatching("fabric.mod.json") {
-        expand "version": inputs.properties.version,
-                "minecraft_version": inputs.properties.minecraft_version,
-                "fabric_loader_version": inputs.properties.fabric_loader_version
+        expand "version": project.version,
+                "minecraft_dep": minecraftDep,
+                "java_dep": nodeProp("java_dep"),
+                "fabric_loader_version": nodeProp("fabric_loader_version")
+    }
+
+    // The loader resolves the access widener from this mod root, common resources are a
+    // separate classpath entry in dev runs so the processed copy must live here too
+    from(processedAw)
+}
+
+if (noRemap) {
+    // Loom already produces a usable jar, shadow re-wraps it with the common module bundled
+    jar {
+        archiveClassifier = "raw"
+    }
+
+    shadowJar {
+        dependsOn jar
+        exclude "architectury.common.json"
+        mainSpec.sourcePaths.clear()
+        from(zipTree(jar.archiveFile))
+        configurations = [project.configurations.shadowCommon]
+        archiveClassifier = null
+    }
+
+    configurations {
+        apiElements {
+            outgoing.artifacts.clear()
+            outgoing.artifact(shadowJar)
+        }
+        runtimeElements {
+            outgoing.artifacts.clear()
+            outgoing.artifact(shadowJar)
+        }
+    }
+} else {
+    jar {
+        archiveClassifier = "dev"
+    }
+
+    shadowJar {
+        exclude "architectury.common.json"
+        configurations = [project.configurations.shadowCommon]
+        archiveClassifier = "dev-shadow"
+    }
+
+    remapJar {
+        input = shadowJar.archiveFile
+        dependsOn shadowJar
+        archiveClassifier = null
     }
 }
 
-// Configure shadow JAR for including common module
-shadowJar {
-    exclude "architectury.common.json"
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
-}
-
-// Remap shadow JAR to proper Fabric format
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    archiveClassifier = null
-}
-
-// Configure regular JAR for development
-jar {
-    archiveClassifier = "dev"
-}
-
-// Configure sources JAR to include common module sources
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    def commonSources = commonProject.tasks.named("sourcesJar")
     dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
+    from(commonSources.flatMap { it.archiveFile }.map { zipTree(it) })
 }
 
-// Configure Java components for publishing
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
     }
 }
 
-// Publishing configuration for Fabric builds
-publishing {
-    publications {
-        mavenFabric(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
-            from components.java
-        }
+java {
+    def toolchainVersion = nodeProp("toolchain_version") ?: nodeProp("java_version")
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(Integer.parseInt(toolchainVersion))
     }
-
-    repositories {
-        // Add repositories to publish to here
-    }
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = javaVersion
+}
+
+// Build the final jar and copy it to the root dist folder
+def buildAndCollect = tasks.register("buildAndCollect", Copy) {
+    group = "build version"
+    description = "Must run through 'build-<version>' or 'buildAll'"
+    def finalJar = noRemap ? shadowJar.archiveFile : remapJar.archiveFile
+    from(finalJar)
+    into(rootProject.layout.buildDirectory.dir("dist"))
+    dependsOn("build")
+}
+

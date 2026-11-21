@@ -1,0 +1,149 @@
+// Stonecutter controller, also acts as the root project build script
+// Version switching is done with "Set active project to <version>" tasks,
+// run "Reset active project" before committing so diffs stay clean
+
+plugins {
+    id "dev.kikugie.stonecutter"
+    // Both plugin ids share the same underlying artifact, each era applies the matching one
+    id "dev.architectury.loom" version "1.17.493" apply false
+    id "dev.architectury.loom-no-remap" version "1.17.493" apply false
+    id "architectury-plugin" version "3.5-SNAPSHOT" apply false
+    id "com.gradleup.shadow" version "9.4.3" apply false
+}
+
+stonecutter.active "1.21.11" /* [SC] DO NOT EDIT */
+
+// Collect the final jar of every loader node into build/dist
+def loaderNodePaths = [:]
+stonecutter.tree.getBranches().each { branch ->
+    def branchName = branch.getId()
+    if (branchName.isEmpty()) return
+    branch.getNodes().each { node ->
+        def mcVersion = node.getMetadata().getVersion()
+        loaderNodePaths.put(mcVersion, loaderNodePaths.getOrDefault(mcVersion, []))
+        loaderNodePaths[mcVersion] << ":${branchName}:${mcVersion}:buildAndCollect"
+    }
+}
+
+loaderNodePaths.each { mcVersion, paths ->
+    tasks.register("build-${mcVersion}") {
+        group = "build version"
+        description = "Builds every loader for Minecraft ${mcVersion} into build/dist"
+        dependsOn paths
+    }
+}
+
+tasks.register("buildAll") {
+    group = "build version"
+    description = "Builds every loader for every Minecraft version into build/dist"
+    dependsOn loaderNodePaths.values().flatten()
+}
+
+// Quick compile-only check across every node (no jars/remaps), use for the version fix loop
+def compileTasks = []
+stonecutter.tree.getBranches().each { branch ->
+    def prefix = branch.getId().isEmpty() ? "" : ":${branch.getId()}"
+    branch.getNodes().each { node ->
+        compileTasks << "${prefix}:${node.getMetadata().getVersion()}:compileJava"
+    }
+}
+
+tasks.register("compileAll") {
+    group = "build version"
+    description = "Compiles every node without building jars"
+    dependsOn compileTasks
+}
+
+// The architectury transformer keeps shared classpath state per daemon, concurrent transform
+// tasks of different version nodes mix eras and fail with TypeNotPresentException, chain them
+// (Every task must run after all earlier ones, ordering between neighbours alone does not
+// carry over when skipped neighbours drop out of the task graph)
+gradle.projectsEvaluated {
+    def transforms = []
+    stonecutter.tree.getBranches().each { branch ->
+        if (!branch.getId().isEmpty()) return
+        branch.getNodes().each { node ->
+            def nodeProject = rootProject.findProject(":${node.getMetadata().getVersion()}")
+            if (nodeProject == null) return
+            ["transformProductionFabric", "transformProductionForge", "transformProductionNeoForge"].each { name ->
+                def transformTask = nodeProject.tasks.findByName(name)
+                if (transformTask != null) transforms << transformTask
+            }
+        }
+    }
+    transforms.eachWithIndex { transformTask, i ->
+        if (i > 0) transformTask.mustRunAfter(transforms[0..<i])
+    }
+}
+
+// Dev runs pair up nicely, servers listen on 30100 in creative with the offline dev account
+// opped and fresh clients get a matching multiplayer list entry (servers.dat is plain
+// uncompressed NBT, this script only evaluates on the root project so reach into every
+// node from here, the servers.dat seed skips itself whenever the file already exists so
+// in-game list edits stay untouched)
+gradle.projectsEvaluated {
+    rootProject.allprojects { node ->
+        node.tasks.matching { it.name == "runServer" || it.name == "runClient" }.configureEach { task ->
+            def devServer = task.name == "runServer"
+            task.doFirst {
+                def runDir = node.file("run")
+                runDir.mkdirs()
+                if (devServer) {
+                    def forced = [
+                        "server-port": "30100",
+                        "gamemode": "creative",
+                        "force-gamemode": "true",
+                        "online-mode": "false",
+                        "op-permission-level": "4",
+                        "spawn-protection": "0"
+                    ]
+                    def props = new File(runDir, "server.properties")
+                    def lines = props.exists() ? props.readLines() : []
+                    forced.each { key, value ->
+                        def prefix = key + "="
+                        def found = false
+                        lines = lines.collect { line ->
+                            if (line.startsWith(prefix)) {
+                                found = true
+                                prefix + value
+                            } else line
+                        }
+                        if (!found) lines << prefix + value
+                    }
+                    props.text = lines.join("\n") + "\n"
+                    // Default dev clients connect as an offline "Player" account, op it up front
+                    // (a fresh boot writes an empty ops list, seed that virgin state too but
+                    // never touch a file with real ops in it)
+                    def ops = new File(runDir, "ops.json")
+                    def opsText = ops.exists() ? ops.text.trim() : ""
+                    if (opsText.empty || opsText == "[]") {
+                        def offlineId = java.util.UUID.nameUUIDFromBytes(
+                                "OfflinePlayer:Player".getBytes("UTF-8")).toString()
+                        ops.text = "[{\"name\":\"Player\",\"uuid\":\"$offlineId\",\"level\":4,\"bypassesPlayerLimit\":true}]\n"
+                    }
+                    // First server boots would otherwise sit waiting on the license prompt
+                    def eula = new File(runDir, "eula.txt")
+                    if (!eula.exists()) eula.text = "eula=true\n"
+                } else {
+                    def dat = new File(runDir, "servers.dat")
+                    if (!dat.exists()) {
+                        def nameBytes = "VTE Dev".getBytes("UTF-8")
+                        def ipBytes = "127.0.0.1:30100".getBytes("UTF-8")
+                        def buffer = new java.io.ByteArrayOutputStream()
+                        def out = new java.io.DataOutputStream(buffer)
+                        out.writeByte(10); out.writeShort(0)
+                        out.writeByte(9); out.writeShort(7); out.writeBytes("servers")
+                        out.writeByte(10); out.writeInt(1)
+                        out.writeByte(8); out.writeShort(4); out.writeBytes("name")
+                        out.writeShort(nameBytes.length); out.write(nameBytes)
+                        out.writeByte(8); out.writeShort(2); out.writeBytes("ip")
+                        out.writeShort(ipBytes.length); out.write(ipBytes)
+                        out.writeByte(0)
+                        out.writeByte(0)
+                        dat.bytes = buffer.toByteArray()
+                    }
+                }
+            }
+        }
+    }
+}
