@@ -1,7 +1,6 @@
 package win.demistorm.client;
 
 import net.minecraft.client.Minecraft;
-import org.vivecraft.api.client.VRClientAPI;
 import win.demistorm.ConfigHelper;
 import win.demistorm.Platform;
 import win.demistorm.client.config.ClientConfigHelper;
@@ -83,10 +82,13 @@ public class VRThrowingExtensionsClient {
 		log.info("Registering entity renderer for thrown projectile");
 	}
 
-	// Add tracker to Vivecraft system
+	// Add tracker to Vivecraft system (only with Vivecraft)
 	private static void registerTracker() {
-		VRClientAPI.instance().addClientRegistrationHandler(event ->
-				event.registerTrackers(new ThrowHelper.ThrowTracker()));
+		if (VRAbstraction.isVRAvailable()) {
+			VRAbstraction.registerThrowTracker();
+		} else {
+			log.info("Vivecraft not found, VR throwing disabled");
+		}
 	}
 
 	// Register clientside commands

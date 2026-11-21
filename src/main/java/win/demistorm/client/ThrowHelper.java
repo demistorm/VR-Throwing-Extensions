@@ -83,9 +83,9 @@ public class ThrowHelper {
 
     // Initialization is done by the tracker in VRThrowingExtensionsClient now
 
-    // Interaction callbacks
-    public static boolean cancellingBreaks() { return (activeMain && cancelBreakingMain) || catchActiveMain; }
-    public static boolean cancellingUse   () { return activeMain; } // Always cancel place/use while main hand throwing is active
+    // Interaction callbacks (old call sites keep using these)
+    public static boolean cancellingBreaks() { return ThrowCancels.cancelBreaks(); }
+    public static boolean cancellingUse   () { return ThrowCancels.cancelUse(); }
 
     // Throwing logic utilizing Vivecraft's Tracker system
     public static class ThrowTracker implements Tracker {
@@ -168,11 +168,15 @@ public class ThrowHelper {
             // Reset swing flags when keys are released
             if (!mainThrowPressed) swungMain = false;
             if (!offThrowPressed) swungOff = false;
+
+            // Update ThrowCancels with this tick's cancel state
+            ThrowCancels.setVr((activeMain && cancelBreakingMain) || catchActiveMain, activeMain);
         }
 
         @Override
         public void inactiveProcess(LocalPlayer player) {
-            // Just here because Tracker calls for it I guess (doesn't seem to error if I remove though?)
+            // VR off, clear the VR cancel flags
+            ThrowCancels.setVr(false, false);
         }
     }
 

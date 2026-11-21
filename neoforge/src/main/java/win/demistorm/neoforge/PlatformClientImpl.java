@@ -20,12 +20,12 @@ public class PlatformClientImpl {
             boolean isLeftClick = event.getKeyMapping() == Minecraft.getInstance().options.keyAttack;
             boolean isRightClick = event.getKeyMapping() == Minecraft.getInstance().options.keyUse;
 
-            if (isLeftClick && win.demistorm.client.ThrowHelper.cancellingBreaks()) {
+            if (isLeftClick && win.demistorm.client.ThrowCancels.cancelBreaks()) {
                 win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Block breaking cancelled at input level due to throwing motion");
                 event.setCanceled(true);
             }
 
-            if (isRightClick && win.demistorm.client.ThrowHelper.cancellingUse()) {
+            if (isRightClick && win.demistorm.client.ThrowCancels.cancelUse()) {
                 win.demistorm.VRThrowingExtensions.log.debug("[VR Cancel] Block placing/item use cancelled at input level due to throwing motion");
                 event.setCanceled(true);
             }
@@ -38,7 +38,7 @@ public class PlatformClientImpl {
             if (mc.player == null) return;
 
             // Only suppress when throwing is active AND place/use key is held
-            if (win.demistorm.client.ThrowHelper.cancellingUse() && mc.options.keyUse.isDown()) {
+            if (win.demistorm.client.ThrowCancels.cancelUse() && mc.options.keyUse.isDown()) {
                 //? if >=26.3 {
                 /*LivingEntity.SwingState swingState = mc.player.swingState;
                 swingState.currentSwing = null;
