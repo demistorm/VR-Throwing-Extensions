@@ -94,6 +94,7 @@ gradle.projectsEvaluated {
                         "gamemode": "creative",
                         "force-gamemode": "true",
                         "online-mode": "false",
+                        "white-list": "false",
                         "op-permission-level": "4",
                         "spawn-protection": "0"
                     ]
@@ -141,6 +142,12 @@ gradle.projectsEvaluated {
                         out.writeByte(0)
                         out.writeByte(0)
                         dat.bytes = buffer.toByteArray()
+                    }
+
+                    // Removes accessibiliy and multiplayer warning from fresh dev run
+                    def opts = new File(runDir, "options.txt")
+                    if (!opts.exists()) {
+                        opts.text = "onboardAccessibility:false\nskipMultiplayerWarning:true\n"
                     }
                 }
             }
