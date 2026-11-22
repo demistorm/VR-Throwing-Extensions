@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
@@ -150,12 +151,18 @@ public class PancakeHandler {
         Vec3 origin = player.getEyePosition().add(dir.scale(originForwardOffset));
         Vec3 assisted = AimHelper.applyAimAssist(player, origin, velocity);
 
-        ClientNetworkHelper.sendToServer(origin, assisted, ctrlHeld, player.isCrouching(), 0.0f, InteractionHand.MAIN_HAND);
+        float rollDeg = simulatedRollDeg(dir);
+        ClientNetworkHelper.sendToServer(origin, assisted, ctrlHeld, player.isCrouching(), rollDeg, InteractionHand.MAIN_HAND);
 
         if (VRThrowingExtensions.debugMode) {
+            float dirYaw = (float) Math.toDegrees(Math.atan2(-dir.x, dir.z));
+            float dirPitch = (float) Math.toDegrees(Math.asin(dir.y));
             player.displayClientMessage(Component.literal(
                     "[Pancake Throw] angSpeed=" + String.format("%.1f", angSpeed) +
                     " speed=" + String.format("%.2f", speed) +
+                    " dirYaw=" + String.format("%.0f", dirYaw) +
+                    " dirPitch=" + String.format("%.0f", dirPitch) +
+                    " roll=" + String.format("%.0f", rollDeg) +
                     " ctrl=" + ctrlHeld), true);
         }
         log.debug("[Pancake Throw] Threw {} at {} blocks per tick", player.getMainHandItem(), speed);
@@ -285,6 +292,23 @@ public class PancakeHandler {
             total += Math.sqrt((double) yawDelta * yawDelta + (double) pitchDelta * pitchDelta);
         }
         return total / window;
+    }
+
+    // Simulate the hand roll to match vr throw visuals
+    private static float simulatedRollDeg(Vec3 dir) {
+        int window = Math.min(maxCameraLookbackTicks, ringFilled - 1);
+        if (window < 1) return 0.0f;
+
+        Vec3 swing = lookVector(0).subtract(lookVector(window));
+        if (swing.lengthSqr() < 1.0e-8) return 0.0f;
+
+        Vector3f fwd = new Vector3f((float) dir.x, (float) dir.y, (float) dir.z);
+        Vector3f up = new Vector3f((float) swing.x, (float) swing.y, (float) swing.z);
+        Vector3f projUp = up.sub(new Vector3f(fwd).mul(up.dot(fwd)));
+        if (projUp.lengthSquared() < 1.0e-10f) return 0.0f;
+        projUp.normalize();
+        Vector3f projWorldUp = new Vector3f(0.0f, 1.0f, 0.0f).sub(new Vector3f(fwd).mul(fwd.y)).normalize();
+        return (float) Math.toDegrees(projUp.angleSigned(projWorldUp, fwd));
     }
 
     // Look vector from N ticks back
