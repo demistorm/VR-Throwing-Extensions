@@ -155,6 +155,17 @@ stonecutter {
         replace "player.swing(InteractionHand.OFF_HAND);", "player.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);"
     }
 
+    // Static Screen helpers before the Minecraft instance methods existed
+    replacements.string(current.parsed < "1.21.11") {
+        replace "mc.hasControlDown()", "Screen.hasControlDown()"
+        replace "Minecraft.getInstance().hasControlDown()", "Screen.hasControlDown()"
+    }
+
+    // Screen field moved into Gui
+    replacements.string(current.parsed >= "26") {
+        replace "mc.screen", "mc.gui.screen()"
+    }
+
     // Fabric API renames in 26.x (keybinding helper and payload registry)
     replacements.string(current.parsed >= "26") {
         replace "import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;", "import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;"

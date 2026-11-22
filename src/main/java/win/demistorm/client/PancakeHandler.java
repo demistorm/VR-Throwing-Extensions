@@ -13,6 +13,10 @@ import org.joml.Vector3f;
 import win.demistorm.ModCompat;
 import win.demistorm.ThrownProjectileEntity;
 import win.demistorm.VRThrowingExtensions;
+//? if <1.21.11
+//import net.minecraft.client.gui.screens.Screen;
+//? if >=26.3
+//import net.minecraft.world.item.component.SwingAnimation;
 
 import java.util.Comparator;
 
@@ -126,9 +130,14 @@ public class PancakeHandler {
     private static void resolveCharge(LocalPlayer player, boolean ctrlHeld) {
         if (ticksHeld < holdThresholdTicks) {
             // Quick tap so do the vanilla drop
+            //? if <26.3 {
             if (player.drop(ctrlHeld)) {
                 player.swing(InteractionHand.MAIN_HAND);
             }
+            //?} else {
+            /*Minecraft.getInstance().gameMode.dropItem(player, ctrlHeld);
+            player.swing(InteractionHand.MAIN_HAND);
+            *///?}
             log.debug("[Pancake Throw] Tap drop after {} ticks", ticksHeld);
         } else if (!player.getMainHandItem().isEmpty()) {
             tryThrow(player, ctrlHeld);
